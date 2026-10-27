@@ -14,6 +14,8 @@
   font-weight: 700;
 }
 
+@import url('https://db.onlinewebfonts.com/c/5005dc6e6f51d029cdbfd327415ec8fc?family=Beautique+Display+Condensed');
+
 :root {
   /* STRICT TYPOGRAPHY TOKENS: REM-ONLY */
   --text-scale-xs: 0.64rem;
@@ -709,15 +711,30 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 
 .workflow-script {
   display: block;
-  font-family: "SVN-Snell Roundhand Script";
+  font-family: "Beautique Display Condensed" !important;
   font-size: 8.125rem;
   font-style: normal;
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
   text-transform: none;
+  /* transform: scaleX(0.75); */
   white-space: nowrap;
 }
+
+.workflow-script-ontop {
+  font-family: 'Roboto';
+  font-size: 2rem;
+  margin-bottom: -3%;
+  margin-left: 1%;
+}
+
+.workflow-script-bottom {
+  font-family: 'Roboto';
+  font-size: 2rem;
+  /* margin- */
+}
+
 
 .workflow-suffix {
   display: block;
@@ -1336,13 +1353,16 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   grid-row: 1 / 3;
   height: 100%;
   min-width: 0;
+  overflow: hidden;
 }
 
 .service-gallery {
   grid-area: 1 / 1;
   display: flex;
   height: 100%;
+  width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -1358,6 +1378,8 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   display: grid;
   align-content: end;
   flex: 0 0 calc(100% / 3);
+  width: calc(100% / 3);
+  max-width: calc(100% / 3);
   scroll-snap-align: start;
   min-width: 0;
   padding: 0 clamp(14px, 1.35vw, 18px) clamp(82px, 12vh, 114px);
@@ -2182,7 +2204,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   }
 
   .service-gallery {
-    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
 
   .service-card {
@@ -2371,15 +2393,15 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   }
 
   .satellite-label {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.333125rem;
-  font-weight: 400;
-  color: #eb2026;
-  white-space: nowrap;
-  letter-spacing: 0;
-  text-transform: capitalize;
-  user-select: none;
-}
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.333125rem;
+    font-weight: 400;
+    color: #eb2026;
+    white-space: nowrap;
+    letter-spacing: 0;
+    text-transform: capitalize;
+    user-select: none;
+  }
 
   .core-center-sphere {
     width: clamp(100px, 18vw, 160px);
@@ -2387,13 +2409,13 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 
   .center-people,
   .center-focus {
-  color: #eb2026;
-  font-family: 'Roboto', sans-serif;
-  font-size: 2.36875rem;
-  font-weight: 900;
-  line-height: 1;
-  margin-top: 2px;
-}
+    color: #eb2026;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.36875rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 2px;
+  }
 
   .service-layout {
     grid-template-columns: 1fr;
@@ -2876,7 +2898,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   .service-gallery {
     grid-column: 1;
     grid-row: 2;
-    grid-template-columns: repeat(4, minmax(min(74vw, 260px), 1fr));
+    grid-template-columns: repeat(3, minmax(min(74vw, 260px), 1fr));
     gap: 12px;
     height: min(430px, calc(100vh - 270px));
     min-width: 0;
@@ -3127,15 +3149,15 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   }
 
   .satellite-label {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.333125rem;
-  font-weight: 400;
-  color: #eb2026;
-  white-space: nowrap;
-  letter-spacing: 0;
-  text-transform: capitalize;
-  user-select: none;
-}
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.333125rem;
+    font-weight: 400;
+    color: #eb2026;
+    white-space: nowrap;
+    letter-spacing: 0;
+    text-transform: capitalize;
+    user-select: none;
+  }
 
   .core-center-sphere {
     width: clamp(80px, 22vw, 105px);
@@ -3143,13 +3165,13 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 
   .center-people,
   .center-focus {
-  color: #eb2026;
-  font-family: 'Roboto', sans-serif;
-  font-size: 2.36875rem;
-  font-weight: 900;
-  line-height: 1;
-  margin-top: 2px;
-}
+    color: #eb2026;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.36875rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 2px;
+  }
 
   .why-layout,
   .connect-layout {
@@ -3354,38 +3376,128 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
     opacity: 0.42;
   }
 }
+
 @media (min-width: 900px) {
-  .service-layout { grid-template-columns: 46.667vw minmax(0, 1fr) !important; height: 100vh !important; min-height: 100vh !important; }
-  .service-copy { align-self: center !important; grid-row: 1 / 3 !important; margin-top: auto !important; margin-bottom: auto !important; margin-left: clamp(190px, 15.95vw, 230px) !important; padding-top: 0 !important; }
-  .service-gallery-wrapper { height: 100vh !important; min-height: 100vh !important; }
-  .service-card { height: 100vh !important; min-height: 100vh !important; padding: 0 16px 40px !important; flex: 0 0 calc(100% / 3.4) !important; justify-content: flex-end !important; display: flex !important; flex-direction: column !important; }
-  .service-media { inset: 0 !important; height: 100% !important; }
-  .service-media::after { height: 35vh !important; background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 70%, #ffffff 100%) !important; }
-  .service-card h3, .service-card p { position: relative; z-index: 3; margin: 0; padding: 0; }
-  .service-card a { position: relative; z-index: 3; margin: 0; }
-  .service-card h3 { margin-bottom: 8px !important; }
-  .service-card p { margin-bottom: 12px !important; }
-  .gallery-arrow-prev, .gallery-arrow-next { top: 50% !important; transform: translateY(-50%) !important; }
-  
-  .workflow-mini-nav { top: 42.8vh !important; bottom: auto !important; }
-  .global-workflow-nav { top: 42.8vh !important; bottom: auto !important; }
-  .workflow-mini-nav button { padding: 0 0 0 13px !important; }
+  .service-layout {
+    grid-template-columns: 46.667vw minmax(0, 1fr) !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+  }
+
+  .service-copy {
+    align-self: center !important;
+    grid-row: 1 / 3 !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    margin-left: clamp(190px, 15.95vw, 230px) !important;
+    padding-top: 0 !important;
+  }
+
+  .service-gallery-wrapper {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .service-card {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    padding: 0 16px 40px !important;
+    flex: 0 0 calc(100% / 3) !important;
+    width: calc(100% / 3) !important;
+    max-width: calc(100% / 3) !important;
+    justify-content: flex-end !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .service-media {
+    inset: 0 !important;
+    height: 100% !important;
+  }
+
+  .service-media::after {
+    height: 35vh !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.9) 70%, #ffffff 100%) !important;
+  }
+
+  .service-card h3,
+  .service-card p {
+    position: relative;
+    z-index: 3;
+    margin: 0;
+    padding: 0;
+  }
+
+  .service-card a {
+    position: relative;
+    z-index: 3;
+    margin: 0;
+  }
+
+  .service-card h3 {
+    margin-bottom: 8px !important;
+  }
+
+  .service-card p {
+    margin-bottom: 12px !important;
+  }
+
+  .gallery-arrow-prev,
+  .gallery-arrow-next {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .workflow-mini-nav {
+    top: 42.8vh !important;
+    bottom: auto !important;
+  }
+
+  .global-workflow-nav {
+    top: 42.8vh !important;
+    bottom: auto !important;
+  }
+
+  .workflow-mini-nav button {
+    padding: 0 0 0 13px !important;
+  }
 }
+
 @media (max-width: 1440px) and (min-width: 900px) {
-  .service-layout { grid-template-columns: 42vw minmax(0, 1fr) !important; }
-  .service-copy { margin-left: clamp(150px, 15vw, 190px) !important; }
+  .service-layout {
+    grid-template-columns: 42vw minmax(0, 1fr) !important;
+  }
+
+  .service-copy {
+    margin-left: clamp(150px, 15vw, 190px) !important;
+  }
 }
+
 @media (max-width: 1180px) and (min-width: 900px) {
-  .service-layout { grid-template-columns: 40vw minmax(0, 1fr) !important; }
-  .service-copy { margin-left: clamp(126px, 17vw, 190px) !important; }
-  .workflow-mini-nav { left: clamp(30px, 5vw, 54px) !important; }
+  .service-layout {
+    grid-template-columns: 40vw minmax(0, 1fr) !important;
+  }
+
+  .service-copy {
+    margin-left: clamp(126px, 17vw, 190px) !important;
+  }
+
+  .workflow-mini-nav {
+    left: clamp(30px, 5vw, 54px) !important;
+  }
 }
 
 
 
 
-.menu-overlay { clip-path: circle(0% at 0% 0%) !important; }
-.menu-overlay.is-open { clip-path: circle(150% at 0% 0%) !important; }
+.menu-overlay {
+  clip-path: circle(0% at 0% 0%) !important;
+}
+
+.menu-overlay.is-open {
+  clip-path: circle(150% at 0% 0%) !important;
+}
 
 
 
@@ -3397,6 +3509,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
     font-size: 0.6875rem !important;
     padding: 0 16px !important;
   }
+
   .project-count {
     left: 20px !important;
     right: 20px !important;
@@ -3404,6 +3517,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
     max-width: none !important;
     bottom: calc(10vh + 54px) !important;
   }
+
   .project-controls {
     bottom: calc(10vh - 8px) !important;
   }
@@ -3418,12 +3532,14 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
     bottom: 10.5vh !important;
     left: 18px !important;
   }
+
   .project-count {
     left: 18px !important;
     right: 18px !important;
     width: auto !important;
     bottom: calc(10.5vh + 54px) !important;
   }
+
   .project-controls {
     bottom: calc(10.5vh - 8px) !important;
     right: 18px !important;

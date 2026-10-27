@@ -15,6 +15,7 @@
 /public/gallery
 /public/upload
 /public/e-henho
+/storage/framework
 # Environment & Credentials
 .env
 .env.backup
