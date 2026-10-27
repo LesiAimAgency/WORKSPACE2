@@ -1,0 +1,19 @@
+{
+    "name": "website-package",
+    "package_type": "standalone_website_application",
+    "theme": "inbetween_v2",
+    "cms_version": "2.0.0",
+    "version": "2.0.0",
+    "exported_at": "2026-10-12T04:15:44+00:00",
+    "platform": "VGT Platform Control Plane",
+    "routing": {
+        "frontend": "\/",
+        "admin": "\/admin",
+        "installer": "\/install"
+    },
+    "isolation": {
+        "database": "independent_website_db",
+        "authentication": "independent_cms_auth",
+        "control_plane": "vgt_remote_api"
+    }
+}

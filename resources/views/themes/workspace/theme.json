@@ -1,0 +1,18 @@
+{
+  "name": "workspace",
+  "title": "Workspace Interior & Architecture",
+  "version": "1.0.0",
+  "description": "Giao diện Onepage Showcase kiến trúc & thi công nội thất với kiến trúc Widgets CMS.",
+  "author": "Workspace",
+  "widgets": [
+    "workspace_home",
+    "workspace_core",
+    "workspace_service",
+    "workspace_workflow",
+    "workspace_project",
+    "workspace_expert",
+    "workspace_why",
+    "workspace_connect",
+    "workspace_service_group"
+  ]
+}

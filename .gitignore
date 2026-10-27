@@ -1,0 +1,99 @@
+# ==============================================================================
+# Laravel Framework Core
+# ==============================================================================
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+/.composer
+.phpunit.result.cache
+/public/images
+/public/gallery
+/public/upload
+/public/e-henho
+# Environment & Credentials
+.env
+.env.backup
+.env.production
+.env.*.php
+!.env.example
+
+# Deployment / Hosting exports
+/public_html
+/public_html/*
+
+# ==============================================================================
+# Cache, Logs & Runtime
+# ==============================================================================
+Homestead.json
+Homestead.yaml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+/auth.json
+.phpactor.json
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# ==============================================================================
+# IDEs, Editors & AI Agents
+# ==============================================================================
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+.cursor/
+/.antigravity
+walkthrough.md
+
+# ==============================================================================
+# Temporary / Scratch & Development Scripts
+# ==============================================================================
+scratch/
+scratch_*.php
+refactor_widgets.php
+read_docx.py
+
+# ==============================================================================
+# Database Dumps & SQL Files
+# ==============================================================================
+*.sql
+*.sql.gz
+*.sqlite
+
+# ==============================================================================
+# Markdown Files & Documentation
+# ==============================================================================
+*.md
+**/*.md
+
+# ==============================================================================
+# Archives & Heavy Binary Files
+# ==============================================================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ==============================================================================
+# Operating System Junk
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/

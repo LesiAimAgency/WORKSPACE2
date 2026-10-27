@@ -1,0 +1,25 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /login/
+Disallow: /register/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /my-account/
+Disallow: /wishlist/
+Disallow: /search/
+Disallow: /?s=
+Disallow: /*?orderby=
+Disallow: /*?filter_
+Disallow: /*?min_price=
+Disallow: /*?max_price=
+Disallow: /*?add-to-cart=
+
+# Allow search bots to crawl public assets
+Allow: /themes/
+Allow: /storage/
+Allow: /media/
+
+# XML Sitemaps (Absolute URL compliant with RFC 9309)
+Sitemap: https://daiphuc68.com/sitemap.xml
+Sitemap: http://localhost:8000/sitemap.xml

@@ -1,0 +1,10 @@
+<!-- JAVASCRIPT -->
+<script  src="{{ URL::asset('build/libs/jquery/jquery.min.js')}}"></script>
+<script  src="{{ URL::asset('build/js/store.js')}}"></script>
+<script  src="{{ URL::asset('build/libs/jarallax/jarallax.min.js')}}"></script>
+<script  src="{{ URL::asset('build/libs/swiper/swiper-bundle.min.js')}}"></script>
+<script  src="{{ URL::asset('build/libs/alpinejs/cdn.min.js')}}"></script>
+<script  src="{{ URL::asset('build/libs/jquery-countdown/jquery.countdown.min.js')}}"></script>
+<script  src="{{ URL::asset('build/libs/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+<script  src="{{ URL::asset('build/js/product-slider.init.js')}}"></script>
+<script  src="{{ URL::asset('build/js/popup.js')}}"></script>
