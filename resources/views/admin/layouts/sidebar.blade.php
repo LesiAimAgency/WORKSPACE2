@@ -300,18 +300,47 @@
             <div class="px-3 mb-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 <span>Material Lab &amp; Khảo Sát</span>
             </div>
-            <ul class="space-y-1">
+            <ul class="space-y-1" x-data="{ openMaterialLab: true }">
                 <li>
-                    <a href="{{ route('admin.material-lab.index') }}" 
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('admin.material-lab.*') ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white font-semibold shadow-md shadow-rose-950/30' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                    <button @click="openMaterialLab = !openMaterialLab"
+                            type="button"
+                            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('admin.material-lab.*') ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white font-semibold shadow-md shadow-rose-950/30' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                         <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ request()->routeIs('admin.material-lab.*') ? 'text-white' : 'text-amber-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             <span>Thư Viện Vật Liệu</span>
                         </div>
-                        <span class="text-[10px] bg-slate-800/80 px-1.5 py-0.5 rounded text-amber-300 font-mono">Lab</span>
-                    </a>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] bg-slate-800/80 px-1.5 py-0.5 rounded text-amber-300 font-mono">Lab</span>
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': openMaterialLab }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <div x-show="openMaterialLab" x-collapse class="pl-9 pr-2 py-1.5 space-y-1">
+                        <a href="{{ route('admin.material-lab.index') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.index') || request()->routeIs('admin.material-lab.edit') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Tất cả vật liệu
+                        </a>
+                        <a href="{{ route('admin.material-lab.create') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.create') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Thêm vật liệu mới
+                        </a>
+                        <a href="{{ route('admin.material-lab.brands') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.brands') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Thương hiệu / Nhà cung cấp
+                        </a>
+                        <a href="{{ route('admin.material-lab.categories') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.categories') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Phân loại danh mục
+                        </a>
+                        <a href="{{ route('admin.material-lab.config') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.config') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Cấu hình các bước Wizard
+                        </a>
+                    </div>
                 </li>
                 <li>
                     <a href="{{ route('admin.surveys.index') }}" 

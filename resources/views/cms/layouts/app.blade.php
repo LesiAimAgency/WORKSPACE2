@@ -21,12 +21,24 @@
     <link rel="stylesheet" href="{{ asset('vendor/ckeditor5/ckeditor5.css') }}">
     <style>
         /* CKEditor UI & Wrapper Styling */
-        .ck-editor {
+        :root {
+            --ck-z-default: 1;
+            --ck-z-panel: 20;
+            --ck-z-dialog: 50;
+        }
+        .ckeditor-container,
+        .ck.ck-editor {
+            position: relative;
+            z-index: 1;
             width: 100%;
             border-radius: 0.5rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+        .ck.ck-editor:focus-within {
+            z-index: 10;
+        }
+        .ck.ck-editor .ck-editor__top .ck-sticky-panel .ck-toolbar {
+            z-index: 10 !important;
             border-top-left-radius: 0.5rem;
             border-top-right-radius: 0.5rem;
             border-color: #d1d5db;
@@ -53,7 +65,7 @@
         .ck.ck-balloon-panel,
         .ck.ck-dropdown__panel,
         .ck-body-wrapper {
-            z-index: 99999;
+            z-index: 30 !important;
         }
         .ck-source-editing-area textarea {
             min-height: 240px;
