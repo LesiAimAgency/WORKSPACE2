@@ -14,6 +14,16 @@
     <link rel="stylesheet" href="{{ asset('themes/workspace/css/style.css') }}?v={{ file_exists(public_path('themes/workspace/css/style.css')) ? filemtime(public_path('themes/workspace/css/style.css')) : '1.0' }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/"
+        }
+      }
+    </script>
+
     <style>
       /* Smooth Entrance Animation Styles */
       .panel {
@@ -92,6 +102,7 @@
     </style>
     
     <script src="{{ asset('themes/workspace/js/main.js') }}?v={{ file_exists(public_path('themes/workspace/js/main.js')) ? filemtime(public_path('themes/workspace/js/main.js')) : '1.0' }}" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     @stack('styles')
   </head>
   <body>
@@ -158,6 +169,7 @@
     <button class="scroll-button" type="button" aria-label="Chuyen xuong section tiep theo">
       <img src="{{ asset('themes/workspace/assets/Icons.png') }}" alt="" aria-hidden="true" />
     </button>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
     @stack('scripts')
   </body>
 </html>

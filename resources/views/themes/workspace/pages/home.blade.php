@@ -22,5 +22,6 @@
     @include('themes.workspace.widgets.expert')
     @include('themes.workspace.widgets.why')
     @include('themes.workspace.widgets.connect')
+    @include('themes.workspace.widgets.coverflow')
   @endif
 @endsection
