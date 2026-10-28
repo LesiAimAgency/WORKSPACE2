@@ -6,45 +6,48 @@
 @endphp
 
 <div x-data="mediaPicker('{{ $inputId }}', '{{ $mediaListUrl }}', '{{ $value }}')" x-cloak @keydown.window.delete="handleGlobalDelete($event)" class="media-picker-wrapper">
-    <div class="flex items-center gap-4">
+    <!-- Hidden file inputs for upload -->
+    <input type="file" x-ref="fileInput" @change="uploadFile" multiple accept="image/*,.ico" class="hidden">
+    <input type="file" x-ref="folderInput" @change="uploadFolder" webkitdirectory directory multiple class="hidden">
+
+    <div class="flex items-start gap-3">
         <!-- Preview Area -->
-        <div class="relative w-24 h-24 border border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center">
+        <div class="relative w-20 h-20 shrink-0 border border-gray-300 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center shadow-sm">
             <template x-if="previewUrl">
                 <img :src="previewUrl" class="w-full h-full object-cover">
             </template>
             <template x-if="!previewUrl">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
             </template>
             <!-- Remove Button -->
-            <button type="button" x-show="previewUrl" @click.prevent="clearSelection()" class="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-50 text-red-500">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <button type="button" x-show="previewUrl" @click.prevent="clearSelection()" class="absolute top-1 right-1 bg-white/90 rounded-full p-0.5 shadow hover:bg-red-50 text-red-500 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
-        <div class="flex-1">
-            <div class="flex gap-2">
-                <input type="text" 
-                       name="{{ $name }}" 
-                       id="{{ $inputId }}" 
-                       x-model="selectedValue" 
-                       placeholder="Nh&#7853;p URL ho&#7863;c ch&#7885;n t&#7915; th&#432; vi&#7879;n" 
-                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
-                <button type="button" @click.prevent="openModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 flex items-center gap-2 transition-colors whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                    </svg>
-                    {{ $label }}
-                </button>
-            </div>
+        <div class="flex-1 min-w-0 space-y-2">
+            <input type="text" 
+                   name="{{ $name }}" 
+                   id="{{ $inputId }}" 
+                   x-model="selectedValue" 
+                   placeholder="Nh&#7853;p URL ho&#7863;c ch&#7885;n t&#7915; th&#432; vi&#7879;n" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+            <button type="button" @click.prevent="openModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-rose-500 transition-colors whitespace-nowrap shadow-sm">
+                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                {{ $label }}
+            </button>
         </div>
     </div>
 
     <!-- Media Picker Modal -->
-    <div x-show="isOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
+    <template x-teleport="body">
+    <div x-show="isOpen" style="display: none;" class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-[1px]">
         <div class="relative w-full max-w-4xl max-h-full p-4" @click.away="closeModal()">
-            <div class="relative bg-white rounded-lg shadow h-[80vh] flex flex-col">
+            <div class="relative bg-white rounded-lg shadow-2xl h-[80vh] flex flex-col">
                 <!-- Modal header -->
                 <div class="flex items-center justify-between p-4 border-b">
                     <h3 class="text-lg font-semibold text-gray-900">Quản lý Media</h3>
@@ -73,23 +76,19 @@
                     </div>
 
                     <!-- Breadcrumb / Toolbar -->
-                    <div class="flex items-center gap-2 mb-4 bg-white p-2 rounded shadow-sm">
+                    <div class="flex flex-wrap items-center gap-2 mb-4 bg-white p-2.5 rounded-lg shadow-sm border border-gray-100">
                         <button type="button" @click="loadMedia('')" class="p-2 hover:bg-gray-100 rounded">
                             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         </button>
                         <span class="text-gray-400">/</span>
                         <span class="text-sm text-gray-600" x-text="currentPath || 'Root'"></span>
                         
-                        <div class="ml-auto">
-                            <!-- Input file for upload -->
-                            <input type="file" x-ref="fileInput" @change="uploadFile" multiple accept="image/*,.ico" class="hidden">
-                            <input type="file" x-ref="folderInput" @change="uploadFolder" webkitdirectory directory multiple class="hidden">
-                            
-                            <button type="button" @click="$refs.fileInput.click()" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center gap-2">
+                        <div class="ml-auto flex items-center gap-2">
+                            <button type="button" @click="$refs.fileInput.click()" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1.5 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                 Upload
                             </button>
-                            <button type="button" @click="$refs.folderInput.click()" class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 flex items-center gap-2">
+                            <button type="button" @click="$refs.folderInput.click()" class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 flex items-center gap-1.5 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m-3-3h6"></path>
@@ -176,7 +175,7 @@
             </div>
         </div>
         <!-- Upload Progress Modal -->
-        <div x-show="uploading" style="display: none;" class="fixed inset-0 z-[100] bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div x-show="uploading" style="display: none;" class="fixed inset-0 z-[100000] bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                 <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                     <h3 class="text-lg font-semibold text-gray-800">
@@ -223,7 +222,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-4"
-             class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-[60] flex items-center gap-3"
+             class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-[100001] flex items-center gap-3"
              :class="notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'"
              style="display: none;">
             <svg x-show="notification.type === 'success'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -232,7 +231,7 @@
         </div>
 
         <!-- Confirm Delete Modal -->
-        <div x-show="showConfirmDelete" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style="display: none;" @click.stop>
+        <div x-show="showConfirmDelete" class="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style="display: none;" @click.stop>
             <div x-show="showConfirmDelete"
                  @click.away="showConfirmDelete = false"
                  x-transition:enter="transition ease-out duration-300"
@@ -262,6 +261,7 @@
             </div>
         </div>
     </div>
+    </template>
 </div>
 
 @push('scripts')

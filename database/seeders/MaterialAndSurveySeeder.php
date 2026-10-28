@@ -408,7 +408,15 @@ class MaterialAndSurveySeeder extends Seeder
             ],
         ];
 
+        $defaultTypologyKeys = ['Office', 'School', 'Townhouse', 'Coffee Shop', 'Retail', 'Apartment'];
+
         foreach ($materialsData as $item) {
+            if (! isset($item['suitable_typologies'])) {
+                $item['suitable_typologies'] = $defaultTypologyKeys;
+            }
+            if (! isset($item['suitable_areas'])) {
+                $item['suitable_areas'] = [];
+            }
             Material::updateOrCreate(['code' => $item['code']], $item);
         }
 

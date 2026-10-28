@@ -93,12 +93,7 @@
         <span x-show="statusMsg" x-text="statusMsg"
               class="sans hidden lg:inline rounded-full bg-[#C1272D]/10 px-2.5 py-1 text-[10px] font-medium text-[#C1272D] max-w-[180px] truncate"></span>
 
-        <button type="button"
-                @click="resetAll()"
-                data-probed="reset"
-                class="sans text-[11px] font-bold uppercase tracking-widest underline underline-offset-4 hover:text-[#C1272D] transition-colors">
-          Đặt lại <span x-show="resetCount > 0" x-text="'• ' + resetCount"></span>
-        </button>
+    
       </div>
     </div>
   </header>
@@ -357,9 +352,18 @@
                   </template>
                 </div>
 
-                <div x-show="selectedDurability && selectedBudget && selectedOrigin && selectedAvailability"
-                     class="mt-3 rounded-xl bg-[#1F1E1C] p-3 text-white">
-                  <div class="sans text-[11px] text-white/70">Đủ thông tin – đang mở kết quả…</div>
+                <div class="mt-4 flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-[#1F1E1C]/10">
+                  <button type="button"
+                          @click="skipStep4()"
+                          class="w-full sm:w-auto sans rounded-full border border-[#1F1E1C]/20 bg-white px-5 py-2.5 text-[13px] font-medium text-[#1F1E1C]/80 hover:border-[#1F1E1C] hover:text-[#1F1E1C] transition-all">
+                    Bỏ qua bước này
+                  </button>
+                  <button type="button"
+                          @click="goToStep(5, 1)"
+                          class="w-full sm:w-auto sans inline-flex items-center justify-center gap-2 rounded-full bg-[#C1272D] px-6 py-2.5 text-[13px] font-semibold text-white shadow-sm hover:bg-[#a81f25] transition-all">
+                    <span>Xem kết quả</span>
+                    <span>→</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -526,25 +530,33 @@
             <div class="mt-5 grid grid-cols-12 gap-4">
               <!-- Left Column: Standards / Field Insights -->
               <div class="col-span-12 md:col-span-5">
-                <div class="rounded-[16px] bg-[#1F1E1C] p-5 text-[#F9F6F0]">
-                  <div class="sans text-[10px] font-bold uppercase tracking-widest text-white/50"
-                       x-text="activeTab === 'ai' ? 'Tiêu chuẩn kỹ thuật' : 'Kinh nghiệm Workspace'"></div>
+                <div class="rounded-[16px] bg-[#1F1E1C] p-5 text-[#F9F6F0] transition-all">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="sans text-[10px] font-bold uppercase tracking-widest text-white/50"
+                         x-text="activeTab === 'ai' ? 'Tiêu chuẩn kỹ thuật' : 'Kinh nghiệm Workspace'"></div>
+                    <template x-if="activeMaterial">
+                      <span class="sans rounded-full bg-[#C1272D] px-2.5 py-0.5 text-[10px] font-semibold text-white truncate max-w-[200px]"
+                            x-text="activeMaterial.name"></span>
+                    </template>
+                  </div>
                   
                   <div class="sans mt-3 text-[20px] font-semibold leading-[1.2]">
+                    <span x-text="activeMaterial ? activeMaterial.name : (selectedTypology ? selectedTypology.vi : '')"></span>
+                  </div>
+                  <div class="sans mt-1 text-[11px] text-white/60">
                     <span x-text="selectedTypology ? selectedTypology.vi : ''"></span> •
                     <span x-text="selectedSurface ? selectedSurface.vi : ''"></span> •
                     <span x-text="selectedArea ? selectedArea.vi : ''"></span>
                   </div>
 
-                  <!-- Tab 1: AI / Tiêu chuẩn -->
+                  <!-- Tab 1: AI / Tiêu chuẩn (Theo từng sản phẩm được click) -->
                   <div x-show="activeTab === 'ai'" class="mt-4 space-y-3">
                     <div class="rounded-xl bg-white/10 p-3">
                       <div class="sans text-[10px] uppercase tracking-widest text-white/50">Căn cứ áp dụng</div>
                       <div class="sans mt-2 space-y-1.5 text-[11px] leading-[1.6] text-white/80">
-                        <div>• QCVN 06:2022/BXD – An toàn cháy: lối thoát nạn yêu cầu vật liệu không cháy / chậm cháy.</div>
-                        <div>• QCVN 16:2023/BXD – Giới hạn VOC, formaldehyde, hấp thụ nước &lt;0.5% cho porcelain.</div>
-                        <div>• TCVN 4474 + TCVN 8264 – Tiêu âm, chống trượt: sàn R9-R11, trần NRC ≥0.65.</div>
-                        <div>• WELL v2 – LEED v4.1 – S03 Movement, S04 Sound, A06 VOC &lt;50g/L.</div>
+                        <template x-for="(line, lIdx) in getMaterialStandardsLines(activeMaterial)" :key="lIdx">
+                          <div x-html="line"></div>
+                        </template>
                       </div>
                     </div>
 
@@ -552,35 +564,37 @@
                       <div class="rounded-xl bg-white/10 p-3">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/50">Yêu cầu cháy</div>
                         <div class="sans mt-1 text-[12px] font-medium leading-tight"
-                             x-text="selectedSurface && selectedSurface.en === 'Floor' ? 'Bfl-s1 / B1 cho thoát nạn' : (selectedSurface && selectedSurface.en === 'Ceiling' ? 'Class A – 30 phút' : 'B1 hành lang')"></div>
+                             x-text="getMaterialFireRequirement(activeMaterial)"></div>
                       </div>
                       <div class="rounded-xl bg-[#C1272D] p-3">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/70">Chỉ số</div>
-                        <div class="sans mt-1 text-[11px] leading-tight">R9-11 • VOC &lt;50 • NRC 0.45-0.70 • E0</div>
+                        <div class="sans mt-1 text-[11px] leading-tight"
+                             x-text="getMaterialMetrics(activeMaterial)"></div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Tab 2: Workspace Field Experience -->
+                  <!-- Tab 2: Workspace Field Experience (Theo từng sản phẩm được click) -->
                   <div x-show="activeTab === 'workspace'" class="mt-4 space-y-3">
                     <div class="rounded-xl bg-white/10 p-3">
                       <div class="sans text-[10px] uppercase tracking-widest text-white/50">Thực tế thi công</div>
                       <div class="sans mt-2 space-y-1.5 text-[11px] leading-[1.6] text-white/80">
-                        <div>• Đã làm 23 phòng họp LVT, 41 văn phòng gạch Taicera, 12 sảnh Terrazzo.</div>
-                        <div>• Bài học: nền ẩm &gt;75% → LVT phồng, cần đo ẩm trước.</div>
-                        <div>• Thẩm mỹ: ưu tiên vân mờ, trung tính ấm, không bóng gắt.</div>
-                        <div>• Đội quen: thợ ốp Taicera, thạch cao Knauf, inox TIG Sài Gòn.</div>
+                        <template x-for="(line, wIdx) in getMaterialExperienceLines(activeMaterial)" :key="wIdx">
+                          <div x-html="line"></div>
+                        </template>
                       </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                       <div class="rounded-xl bg-white/10 p-3">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/50">Lỗi thường gặp</div>
-                        <div class="sans mt-1 text-[10px] leading-tight">Nền không phẳng • Ẩm &gt;75% • Keo rẻ bong mép</div>
+                        <div class="sans mt-1 text-[10px] leading-tight"
+                             x-text="getMaterialCommonErrors(activeMaterial)"></div>
                       </div>
                       <div class="rounded-xl bg-[#C1272D] p-3">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/70">Mẹo</div>
-                        <div class="sans mt-1 text-[10px] leading-tight">Đo ẩm • Cán phẳng 3mm • Keo Wakol/Weber • Khe 5mm</div>
+                        <div class="sans mt-1 text-[10px] leading-tight"
+                             x-text="getMaterialTips(activeMaterial)"></div>
                       </div>
                     </div>
                   </div>
@@ -605,20 +619,33 @@
               <div class="col-span-12 md:col-span-7">
                 <div class="grid grid-cols-1 gap-3">
                   <template x-for="item in filteredMaterials" :key="item.id">
-                    <div class="flex items-stretch gap-3 rounded-[14px] border border-[#1F1E1C]/10 bg-white p-4 shadow-sm hover:shadow-md transition-all">
+                    <div @click="selectMaterial(item)"
+                         class="flex items-stretch gap-3 rounded-[14px] border p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                         :class="activeMaterial && activeMaterial.id === item.id ? 'border-[#C1272D] ring-2 ring-[#C1272D]/20 bg-[#FFFDF9]' : 'border-[#1F1E1C]/10 bg-white hover:border-[#1F1E1C]/25'">
                       <!-- Left Swatch Icon Column -->
                       <div class="flex w-[72px] shrink-0 flex-col items-center justify-center rounded-[10px] bg-[#F9F6F0] p-2">
-                        <div class="sans text-[8px] font-bold uppercase tracking-widest text-[#1F1E1C]/40" x-text="item.category"></div>
-                        <div class="mt-1 h-8 w-8 rounded-full border border-[#1F1E1C]/10 bg-white"
-                             :style="getSwatchGradient(item.id)"></div>
+                        <div class="sans text-[8px] font-bold uppercase tracking-widest text-[#1F1E1C]/40 text-center truncate w-full" x-text="item.category"></div>
+                        <template x-if="item.image_url">
+                          <img :src="item.image_url" :alt="item.name" class="mt-1 h-9 w-9 rounded-full border border-[#1F1E1C]/10 object-cover bg-white">
+                        </template>
+                        <template x-if="!item.image_url">
+                          <div class="mt-1 h-8 w-8 rounded-full border border-[#1F1E1C]/10 bg-white"
+                               :style="getSwatchGradient(item.id)"></div>
+                        </template>
                         <div class="mt-2 sans text-[9px] font-bold text-[#1F1E1C]/50" x-text="item.durabilityYears + ' năm'"></div>
                       </div>
 
                       <!-- Center & Content Column -->
                       <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2">
-                          <div class="sans text-[15px] font-semibold leading-none" x-text="item.name"></div>
-                          <span class="sans text-[10px] text-[#1F1E1C]/40" x-text="item.brand"></span>
+                        <div class="flex items-center justify-between gap-2">
+                          <div class="flex items-center gap-2 min-w-0">
+                            <div class="sans text-[15px] font-semibold leading-none truncate" x-text="item.name"></div>
+                            <span class="sans text-[10px] text-[#1F1E1C]/40 shrink-0" x-text="item.brand"></span>
+                          </div>
+                          <span x-show="activeMaterial && activeMaterial.id === item.id"
+                                class="sans shrink-0 rounded-full bg-[#C1272D]/10 px-2 py-0.5 text-[9px] font-bold text-[#C1272D]">
+                            Đang chọn
+                          </span>
                         </div>
 
                         <div class="mt-2 flex flex-wrap gap-1.5">
@@ -630,8 +657,8 @@
 
                         <!-- Technical Specification or Practical Experience Note -->
                         <div class="mt-2.5 rounded-[8px] bg-[#F9F6F0] p-2.5">
-                          <div class="sans text-[11px] leading-[1.5] text-[#1F1E1C]/80"
-                               x-text="activeTab === 'ai' ? (item.tech_desc || item.tech) : (item.experience_desc || item.application)"></div>
+                          <div class="sans text-[11px] leading-[1.5] text-[#1F1E1C]/80 whitespace-pre-line"
+                               x-html="activeTab === 'ai' ? (item.ai_standards || item.tech_desc || item.tech) : (item.ws_experience || item.experience_desc || item.application)"></div>
                         </div>
 
                         <!-- Score Match Badges -->
@@ -686,6 +713,7 @@
         areaLabels: @json($areaLabels ?? []),
         lifeCycles: @json($lifeCycles ?? []),
         budgetLevels: @json($budgetLevels ?? []),
+        step5Insight: @json($step5Insight ?? []),
         allMaterials: @json($materials ?? []),
 
         // User Selection State
@@ -696,6 +724,7 @@
         selectedBudget: null,
         selectedOrigin: null,
         selectedAvailability: null,
+        selectedMaterial: null,
 
         initApp() {
           // Pre-select defaults for quick usability
@@ -703,6 +732,61 @@
           this.selectedBudget = this.budgetLevels[1] || null; // level 2: Balanced
           this.selectedOrigin = 'Vietnam';
           this.selectedAvailability = 'Stock';
+        },
+
+        get activeMaterial() {
+          const list = this.filteredMaterials;
+          if (!list || list.length === 0) return null;
+          if (this.selectedMaterial) {
+            const found = list.find(m => m.id === this.selectedMaterial.id);
+            if (found) return found;
+          }
+          return list[0];
+        },
+
+        selectMaterial(item) {
+          this.selectedMaterial = item;
+          this.statusMsg = 'Đang xem: ' + item.name;
+        },
+
+        getMaterialStandardsLines(m) {
+          const raw = (m && (m.ai_standards || m.tech_desc)) || this.step5Insight.ai_standards || '';
+          const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+          if (lines.length > 0) return lines;
+          return ['• QCVN 06:2022/BXD – An toàn cháy: lối thoát nạn yêu cầu vật liệu không cháy / chậm cháy.'];
+        },
+
+        getMaterialFireRequirement(m) {
+          if (m && m.fire_requirement) return m.fire_requirement;
+          if (this.selectedSurface && this.selectedSurface.en === 'Floor') {
+            return this.step5Insight.ai_fire_floor || 'Bfl-s1 / B1 cho thoát nạn';
+          }
+          if (this.selectedSurface && this.selectedSurface.en === 'Ceiling') {
+            return this.step5Insight.ai_fire_ceiling || 'Class A – 30 phút';
+          }
+          return this.step5Insight.ai_fire_other || 'B1 hành lang';
+        },
+
+        getMaterialMetrics(m) {
+          if (m && (m.metrics || m.tech)) return m.metrics || m.tech;
+          return this.step5Insight.ai_metrics || 'R9-11 • VOC <50 • NRC 0.45-0.70 • E0';
+        },
+
+        getMaterialExperienceLines(m) {
+          const raw = (m && (m.ws_experience || m.experience_desc)) || this.step5Insight.ws_experience || '';
+          const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+          if (lines.length > 0) return lines;
+          return ['• Đã kiểm chứng thực tế thi công tại các dự án Workspace.'];
+        },
+
+        getMaterialCommonErrors(m) {
+          if (m && m.common_errors) return m.common_errors;
+          return this.step5Insight.ws_common_errors || 'Nền không phẳng • Ẩm >75% • Keo rẻ bong mép';
+        },
+
+        getMaterialTips(m) {
+          if (m && m.tips) return m.tips;
+          return this.step5Insight.ws_tips || 'Đo ẩm • Cán phẳng 3mm • Keo Wakol/Weber • Khe 5mm';
         },
 
         get availableAreas() {
@@ -717,9 +801,25 @@
         },
 
         get filteredMaterials() {
-          if (!this.selectedSurface) return this.allMaterials;
-          const surf = this.selectedSurface.en;
-          let list = this.allMaterials.filter(m => Array.isArray(m.suitableLocations) && m.suitableLocations.includes(surf));
+          let list = this.allMaterials;
+
+          // Step 1: Filter by Typology (if material specifies suitableTypologies)
+          if (this.selectedTypology) {
+            const typo = this.selectedTypology.en;
+            list = list.filter(m => !Array.isArray(m.suitableTypologies) || m.suitableTypologies.length === 0 || m.suitableTypologies.includes(typo));
+          }
+
+          // Step 2: Filter by Surface / Location
+          if (this.selectedSurface) {
+            const surf = this.selectedSurface.en;
+            list = list.filter(m => Array.isArray(m.suitableLocations) && m.suitableLocations.includes(surf));
+          }
+
+          // Step 3: Filter by Functional Area (if material restricts suitableAreas)
+          if (this.selectedArea) {
+            const area = this.selectedArea.en;
+            list = list.filter(m => !Array.isArray(m.suitableAreas) || m.suitableAreas.length === 0 || m.suitableAreas.includes(area));
+          }
 
           if (this.selectedDurability) {
             list = list.filter(m => m.durabilityYears >= (this.selectedDurability.years - 1));
@@ -778,8 +878,7 @@
 
         setDurability(item) {
           this.selectedDurability = item;
-          if (!this.selectedBudget) this.activeFilterFocus = 'budget';
-          this.checkAutoAdvanceStep4();
+          this.activeFilterFocus = 'budget';
         },
 
         onBudgetSlider(val) {
@@ -787,33 +886,30 @@
           const found = this.budgetLevels.find(b => b.level === lvl);
           if (found) {
             this.selectedBudget = found;
-            if (!this.selectedOrigin) this.activeFilterFocus = 'origin';
+            this.activeFilterFocus = 'origin';
           }
         },
 
         setBudget(item) {
           this.selectedBudget = item;
-          if (!this.selectedOrigin) this.activeFilterFocus = 'origin';
-          this.checkAutoAdvanceStep4();
+          this.activeFilterFocus = 'origin';
         },
 
         setOrigin(orig) {
           this.selectedOrigin = orig;
-          if (!this.selectedAvailability) this.activeFilterFocus = 'availability';
-          this.checkAutoAdvanceStep4();
+          this.activeFilterFocus = 'availability';
         },
 
         setAvailability(avail) {
           this.selectedAvailability = avail;
-          this.checkAutoAdvanceStep4();
         },
 
-        checkAutoAdvanceStep4() {
-          if (this.selectedDurability && this.selectedBudget && this.selectedOrigin && this.selectedAvailability) {
-            setTimeout(() => {
-              this.goToStep(5, 1);
-            }, 300);
-          }
+        skipStep4() {
+          this.selectedDurability = null;
+          this.selectedBudget = this.budgetLevels.find(b => b.isSkip) || this.budgetLevels[4] || null;
+          this.selectedOrigin = 'Any';
+          this.selectedAvailability = 'Any';
+          this.goToStep(5, 1);
         },
 
         relaxFilters() {
@@ -845,6 +941,7 @@
           this.selectedTypology = null;
           this.selectedSurface = null;
           this.selectedArea = null;
+          this.selectedMaterial = null;
           this.selectedDurability = this.lifeCycles[1];
           this.selectedBudget = this.budgetLevels[1];
           this.selectedOrigin = 'Vietnam';
