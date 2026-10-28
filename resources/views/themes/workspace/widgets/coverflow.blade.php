@@ -17,19 +17,19 @@
       <!-- 1. Top Category Tabs (Chips Selector) -->
       <nav class="coverflow-chips">
         <button type="button" class="coverflow-chip is-active">
-          Interior Advisory<br>and Project Setup
+          Interior Advisory and Project Setup
         </button>
         <button type="button" class="coverflow-chip">
-          Interior Design<br>and FF&E Consultancy
+          Interior Design and FF&E Consultancy
         </button>
         <button type="button" class="coverflow-chip">
-          Fit-Out and<br>Finishing Works
+          Fit-Out and Finishing Works
         </button>
         <button type="button" class="coverflow-chip">
-          Joinery Manufacturer<br>and FF&E Installation
+          Joinery Manufacturer and FF&E Installation
         </button>
         <button type="button" class="coverflow-chip">
-          Material Library and<br>Competency Management
+          Material Library and Competency Management
         </button>
       </nav>
 
@@ -48,7 +48,7 @@
             </a>
           </div>
           <h3 class="badge-title">
-            Interior Advisory<br>and Project Setup
+            Interior Advisory and Project Setup
           </h3>
         </div>
       </div>
