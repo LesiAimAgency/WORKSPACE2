@@ -1,34 +1,72 @@
-@font-face {
-  font-family: "SVN-Snell Roundhand Script";
-  src: url("../assets/SVN-Snell Roundhand Script.ttf") format("truetype");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "SVN-Snell Roundhand Script";
-  src: url("../assets/SVN-Snell Roundhand Script Bold.ttf") format("truetype");
-  font-display: swap;
-  font-style: normal;
-  font-weight: 700;
-}
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 @import url('https://db.onlinewebfonts.com/c/5005dc6e6f51d029cdbfd327415ec8fc?family=Beautique+Display+Condensed');
 
 :root {
-  /* STRICT TYPOGRAPHY TOKENS: REM-ONLY */
-  --text-scale-xs: 0.64rem;
-  --text-scale-sm: 0.8rem;
-  --text-scale-base: 1rem;
-  --text-scale-h6: 1.25rem;
-  --text-scale-h5: 1.5625rem;
-  --text-scale-h4: 1.953125rem;
-  --text-scale-h3: 2.44125rem;
-  --text-scale-h2: 3.051875rem;
-  --text-scale-h1: 3.815rem;
-  --font-main: "Roboto", Arial, Helvetica, sans-serif;
-  --font-nav: "Roboto", Arial, Helvetica, sans-serif;
+  /* ==========================================================================
+     TYPOGRAPHY CONFIGURATION (Figma Modular Scale - 16px Base | Roboto Only)
+     Form:
+       h1   · 89.8 / Auto
+       h2   · 67.3 / Auto
+       h3   · 50.5 / Auto
+       h4   · 37.9 / Auto
+       h5   · 28.4 / Auto
+       h6   · 21.3 / Auto
+       h6_B · 21.3 / Auto (Bold)
+       p    · 16   / Auto
+       p_S  · 12   / Auto
+     ========================================================================== */
+  --font-main: "Roboto";
+  --font-nav: "Roboto";
+
+  /* Line-height Auto */
+  --lh-auto: normal;
+
+  /* Figma Token Values (px) */
+  --h1: 89.8px;
+  --h2: 67.3px;
+  --h3: 50.5px;
+  --h4: 37.9px;
+  --h5: 28.4px;
+  --h6: 21.3px;
+  --h6_B: 21.3px;
+  --h6_b: 21.3px;
+  --h6-b: 21.3px;
+  --p: 16px;
+  --p_S: 12px;
+  --p_s: 12px;
+  --p-s: 12px;
+
+  /* REM Equivalents (1rem = 16px) */
+  --h1-rem: 5.6125rem;
+  /* 89.8px */
+  --h2-rem: 4.20625rem;
+  /* 67.3px */
+  --h3-rem: 3.15625rem;
+  /* 50.5px */
+  --h4-rem: 2.36875rem;
+  /* 37.9px */
+  --h5-rem: 1.775rem;
+  /* 28.4px */
+  --h6-rem: 1.33125rem;
+  /* 21.3px */
+  --p-rem: 1rem;
+  /* 16px */
+  --p_S-rem: 0.75rem;
+  /* 12px */
+  --p-s-rem: 0.75rem;
+
+  /* Backward Compatibility Scale Tokens */
+  --text-scale-xs: 0.75rem;
+  --text-scale-sm: var(--p_S-rem);
+  --text-scale-base: var(--p-rem);
+  --text-scale-h6: var(--h6-rem);
+  --text-scale-h5: var(--h5-rem);
+  --text-scale-h4: var(--h4-rem);
+  --text-scale-h3: var(--h3-rem);
+  --text-scale-h2: var(--h2-rem);
+  --text-scale-h1: var(--h1-rem);
+
   --color-page-bg: #ffffff;
   --color-surface: #ffffff;
   --color-text: #101010;
@@ -38,8 +76,78 @@
   --section-frame-width: min(100%, 1440px);
   --section-header-height: 110px;
   --nav-top: clamp(24px, 6vh, 54px);
-  --typo-small: 10px;
-  --typo-section: clamp(30px, 8vw, 96px);
+  --typo-small: 12px;
+  --typo-section: clamp(30px, 8vw, 89.8px);
+}
+
+/* ==========================================================================
+   FIGMA TYPOGRAPHY UTILITY CLASSES & BASE ELEMENTS (Roboto Only)
+   ========================================================================== */
+h1,
+.h1 {
+  font-family: var(--font-main);
+  font-size: var(--h1);
+  line-height: var(--lh-auto, normal);
+}
+
+h2,
+.h2 {
+  font-family: var(--font-main);
+  font-size: var(--h2);
+  line-height: var(--lh-auto, normal);
+}
+
+h3,
+.h3 {
+  font-family: var(--font-main);
+  font-size: var(--h3);
+  line-height: var(--lh-auto, normal);
+}
+
+h4,
+.h4 {
+  font-family: var(--font-main);
+  font-size: var(--h4);
+  line-height: var(--lh-auto, normal);
+}
+
+h5,
+.h5 {
+  font-family: var(--font-main);
+  font-size: var(--h5);
+  line-height: var(--lh-auto, normal);
+}
+
+h6,
+.h6 {
+  font-family: var(--font-main);
+  font-size: var(--h6);
+  line-height: var(--lh-auto, normal);
+  font-weight: 400;
+}
+
+.h6_B,
+.h6_b,
+.h6-b {
+  font-family: var(--font-main);
+  font-size: var(--h6_B);
+  line-height: var(--lh-auto, normal);
+  font-weight: 700;
+}
+
+p,
+.p {
+  font-family: var(--font-main);
+  font-size: var(--p);
+  line-height: var(--lh-auto, normal);
+}
+
+.p_S,
+.p_s,
+.p-s {
+  font-family: var(--font-main);
+  font-size: var(--p_S);
+  line-height: var(--lh-auto, normal);
 }
 
 /* Utility class to hide elements via JS filtering */
@@ -612,35 +720,14 @@ a {
   z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease, color 0.4s ease;
+  mix-blend-mode: difference;
+  color: #ffffff;
+  transition: opacity 0.4s ease;
 }
 
 body.in-workflow-flow .global-workflow-nav {
   opacity: 1;
   pointer-events: auto;
-}
-
-body[data-current-step="2"] .global-workflow-nav {
-  color: rgba(0, 0, 0, 0.42);
-}
-
-body[data-current-step="2"] .global-workflow-nav .mini-rule {
-  background: rgba(0, 0, 0, 0.62);
-}
-
-body[data-current-step="2"] .global-workflow-nav button::before {
-  border-color: #ef2334;
-}
-
-body[data-current-step="2"] .global-workflow-nav button.is-current {
-  color: #050505;
-  font-weight: 500;
-}
-
-body[data-current-step="2"] .global-workflow-nav button.is-current::before {
-  border-color: #ef2334;
-  box-shadow: none;
-  background: #ef2334;
 }
 
 .panel .workflow-mini-nav {
@@ -653,10 +740,17 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   padding: 0 0 0 17px;
   border: 0;
   background: transparent;
-  color: inherit;
+  color: rgba(255, 255, 255, 0.6);
+  color: color-mix(in srgb, #ffffff 60%, transparent);
   line-height: 1;
   text-align: left;
   cursor: pointer;
+  transition: opacity 0.25s ease, color 0.25s ease;
+}
+
+.workflow-mini-nav button:hover {
+  color: #ffffff;
+  opacity: 1;
 }
 
 .workflow-mini-nav button::before {
@@ -665,24 +759,33 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   left: 0;
   width: 7px;
   height: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-color: color-mix(in srgb, #ffffff 60%, transparent);
   border-radius: 50%;
   content: "";
   transform: translateY(-50%);
+  background: transparent;
+  box-shadow: none;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
 }
 
 .workflow-mini-nav button.is-current {
   color: #ffffff;
+  font-weight: 500;
 }
 
 .workflow-mini-nav button.is-current::before {
   border-color: #ffffff;
-  box-shadow: inset 0 0 0 2px #1b1b1b;
   background: #ffffff;
+  box-shadow: none;
 }
 
 .workflow-mini-nav .mini-rule {
-  background: rgba(255, 255, 255, 0.82);
+  display: block;
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.75);
+  background: color-mix(in srgb, #ffffff 75%, transparent);
 }
 
 .workflow-copy {
@@ -712,6 +815,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 .workflow-script {
   display: block;
   font-family: "Beautique Display Condensed" !important;
+  font-family: var(--font-main);
   font-size: 8.125rem;
   font-style: normal;
   font-weight: 400;
@@ -1085,30 +1189,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 }
 
 .expert-mini-nav {
-  /* top: 44%; Removed to synchronize with workflow-mini-nav */
-}
-
-.expert-mini-nav.workflow-mini-nav {
-  color: rgba(0, 0, 0, 0.42);
-}
-
-.expert-mini-nav.workflow-mini-nav .mini-rule {
-  background: rgba(0, 0, 0, 0.62);
-}
-
-.expert-mini-nav.workflow-mini-nav button::before {
-  border-color: #ef2334;
-}
-
-.expert-mini-nav.workflow-mini-nav button.is-current {
-  color: #050505;
-  font-weight: 500;
-}
-
-.expert-mini-nav.workflow-mini-nav button.is-current::before {
-  border-color: #ef2334;
-  box-shadow: none;
-  background: #ef2334;
+  display: none !important;
 }
 
 .expert-copy {
@@ -1602,7 +1683,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 .why-statement p {
   margin: 0 0 8px;
   color: #101010;
-  font-family: "SVN-Snell Roundhand Script";
+  font-family: var(--font-main);
   font-size: 2.25rem;
   font-weight: 400;
   line-height: 0.9;
@@ -2048,15 +2129,23 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
 }
 
 .menu-backdrop {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: clamp(340px, 42vw, 600px);
-  background: rgba(0, 0, 0, 0.42);
+  position: relative;
+  width: 100%;
+  background: #1f1f1f99;
   opacity: 0;
-  transform: translateX(-40px);
-  transition:
-    opacity 480ms ease 120ms,
-    transform 620ms cubic-bezier(0.76, 0, 0.24, 1) 120ms;
+  height: 100%;
+  transition: opacity 480ms ease 120ms, transform 620ms cubic-bezier(0.76, 0, 0.24, 1) 120ms;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-sidebar {
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  width: 30%;
+  transform: translateX(50%);
 }
 
 .menu-overlay.is-open .menu-backdrop {
@@ -2068,10 +2157,10 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: clamp(24px, 5vh, 42px);
+  gap: 38px;
   width: var(--layout-width);
-  margin: 0 auto;
-  padding: 9vh 0 0 clamp(24px, 3vw, 34px);
+  /* margin: 0 auto;
+  padding: 9vh 0 0 clamp(24px, 3vw, 34px); */
 }
 
 .menu-panel a {
@@ -3406,6 +3495,7 @@ body[data-current-step="2"] .global-workflow-nav button.is-current::before {
     flex: 0 0 calc(100% / 3) !important;
     width: calc(100% / 3) !important;
     max-width: calc(100% / 3) !important;
+    flex: 0 0 calc(100% / 3.4) !important;
     justify-content: flex-end !important;
     display: flex !important;
     flex-direction: column !important;
@@ -3867,7 +3957,7 @@ body.in-section-flow .global-section-nav {
 
 .why-statement p {
   font-size: 2rem;
-  font-family: 'SVN-Snell Roundhand Script', cursive, sans-serif;
+  font-family: var(--font-main);
 }
 
 .why-statement strong {
@@ -4299,17 +4389,35 @@ body.in-section-flow .global-section-nav {
 
 
 
-/* Trang Chu Alt Typography (Figma Frame 24: 256:2322) */
-.home-about-heading {
-  margin-top: 2rem;
+/* Step 2: About Workspace Section */
+.panel-about {
+  background: var(--color-surface, #ffffff);
+  font-weight: bold;
+}
+
+.surface-about {
+  min-height: 100%;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+}
+
+.surface-about .brand-logo {
+  grid-area: 1 / 1;
+}
+
+.surface-about .home-about-heading {
+  grid-area: 2 / 1;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   font-family: 'Roboto', sans-serif;
-  font-size: 4.20875rem;
-  font-weight: 600;
+  font-size: clamp(2.5rem, 5vw, 4.20875rem);
+  font-weight: 700;
   line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 .home-about-black {
@@ -4318,4 +4426,20 @@ body.in-section-flow .global-section-nav {
 
 .home-about-red {
   color: #EB2026;
+}
+
+/* PDF Profile Link - initial hide on Cover (Step 1), reveal on Step 2 (About) and beyond */
+.pdf-profile-link {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 300ms ease, transform 300ms ease, visibility 300ms ease;
+}
+
+body.is-scrolled-past-home .pdf-profile-link {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
 }

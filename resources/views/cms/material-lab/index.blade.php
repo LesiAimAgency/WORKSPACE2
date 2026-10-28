@@ -4,21 +4,27 @@
 @section('page-title', 'Thư viện vật liệu (Material Lab)')
 
 @section('content')
+@php
+    $typoMap = collect($typologies ?? [])->mapWithKeys(fn($t) => [($t['en'] ?? '') => ($t['vi'] ?? ($t['en'] ?? ''))])->toArray();
+    $surfMap = collect($surfaces ?? [])->mapWithKeys(fn($s) => [($s['en'] ?? '') => ($s['vi'] ?? ($s['en'] ?? ''))])->toArray();
+@endphp
 <div class="space-y-6">
     <!-- Header Summary & Quick Links -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm">
         <div>
             <h2 class="text-lg font-bold text-gray-900">Danh mục vật liệu &amp; Tiêu chuẩn kỹ thuật</h2>
-            <p class="text-xs text-gray-500 mt-1">Quản lý toàn bộ 15+ mẫu vật liệu hiển thị trong wizard gợi ý vật liệu tại <a href="{{ route('material-lab') }}" target="_blank" class="text-rose-600 font-semibold hover:underline">/material-lab &nearr;</a></p>
+            <p class="text-xs text-gray-500 mt-1">Quản lý toàn bộ mẫu vật liệu và điều kiện lọc theo từng bước hiển thị tại <a href="{{ route('material-lab') }}" target="_blank" class="text-rose-600 font-semibold hover:underline">/material-lab &nearr;</a></p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('material-lab') }}" target="_blank" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                Xem Frontend
+            <a href="{{ route('admin.material-lab.brands') }}" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
+                Thương hiệu / Nhà cung cấp
+            </a>
+            <a href="{{ route('admin.material-lab.categories') }}" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
+                Phân loại danh mục
             </a>
             <a href="{{ route('admin.material-lab.config') }}" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
-                Cấu hình Tiêu đề &amp; Bộ lọc
+                Cấu hình Wizard
             </a>
             <a href="{{ route('admin.material-lab.create') }}" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -27,26 +33,43 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 text-xs rounded-r-lg font-medium flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
     <!-- Filter & Search Toolbar -->
     <div class="bg-white p-4 rounded-xl border border-gray-200/80 shadow-sm">
-        <form method="GET" action="{{ route('admin.material-lab.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <form method="GET" action="{{ route('admin.material-lab.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
             <div>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Tìm tên, mã, hãng..." class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
             </div>
             <div>
-                <select name="category" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
-                    <option value="">Tất cả phân loại</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                <select name="typology" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                    <option value="">Tất cả loại hình (Bước 1)</option>
+                    @foreach($typologies ?? [] as $t)
+                        @php $tEn = $t['en'] ?? ''; $tVi = $t['vi'] ?? $tEn; @endphp
+                        <option value="{{ $tEn }}" {{ request('typology') === $tEn ? 'selected' : '' }}>{{ $t['icon'] ?? '' }} {{ $tVi }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <select name="origin" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
-                    <option value="">Tất cả xuất xứ</option>
-                    <option value="Vietnam" {{ request('origin') === 'Vietnam' ? 'selected' : '' }}>Hàng Việt</option>
-                    <option value="Import" {{ request('origin') === 'Import' ? 'selected' : '' }}>Nhập khẩu</option>
-                    <option value="Both" {{ request('origin') === 'Both' ? 'selected' : '' }}>Liên doanh / Cả hai</option>
+                <select name="surface" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                    <option value="">Tất cả bề mặt (Bước 2)</option>
+                    @foreach($surfaces ?? [] as $s)
+                        @php $sEn = $s['en'] ?? ''; $sVi = $s['vi'] ?? $sEn; @endphp
+                        <option value="{{ $sEn }}" {{ request('surface') === $sEn ? 'selected' : '' }}>{{ $sVi }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <select name="category" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
@@ -62,7 +85,7 @@
                 <button type="submit" class="flex-1 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-lg hover:bg-black transition-colors">
                     Lọc dữ liệu
                 </button>
-                @if(request()->anyFilled(['search', 'category', 'origin', 'budget_level']))
+                @if(request()->anyFilled(['search', 'typology', 'surface', 'category', 'origin', 'budget_level']))
                     <a href="{{ route('admin.material-lab.index') }}" class="px-3 py-2 bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-200 transition-colors" title="Xóa lọc">
                         ✕
                     </a>
@@ -80,7 +103,7 @@
                         <th class="py-3.5 px-4 w-12 text-center">#</th>
                         <th class="py-3.5 px-4">Vật liệu</th>
                         <th class="py-3.5 px-4">Phân loại</th>
-                        <th class="py-3.5 px-4">Vị trí áp dụng</th>
+                        <th class="py-3.5 px-4">Bước 1: Loại hình &amp; Bước 2: Bề mặt</th>
                         <th class="py-3.5 px-4">Xuất xứ &amp; Tồn kho</th>
                         <th class="py-3.5 px-4">Độ bền &amp; Giá</th>
                         <th class="py-3.5 px-4 text-center">Hiển thị</th>
@@ -95,10 +118,14 @@
                             </td>
                             <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center shrink-0"
-                                         style="background: radial-gradient(circle at 30% 30%, #E8E2D8 0%, white 70%);">
-                                        <span class="text-[10px] font-bold text-gray-600">{{ substr($item->category, 0, 2) }}</span>
-                                    </div>
+                                    @if(!empty($item->image_url))
+                                        <img src="{{ $item->image_url }}" alt="{{ $item->name }}" class="w-9 h-9 rounded-lg border border-gray-200 object-cover shrink-0">
+                                    @else
+                                        <div class="w-9 h-9 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center shrink-0"
+                                             style="background: radial-gradient(circle at 30% 30%, #E8E2D8 0%, white 70%);">
+                                            <span class="text-[10px] font-bold text-gray-600">{{ substr($item->category, 0, 2) }}</span>
+                                        </div>
+                                    @endif
                                     <div>
                                         <div class="font-bold text-gray-900 text-[13px]">{{ $item->name }}</div>
                                         <div class="text-gray-500 flex items-center gap-2 mt-0.5">
@@ -112,18 +139,50 @@
                                 <span class="px-2 py-1 bg-gray-100 rounded text-gray-700">{{ $item->category }}</span>
                             </td>
                             <td class="py-3.5 px-4">
-                                <div class="flex flex-wrap gap-1 max-w-[200px]">
-                                    @if(is_array($item->suitable_locations))
-                                        @foreach($item->suitable_locations as $loc)
-                                            <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-medium">{{ $loc }}</span>
-                                        @endforeach
-                                    @else
-                                        <span class="text-gray-400">--</span>
-                                    @endif
+                                <div class="space-y-1.5 max-w-[260px]">
+                                    <!-- Bước 2: Bề mặt -->
+                                    <div class="flex flex-wrap gap-1">
+                                        @if(is_array($item->suitable_locations) && count($item->suitable_locations))
+                                            @foreach($item->suitable_locations as $loc)
+                                                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200/60 rounded text-[10px] font-medium">
+                                                    {{ $surfMap[$loc] ?? $loc }}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <span class="text-gray-400 text-[10px]">Chưa chọn bề mặt</span>
+                                        @endif
+                                    </div>
+                                    <!-- Bước 1: Loại hình -->
+                                    <div class="flex flex-wrap gap-1">
+                                        @php
+                                            $typos = is_array($item->suitable_typologies) ? $item->suitable_typologies : [];
+                                        @endphp
+                                        @if(empty($typos) || count($typos) >= count($typologies ?? []))
+                                            <span class="px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-medium">
+                                                Tất cả loại hình công trình
+                                            </span>
+                                        @else
+                                            @foreach($typos as $tKey)
+                                                <span class="px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px]">
+                                                    {{ $typoMap[$tKey] ?? $tKey }}
+                                                </span>
+                                            @endforeach
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                             <td class="py-3.5 px-4">
-                                <div>{{ $item->origin_label ?: $item->origin }}</div>
+                                <div>
+                                    @if($item->origin === 'Vietnam')
+                                        Hàng Việt
+                                    @elseif($item->origin === 'Import')
+                                        Nhập khẩu
+                                    @elseif($item->origin === 'Both')
+                                        Liên doanh
+                                    @else
+                                        {{ $item->origin_label ?: $item->origin }}
+                                    @endif
+                                </div>
                                 <div class="text-gray-500 text-[11px] mt-0.5">
                                     <span class="inline-block w-1.5 h-1.5 rounded-full {{ $item->availability === 'Stock' ? 'bg-emerald-500' : 'bg-amber-500' }} mr-1"></span>
                                     {{ $item->availability }}

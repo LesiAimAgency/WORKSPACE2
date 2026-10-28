@@ -59,8 +59,18 @@
         color: var(--color-text, #111111);
         line-height: 1;
         text-decoration: none;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: opacity 300ms ease, transform 300ms ease, visibility 300ms ease;
+      }
+
+      body.is-scrolled-past-home .pdf-profile-link {
+        opacity: 1;
+        visibility: visible;
         pointer-events: auto;
-        transition: opacity 260ms ease, transform 260ms ease;
+        transform: translateY(0);
       }
 
       body.is-workflow-section .pdf-profile-link {
@@ -153,17 +163,33 @@
     </nav>
 
     <aside class="menu-overlay" id="menuOverlay" aria-hidden="true">
-      <div class="menu-backdrop" aria-hidden="true"></div>
+      <div class="menu-backdrop" aria-hidden="true">
+
+        <nav class="menu-panel" aria-label="Menu">
+          <a href="#about-workspace" data-menu-section="1">ABOUT WORKSPACE</a>
+          <a href="#core-values" data-menu-section="2">CORE VALUES</a>
+          <a href="#service" data-menu-section="3">OUR SERVICES</a>
+          <a href="#why-workspace" data-menu-section="4">WHY CHOOSE US</a>
+          <a href="#connect" data-menu-section="5">CONTACT</a>
+          @if(setting('contact_pdf_link', setting('company_profile_pdf')))
+          <a href="{{ setting('contact_pdf_link', setting('company_profile_pdf')) }}" target="_blank" data-menu-section="6">COMPANY PROFILE</a>
+          @endif
+        </nav>
+      
+      @php
+        $settings = $settings ?? [];
+        $logo = !empty($settings['logo']) 
+        ? (Str::startsWith($settings['logo'], ['http://', 'https://', '/']) ? $settings['logo'] : asset($settings['logo'])) 
+        : asset('themes/workspace/assets/logo.png');
+        $alt = $settings['alt'] ?? 'Workspace Interior design and build';
+        $ariaLabel = $settings['aria_label'] ?? 'Workspace';
+       
+      @endphp
+      <img class="brand-logo brand-logo-menu logo-sidebar"  src="{{ $logo }}" alt="{{ $alt }}" />
+
+      </div>
       <button class="menu-close" type="button" aria-label="Dong menu"></button>
-      <nav class="menu-panel" aria-label="Menu">
-        <a href="#core-values" data-menu-section="1">CORE VALUES</a>
-        <a href="#service" data-menu-section="2">OUR SERVICES</a>
-        <a href="#why-workspace" data-menu-section="3">WHY CHOOSE US</a>
-        <a href="#connect" data-menu-section="4">CONTACT</a>
-        @if(setting('contact_pdf_link', setting('company_profile_pdf')))
-        <a href="{{ setting('contact_pdf_link', setting('company_profile_pdf')) }}" target="_blank" data-menu-section="5">COMPANY PROFILE</a>
-        @endif
-      </nav>
+     
     </aside>
 
     <button class="scroll-button" type="button" aria-label="Chuyen xuong section tiep theo">

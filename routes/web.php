@@ -42,6 +42,9 @@ Route::get('/theme/workspace', [WorkspaceThemeController::class, 'home'])->name(
 
 // Material Lab Frontend
 Route::get('/material-lab', [MaterialLabController::class, 'index'])->name('material-lab');
+Route::get('/hihi', function () {
+    return 'hihi';
+});
 
 // Customer Survey Frontend
 Route::get('/customer-survey', [CustomerSurveyController::class, 'show'])->name('customer-survey.show');
@@ -286,6 +289,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // MATERIAL LAB & CUSTOMER SURVEY MANAGEMENT
     // ============================================
     // Material Lab
+    Route::get('material-lab/brands', [MaterialController::class, 'brands'])->name('material-lab.brands');
+    Route::post('material-lab/brands', [MaterialController::class, 'saveBrands'])->name('material-lab.save-brands');
+    Route::get('material-lab/categories', [MaterialController::class, 'categories'])->name('material-lab.categories');
+    Route::post('material-lab/categories', [MaterialController::class, 'saveCategories'])->name('material-lab.save-categories');
     Route::get('material-lab/config', [MaterialController::class, 'config'])->name('material-lab.config');
     Route::post('material-lab/config', [MaterialController::class, 'saveConfig'])->name('material-lab.save-config');
     Route::post('material-lab/toggle', [MaterialController::class, 'toggleActive'])->name('material-lab.toggle');

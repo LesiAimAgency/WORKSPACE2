@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admin\MaterialController;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,79 +16,91 @@ class MaterialLabController extends Controller
      */
     public function index(Request $request): View
     {
+        $budgetLevels = MaterialController::resolveArraySetting(
+            'material_lab_budgets',
+            MaterialController::getDefaultBudgetLevels()
+        );
+        $budgetMap = collect($budgetLevels)->mapWithKeys(fn ($b) => [(int) ($b['level'] ?? 0) => ($b['vnd'] ?? '')])->toArray();
+
         // 1. Get all active materials ordered by sort_order
         $materials = Material::where('is_active', true)
             ->orderBy('sort_order')
             ->get()
-            ->map(function ($m) {
+            ->map(function ($m) use ($budgetMap) {
+                $unifiedMetrics = $m->metrics ?: $m->tech_specs;
+                $unifiedStandards = $m->ai_standards ?: $m->tech_description;
+                $unifiedExperience = $m->ws_experience ?: ($m->experience_description ?: $m->application);
+                $unifiedCost = $budgetMap[(int) $m->budget_level] ?? ($m->cost_label ?: '300k – 600k');
+
                 return [
                     'id' => $m->code,
                     'name' => $m->name,
                     'brand' => $m->brand,
-                    'suitableLocations' => $m->suitable_locations ?? [],
+                    'suitableTypologies' => is_array($m->suitable_typologies) ? $m->suitable_typologies : [],
+                    'suitableLocations' => is_array($m->suitable_locations) ? $m->suitable_locations : [],
+                    'suitableAreas' => is_array($m->suitable_areas) ? $m->suitable_areas : [],
                     'category' => $m->category,
                     'origin' => $m->origin,
-                    'originLabel' => $m->origin_label ?: ($m->origin === 'Vietnam' ? 'Hàng Việt' : 'Nhập khẩu'),
+                    'originLabel' => match ($m->origin) {
+                        'Vietnam' => 'Hàng Việt',
+                        'Import' => 'Nhập khẩu',
+                        'Both' => 'Liên doanh',
+                        default => $m->origin_label ?: 'Hàng Việt',
+                    },
                     'availability' => $m->availability,
                     'durabilityYears' => (int) $m->durability_years,
-                    'costLabel' => $m->cost_label,
+                    'costLabel' => $unifiedCost,
                     'budgetLevel' => (int) $m->budget_level,
                     'finish' => $m->finish,
-                    'tech' => $m->tech_specs,
-                    'application' => $m->application,
-                    'tech_desc' => $m->tech_description,
-                    'experience_desc' => $m->experience_description,
+                    'tech' => $unifiedMetrics,
+                    'application' => $unifiedExperience,
+                    'tech_desc' => $unifiedStandards,
+                    'ai_standards' => $unifiedStandards,
+                    'fire_requirement' => $m->fire_requirement,
+                    'metrics' => $unifiedMetrics,
+                    'experience_desc' => $unifiedExperience,
+                    'ws_experience' => $unifiedExperience,
+                    'common_errors' => $m->common_errors,
+                    'tips' => $m->tips,
                     'image_url' => $m->image_url,
                 ];
             });
 
         // 2. Fetch configurations from settings or defaults
-        $typologies = setting('material_lab_typologies') ?: [
-            ['en' => 'Office', 'vi' => 'Văn phòng làm việc', 'icon' => '🏢', 'desc' => 'Không gian hiệu suất cao, cần tiêu âm và độ bền bề mặt.'],
-            ['en' => 'School', 'vi' => 'Trường học', 'icon' => '🎓', 'desc' => 'An toàn, kháng khuẩn, bền và dễ bảo trì.'],
-            ['en' => 'Townhouse', 'vi' => 'Nhà phố', 'icon' => '🏠', 'desc' => 'Không gian ở ấm áp, cân bằng thẩm mỹ nội thất.'],
-            ['en' => 'Coffee Shop', 'vi' => 'Quán cà phê', 'icon' => '☕', 'desc' => 'Trải nghiệm xúc giác, chịu ẩm và biểu cảm vật liệu.'],
-            ['en' => 'Retail', 'vi' => 'Cửa hàng bán lẻ', 'icon' => '🛍️', 'desc' => 'Dẫn dắt hành vi mua sắm, bền và tạo điểm nhấn.'],
-            ['en' => 'Apartment', 'vi' => 'Căn hộ chung cư', 'icon' => '🏬', 'desc' => 'Tinh gọn, bền vững, cân bằng kỹ thuật và ở.'],
-        ];
-        if (is_string($typologies)) {
-            $typologies = json_decode($typologies, true) ?: [];
-        }
+        $typologies = MaterialController::resolveArraySetting(
+            'material_lab_typologies',
+            MaterialController::getDefaultTypologies()
+        );
 
-        $surfaces = setting('material_lab_surfaces') ?: [
-            ['en' => 'Floor', 'vi' => 'Bề mặt sàn', 'viShort' => 'Bề mặt sàn', 'enLabel' => 'Floor'],
-            ['en' => 'Wall', 'vi' => 'Bề mặt tường', 'viShort' => 'Bề mặt tường', 'enLabel' => 'Wall'],
-            ['en' => 'Ceiling', 'vi' => 'Hệ trần', 'viShort' => 'Hệ trần', 'enLabel' => 'Ceiling'],
-            ['en' => 'Loose Furniture', 'vi' => 'Đồ rời', 'viShort' => 'Đồ rời', 'enLabel' => 'Loose'],
-            ['en' => 'Detail Surface', 'vi' => 'Chi tiết kỹ thuật', 'viShort' => 'Chi tiết kỹ thuật', 'enLabel' => 'Detail'],
-        ];
-        if (is_string($surfaces)) {
-            $surfaces = json_decode($surfaces, true) ?: [];
-        }
+        $surfaces = MaterialController::resolveArraySetting(
+            'material_lab_surfaces',
+            MaterialController::getDefaultSurfaces()
+        );
 
-        $areaMatrix = setting('material_lab_area_matrix') ?: [];
-        if (is_string($areaMatrix)) {
-            $areaMatrix = json_decode($areaMatrix, true) ?: [];
-        }
+        $areaMatrix = MaterialController::resolveArraySetting(
+            'material_lab_area_matrix',
+            MaterialController::getDefaultAreaMatrix()
+        );
 
-        $areaLabels = setting('material_lab_area_labels') ?: [];
-        if (is_string($areaLabels)) {
-            $areaLabels = json_decode($areaLabels, true) ?: [];
-        }
+        $areaLabels = MaterialController::resolveArraySetting(
+            'material_lab_area_labels',
+            MaterialController::getDefaultAreaLabels()
+        );
 
-        $lifeCycles = [
-            ['id' => 'short', 'years' => 3, 'vi' => '1–3 năm', 'en' => 'Short term', 'note' => 'Pop-up, thử nghiệm'],
-            ['id' => 'medium', 'years' => 7, 'vi' => '5–10 năm', 'en' => 'Standard', 'note' => 'Văn phòng tiêu chuẩn'],
-            ['id' => 'long', 'years' => 15, 'vi' => '10+ năm', 'en' => 'Long term', 'note' => 'Sảnh, lõi, WC'],
-        ];
+        $lifeCycles = MaterialController::resolveArraySetting(
+            'material_lab_lifecycles',
+            MaterialController::getDefaultLifeCycles()
+        );
 
-        $budgetLevels = [
-            ['level' => 1, 'vi' => 'Tiết kiệm', 'en' => 'Economical', 'vnd' => '85k – 300k'],
-            ['level' => 2, 'vi' => 'Cân bằng', 'en' => 'Balanced', 'vnd' => '300k – 600k'],
-            ['level' => 3, 'vi' => 'Cao cấp', 'en' => 'Premium', 'vnd' => '600k – 900k'],
-            ['level' => 4, 'vi' => 'Siêu cao cấp', 'en' => 'Luxury', 'vnd' => '900k – 1.5tr+'],
-            ['level' => 5, 'vi' => 'Bỏ qua', 'en' => 'Skip', 'vnd' => 'Mọi mức giá', 'isSkip' => true],
-        ];
+        $budgetLevels = MaterialController::resolveArraySetting(
+            'material_lab_budgets',
+            MaterialController::getDefaultBudgetLevels()
+        );
+
+        $step5Insight = array_merge(
+            MaterialController::getDefaultStep5Insight(),
+            MaterialController::resolveArraySetting('material_lab_step5_insight', [])
+        );
 
         $pageTitle = setting('material_lab_title', 'Thư viện vật liệu');
         $pageSubtitle = setting('material_lab_subtitle', 'Material Lab • V1.0');
@@ -107,6 +120,7 @@ class MaterialLabController extends Controller
             'areaLabels',
             'lifeCycles',
             'budgetLevels',
+            'step5Insight',
             'pageTitle',
             'pageSubtitle',
             'step1Title',

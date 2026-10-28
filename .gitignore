@@ -22,7 +22,7 @@
 .env.production
 .env.*.php
 !.env.example
-
+/storage
 # Deployment / Hosting exports
 /public_html
 /public_html/*
