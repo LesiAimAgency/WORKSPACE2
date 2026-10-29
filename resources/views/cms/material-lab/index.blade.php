@@ -103,7 +103,7 @@
                         <th class="py-3.5 px-4 w-12 text-center">#</th>
                         <th class="py-3.5 px-4">Vật liệu</th>
                         <th class="py-3.5 px-4">Phân loại</th>
-                        <th class="py-3.5 px-4">Bước 1: Loại hình &amp; Bước 2: Bề mặt</th>
+                        <th class="py-3.5 px-4">Tương thích (Bước 1, 2 &amp; 3)</th>
                         <th class="py-3.5 px-4">Xuất xứ &amp; Tồn kho</th>
                         <th class="py-3.5 px-4">Độ bền &amp; Giá</th>
                         <th class="py-3.5 px-4 text-center">Hiển thị</th>
@@ -139,7 +139,7 @@
                                 <span class="px-2 py-1 bg-gray-100 rounded text-gray-700">{{ $item->category }}</span>
                             </td>
                             <td class="py-3.5 px-4">
-                                <div class="space-y-1.5 max-w-[260px]">
+                                <div class="space-y-1.5 max-w-[280px]">
                                     <!-- Bước 2: Bề mặt -->
                                     <div class="flex flex-wrap gap-1">
                                         @if(is_array($item->suitable_locations) && count($item->suitable_locations))
@@ -159,7 +159,7 @@
                                         @endphp
                                         @if(empty($typos) || count($typos) >= count($typologies ?? []))
                                             <span class="px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-medium">
-                                                Tất cả loại hình công trình
+                                                Tất cả công trình
                                             </span>
                                         @else
                                             @foreach($typos as $tKey)
@@ -167,6 +167,32 @@
                                                     {{ $typoMap[$tKey] ?? $tKey }}
                                                 </span>
                                             @endforeach
+                                        @endif
+                                    </div>
+                                    <!-- Bước 3: Khu vực chức năng -->
+                                    <div>
+                                        @php
+                                            $areas = is_array($item->suitable_areas) ? $item->suitable_areas : [];
+                                        @endphp
+                                        @if(empty($areas))
+                                            <span class="text-[10px] text-emerald-700 font-medium inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                Áp dụng: Tất cả khu vực
+                                            </span>
+                                        @else
+                                            <div class="flex flex-wrap gap-1 items-center" title="{{ implode(', ', array_map(fn($a) => $areaLabels[$a] ?? $a, $areas)) }}">
+                                                <span class="text-[10px] text-gray-500">Khu vực:</span>
+                                                @foreach(array_slice($areas, 0, 2) as $aKey)
+                                                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/60 rounded text-[10px]">
+                                                        {{ $areaLabels[$aKey] ?? $aKey }}
+                                                    </span>
+                                                @endforeach
+                                                @if(count($areas) > 2)
+                                                    <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-semibold" title="{{ implode(', ', array_map(fn($a) => $areaLabels[$a] ?? $a, $areas)) }}">
+                                                        +{{ count($areas) - 2 }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
                                 </div>

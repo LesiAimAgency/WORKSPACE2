@@ -22,12 +22,12 @@ class MaterialController extends Controller
     public static function getDefaultTypologies(): array
     {
         return [
-            ['en' => 'Office', 'vi' => 'Văn phòng làm việc', 'icon' => '🏢', 'desc' => 'Không gian hiệu suất cao, cần tiêu âm và độ bền bề mặt.'],
-            ['en' => 'School', 'vi' => 'Trường học', 'icon' => '🎓', 'desc' => 'An toàn, kháng khuẩn, bền và dễ bảo trì.'],
-            ['en' => 'Townhouse', 'vi' => 'Nhà phố', 'icon' => '🏠', 'desc' => 'Không gian ở ấm áp, cân bằng thẩm mỹ nội thất.'],
-            ['en' => 'Coffee Shop', 'vi' => 'Quán cà phê', 'icon' => '☕', 'desc' => 'Trải nghiệm xúc giác, chịu ẩm và biểu cảm vật liệu.'],
-            ['en' => 'Retail', 'vi' => 'Cửa hàng bán lẻ', 'icon' => '🛍️', 'desc' => 'Dẫn dắt hành vi mua sắm, bền và tạo điểm nhấn.'],
-            ['en' => 'Apartment', 'vi' => 'Căn hộ chung cư', 'icon' => '🏬', 'desc' => 'Tinh gọn, bền vững, cân bằng kỹ thuật và ở.'],
+            ['en' => 'Office', 'vi' => 'Văn phòng làm việc', 'icon' => '', 'desc' => 'Không gian hiệu suất cao, cần tiêu âm và độ bền bề mặt.'],
+            ['en' => 'School', 'vi' => 'Trường học', 'icon' => '', 'desc' => 'An toàn, kháng khuẩn, bền và dễ bảo trì.'],
+            ['en' => 'Townhouse', 'vi' => 'Nhà phố', 'icon' => '', 'desc' => 'Không gian ở ấm áp, cân bằng thẩm mỹ nội thất.'],
+            ['en' => 'Coffee Shop', 'vi' => 'Quán cà phê', 'icon' => '', 'desc' => 'Trải nghiệm xúc giác, chịu ẩm và biểu cảm vật liệu.'],
+            ['en' => 'Retail', 'vi' => 'Cửa hàng bán lẻ', 'icon' => '', 'desc' => 'Dẫn dắt hành vi mua sắm, bền và tạo điểm nhấn.'],
+            ['en' => 'Apartment', 'vi' => 'Căn hộ chung cư', 'icon' => '', 'desc' => 'Tinh gọn, bền vững, cân bằng kỹ thuật và ở.'],
         ];
     }
 
@@ -46,7 +46,7 @@ class MaterialController extends Controller
     }
 
     /**
-     * Default Step 3 Area Matrix.
+     * Default Step 3 Area Matrix (Normalized, no duplicates).
      */
     public static function getDefaultAreaMatrix(): array
     {
@@ -56,69 +56,321 @@ class MaterialController extends Controller
                 'Wall' => ['Reception', 'Open Work', 'Meeting Room', 'Corridor', 'Pantry', 'Executive'],
                 'Ceiling' => ['Reception', 'Open Work', 'Meeting Room', 'Executive', 'Corridor'],
                 'Loose Furniture' => ['Reception', 'Open Work', 'Meeting Room', 'Pantry', 'Lounge'],
-                'Detail Surface' => ['Reception Desk', 'Pantry Counter', 'Meeting Table', 'Executive Desk', 'Corridor Handrail'],
+                'Detail Surface' => ['Reception', 'Pantry', 'Meeting Room', 'Executive', 'Corridor'],
             ],
             'School' => [
                 'Floor' => ['Classroom', 'Corridor', 'Library', 'Canteen', 'Playground', 'WC', 'Admin'],
                 'Wall' => ['Classroom', 'Corridor', 'Library', 'Canteen', 'Auditorium'],
                 'Ceiling' => ['Classroom', 'Library', 'Auditorium', 'Corridor', 'Canteen'],
                 'Loose Furniture' => ['Classroom', 'Library', 'Canteen', 'Admin', 'Auditorium'],
-                'Detail Surface' => ['Lab Bench', 'Library Shelf', 'Canteen Counter', 'Classroom Desk'],
+                'Detail Surface' => ['Lab Bench', 'Library', 'Canteen', 'Classroom'],
             ],
             'Townhouse' => [
                 'Floor' => ['Living Room', 'Kitchen', 'Bedroom', 'WC', 'Stair', 'Terrace'],
                 'Wall' => ['Living Room', 'Kitchen', 'Bedroom', 'Facade', 'WC', 'Stair'],
                 'Ceiling' => ['Living Room', 'Kitchen', 'Bedroom', 'WC', 'Terrace'],
                 'Loose Furniture' => ['Living Room', 'Bedroom', 'Kitchen', 'Terrace'],
-                'Detail Surface' => ['Kitchen Counter', 'Stair Handrail', 'Wardrobe Surface', 'Bath Vanity'],
+                'Detail Surface' => ['Kitchen', 'Stair', 'Wardrobe', 'WC'],
             ],
             'Coffee Shop' => [
                 'Floor' => ['Serving Area', 'Seating Area', 'Bar Counter', 'WC', 'Terrace', 'Kitchen'],
                 'Wall' => ['Bar Counter', 'Seating Area', 'Facade', 'WC', 'Kitchen', 'Serving Area'],
                 'Ceiling' => ['Seating Area', 'Bar Counter', 'Serving Area', 'WC'],
                 'Loose Furniture' => ['Seating Area', 'Bar Counter', 'Terrace', 'Serving Area'],
-                'Detail Surface' => ['Bar Counter', 'Table Top', 'Facade Cladding', 'Menu Board'],
+                'Detail Surface' => ['Bar Counter', 'Table Top', 'Facade', 'Menu Board'],
             ],
             'Retail' => [
                 'Floor' => ['Sales Floor', 'Fitting Room', 'Cashier', 'Storage', 'WC', 'Entrance'],
                 'Wall' => ['Sales Floor', 'Fitting Room', 'Facade', 'Cashier', 'Entrance'],
                 'Ceiling' => ['Sales Floor', 'Fitting Room', 'Entrance', 'Cashier'],
-                'Loose Furniture' => ['Sales Floor', 'Fitting Room', 'Cashier', 'Window Display'],
-                'Detail Surface' => ['Cashier Counter', 'Display Shelf', 'Facade', 'Fitting Bench'],
+                'Loose Furniture' => ['Sales Floor', 'Fitting Room', 'Cashier', 'Display Shelf'],
+                'Detail Surface' => ['Cashier', 'Display Shelf', 'Facade', 'Fitting Room'],
             ],
             'Apartment' => [
                 'Floor' => ['Living Room', 'Kitchen', 'Bedroom', 'Balcony', 'WC', 'Corridor'],
                 'Wall' => ['Living Room', 'Kitchen', 'Bedroom', 'Balcony', 'WC', 'Corridor'],
                 'Ceiling' => ['Living Room', 'Kitchen', 'Bedroom', 'Balcony', 'WC'],
                 'Loose Furniture' => ['Living Room', 'Bedroom', 'Balcony', 'Kitchen', 'Corridor'],
-                'Detail Surface' => ['Kitchen Counter', 'Wardrobe', 'Bath Vanity', 'Balcony Railing'],
+                'Detail Surface' => ['Kitchen', 'Wardrobe', 'WC', 'Balcony'],
             ],
         ];
     }
 
     /**
-     * Default Step 3 Area Vietnamese Labels.
+     * Default 3-tier compatibility matrix for a new material.
+     */
+    public static function getDefaultCompatibilityMatrix(): array
+    {
+        $typologies = self::getDefaultTypologies();
+        $surfaces = self::getDefaultSurfaces();
+
+        $matrix = [];
+        foreach ($typologies as $t) {
+            $tKey = is_array($t) ? ($t['en'] ?? '') : $t;
+            if (!$tKey) continue;
+            $matrix[$tKey] = [
+                'enabled' => true,
+                'surfaces' => [],
+            ];
+            foreach ($surfaces as $s) {
+                $sKey = is_array($s) ? ($s['en'] ?? '') : $s;
+                if (!$sKey) continue;
+                $matrix[$tKey]['surfaces'][$sKey] = [
+                    'enabled' => false,
+                    'areas' => [],
+                ];
+            }
+        }
+
+        return $matrix;
+    }
+
+    /**
+     * Validate and build 3-tier compatibility matrix from request,
+     * maintaining single source of truth across project_type -> surface -> areas.
+     */
+    public static function buildCompatibilityPayload(Request $request): array
+    {
+        $typologies = self::getDefaultTypologies();
+        $surfaces = self::getDefaultSurfaces();
+        $areaMatrix = self::resolveArraySetting('material_lab_area_matrix', self::getDefaultAreaMatrix());
+        $savedLabels = self::resolveArraySetting('material_lab_area_labels', self::getDefaultAreaLabels());
+        $labelUpdated = false;
+
+        $typoKeys = array_map(fn ($t) => is_array($t) ? $t['en'] : $t, $typologies);
+        $surfKeys = array_map(fn ($s) => is_array($s) ? $s['en'] : $s, $surfaces);
+
+        $rawCompat = $request->input('compatibility');
+        if (is_string($rawCompat)) {
+            $rawCompat = json_decode($rawCompat, true);
+        }
+        if (!is_array($rawCompat)) {
+            $rawCompat = [];
+        }
+
+        $fallbackTypo = (array) $request->input('suitable_typologies', []);
+        $fallbackSurf = (array) $request->input('suitable_locations', []);
+        $fallbackAreas = (array) $request->input('suitable_areas', []);
+
+        $compatibilityMatrix = [];
+        $activeTypologies = [];
+        $activeSurfaces = [];
+        $allSelectedAreas = [];
+
+        foreach ($typoKeys as $tKey) {
+            $typoInput = $rawCompat[$tKey] ?? null;
+            $isTypoEnabled = false;
+
+            if ($typoInput !== null && isset($typoInput['enabled'])) {
+                $isTypoEnabled = (bool) $typoInput['enabled'];
+            } elseif (!empty($fallbackTypo)) {
+                $isTypoEnabled = in_array($tKey, $fallbackTypo, true);
+            } else {
+                $isTypoEnabled = false;
+            }
+
+            $compatibilityMatrix[$tKey] = [
+                'enabled' => $isTypoEnabled,
+                'surfaces' => [],
+            ];
+
+            if ($isTypoEnabled) {
+                $activeTypologies[] = $tKey;
+            }
+
+            foreach ($surfKeys as $sKey) {
+                $surfInput = $typoInput['surfaces'][$sKey] ?? null;
+                $isSurfEnabled = false;
+
+                if ($surfInput !== null && isset($surfInput['enabled'])) {
+                    $isSurfEnabled = (bool) $surfInput['enabled'];
+                } elseif (!empty($fallbackSurf)) {
+                    $isSurfEnabled = in_array($sKey, $fallbackSurf, true);
+                } else {
+                    $isSurfEnabled = false;
+                }
+
+                if ($isTypoEnabled && $isSurfEnabled) {
+                    if (!in_array($sKey, $activeSurfaces, true)) {
+                        $activeSurfaces[] = $sKey;
+                    }
+                }
+
+                $rawAreas = [];
+                if ($surfInput !== null && isset($surfInput['areas']) && is_array($surfInput['areas'])) {
+                    $rawAreas = $surfInput['areas'];
+                } elseif (!empty($fallbackAreas) && $isSurfEnabled) {
+                    $defaultPair = $areaMatrix[$tKey][$sKey] ?? [];
+                    $rawAreas = array_values(array_intersect($fallbackAreas, $defaultPair));
+                }
+
+                $pairCleanAreas = [];
+                foreach ($rawAreas as $areaItem) {
+                    $trimmed = trim((string) $areaItem);
+                    if ($trimmed === '') continue;
+                    $canon = self::canonicalizeArea($trimmed);
+                    if (!in_array($canon, $pairCleanAreas, true)) {
+                        $pairCleanAreas[] = $canon;
+                    }
+                    if (!isset($savedLabels[$canon])) {
+                        $savedLabels[$canon] = $trimmed;
+                        $labelUpdated = true;
+                    }
+                    if ($isTypoEnabled && $isSurfEnabled && !in_array($canon, $allSelectedAreas, true)) {
+                        $allSelectedAreas[] = $canon;
+                    }
+                }
+
+                $compatibilityMatrix[$tKey]['surfaces'][$sKey] = [
+                    'enabled' => $isSurfEnabled,
+                    'areas' => $pairCleanAreas,
+                ];
+            }
+        }
+
+        if ($labelUpdated) {
+            setting(['material_lab_area_labels' => json_encode($savedLabels, JSON_UNESCAPED_UNICODE)]);
+        }
+
+        return [
+            'compatibility_matrix' => $compatibilityMatrix,
+            'suitable_typologies' => array_values(array_unique($activeTypologies)),
+            'suitable_locations' => array_values(array_unique($activeSurfaces)),
+            'suitable_areas' => array_values(array_unique($allSelectedAreas)),
+        ];
+    }
+
+    /**
+     * Aliases mapping duplicate/legacy keys to canonical keys.
+     */
+    public static function getAreaAliases(): array
+    {
+        return [
+            'Reception Desk' => 'Reception',
+            'Meeting Table' => 'Meeting Room',
+            'Pantry Counter' => 'Pantry',
+            'Executive Desk' => 'Executive',
+            'Corridor Handrail' => 'Corridor',
+            'Classroom Desk' => 'Classroom',
+            'Library Shelf' => 'Library',
+            'Canteen Counter' => 'Canteen',
+            'Cashier Counter' => 'Cashier',
+            'Kitchen Counter' => 'Kitchen',
+            'Stair Handrail' => 'Stair',
+            'Wardrobe Surface' => 'Wardrobe',
+            'Bath Vanity' => 'WC',
+            'Facade Cladding' => 'Facade',
+            'Fitting Bench' => 'Fitting Room',
+            'Window Display' => 'Display Shelf',
+            'Balcony Railing' => 'Balcony',
+        ];
+    }
+
+    /**
+     * Convert any area key to canonical key.
+     */
+    public static function canonicalizeArea(string $key): string
+    {
+        $aliases = self::getAreaAliases();
+
+        return $aliases[$key] ?? $key;
+    }
+
+    /**
+     * Get Contextual label for an area depending on the surface (Floor vs Detail vs Loose, etc.).
+     */
+    public static function getContextualAreaLabel(string $areaKey, string $surfaceKey, array $defaultLabels = []): string
+    {
+        $canon = self::canonicalizeArea($areaKey);
+
+        if ($surfaceKey === 'Detail Surface') {
+            $detailLabels = [
+                'Reception' => 'Quầy lễ tân',
+                'Meeting Room' => 'Bàn họp',
+                'Pantry' => 'Bàn pantry',
+                'Executive' => 'Bàn điều hành',
+                'Corridor' => 'Tay vịn hành lang',
+                'Classroom' => 'Bàn học',
+                'Library' => 'Kệ sách thư viện',
+                'Canteen' => 'Quầy căn tin',
+                'Lab Bench' => 'Bàn thí nghiệm',
+                'Kitchen' => 'Mặt bếp',
+                'Stair' => 'Tay vịn cầu thang',
+                'Wardrobe' => 'Bề mặt tủ áo',
+                'WC' => 'Bàn lavabo',
+                'Facade' => 'Ốp mặt dựng',
+                'Cashier' => 'Quầy thu ngân',
+                'Display Shelf' => 'Kệ trưng bày',
+                'Table Top' => 'Mặt bàn',
+                'Menu Board' => 'Bảng thực đơn',
+                'Balcony' => 'Lan can ban công',
+                'Fitting Room' => 'Băng thử đồ',
+            ];
+            if (isset($detailLabels[$canon])) {
+                return $detailLabels[$canon];
+            }
+        }
+
+        if ($surfaceKey === 'Loose Furniture') {
+            $looseLabels = [
+                'Reception' => 'Nội thất sảnh lễ tân',
+                'Meeting Room' => 'Bàn ghế phòng họp',
+                'Pantry' => 'Bàn ghế pantry',
+                'Lounge' => 'Sofa / Khu thư giãn Lounge',
+                'Classroom' => 'Bàn ghế học sinh',
+                'Living Room' => 'Sofa / Bàn trà phòng khách',
+                'Dining' => 'Bàn ghế ăn',
+                'Bedroom' => 'Giường / Tab đầu giường',
+                'Display Shelf' => 'Kệ trưng bày đồ rời',
+            ];
+            if (isset($looseLabels[$canon])) {
+                return $looseLabels[$canon];
+            }
+        }
+
+        return $defaultLabels[$canon] ?? ($defaultLabels[$areaKey] ?? $areaKey);
+    }
+
+    /**
+     * Default Step 3 Area Vietnamese Labels (Cleaned & consolidated).
      */
     public static function getDefaultAreaLabels(): array
     {
         return [
-            'Reception' => 'Khu lễ tân', 'Open Work' => 'Khu làm việc mở', 'Meeting Room' => 'Phòng họp',
-            'Executive' => 'Phòng điều hành', 'Corridor' => 'Hành lang', 'Pantry' => 'Pantry',
-            'WC' => 'Khu vệ sinh', 'Lounge' => 'Khu thư giãn (Lounge)', 'Classroom' => 'Phòng học', 'Library' => 'Thư viện',
-            'Canteen' => 'Căn tin', 'Playground' => 'Sân chơi', 'Admin' => 'Hành chính',
-            'Auditorium' => 'Hội trường', 'Living Room' => 'Phòng khách', 'Kitchen' => 'Bếp',
-            'Bedroom' => 'Phòng ngủ', 'Stair' => 'Cầu thang', 'Terrace' => 'Sân thượng',
-            'Facade' => 'Mặt dựng', 'Serving Area' => 'Khu phục vụ', 'Seating Area' => 'Khu chỗ ngồi',
-            'Bar Counter' => 'Quầy bar', 'Sales Floor' => 'Sàn bán hàng', 'Fitting Room' => 'Phòng thử đồ',
-            'Cashier' => 'Thu ngân', 'Storage' => 'Kho', 'Entrance' => 'Lối vào',
-            'Window Display' => 'Tủ trưng bày', 'Reception Desk' => 'Quầy lễ tân', 'Pantry Counter' => 'Bàn pantry',
-            'Meeting Table' => 'Bàn họp', 'Executive Desk' => 'Bàn điều hành', 'Corridor Handrail' => 'Tay vịn',
-            'Lab Bench' => 'Bàn thí nghiệm', 'Library Shelf' => 'Kệ thư viện', 'Canteen Counter' => 'Quầy căn tin',
-            'Classroom Desk' => 'Bàn học', 'Kitchen Counter' => 'Mặt bếp', 'Stair Handrail' => 'Tay vịn cầu thang',
-            'Wardrobe Surface' => 'Bề mặt tủ áo', 'Bath Vanity' => 'Bàn lavabo', 'Table Top' => 'Mặt bàn',
-            'Facade Cladding' => 'Ốp mặt dựng', 'Menu Board' => 'Bảng thực đơn', 'Cashier Counter' => 'Quầy thu ngân',
-            'Display Shelf' => 'Kệ trưng bày', 'Fitting Bench' => 'Băng thử đồ', 'Wardrobe' => 'Tủ áo',
-            'Balcony' => 'Ban công', 'Balcony Railing' => 'Lan can',
+            'Reception' => 'Khu / Quầy lễ tân',
+            'Open Work' => 'Khu làm việc mở',
+            'Meeting Room' => 'Phòng họp / Bàn họp',
+            'Executive' => 'Phòng điều hành / Bàn giám đốc',
+            'Corridor' => 'Hành lang / Tay vịn',
+            'Pantry' => 'Pantry / Quầy pantry',
+            'WC' => 'Khu vệ sinh / Lavabo',
+            'Lounge' => 'Khu thư giãn (Lounge)',
+            'Classroom' => 'Phòng học / Bàn học',
+            'Library' => 'Thư viện / Kệ sách',
+            'Canteen' => 'Căn tin / Quầy ăn',
+            'Playground' => 'Sân chơi',
+            'Admin' => 'Khối hành chính',
+            'Auditorium' => 'Hội trường',
+            'Lab Bench' => 'Phòng / Bàn thí nghiệm',
+            'Living Room' => 'Phòng khách',
+            'Kitchen' => 'Bếp / Mặt bếp',
+            'Bedroom' => 'Phòng ngủ',
+            'Stair' => 'Cầu thang / Tay vịn',
+            'Terrace' => 'Sân thượng',
+            'Facade' => 'Mặt dựng / Mặt tiền',
+            'Serving Area' => 'Khu phục vụ',
+            'Seating Area' => 'Khu chỗ ngồi / Bàn khách',
+            'Bar Counter' => 'Quầy bar / Pha chế',
+            'Table Top' => 'Mặt bàn',
+            'Menu Board' => 'Bảng thực đơn',
+            'Sales Floor' => 'Sàn bán hàng',
+            'Fitting Room' => 'Phòng thử đồ',
+            'Cashier' => 'Thu ngân / Quầy thu ngân',
+            'Storage' => 'Kho hàng',
+            'Entrance' => 'Lối vào / Mặt tiền',
+            'Display Shelf' => 'Tủ / Kệ trưng bày',
+            'Wardrobe' => 'Tủ áo / Bề mặt tủ áo',
+            'Balcony' => 'Ban công / Lan can',
         ];
     }
 
@@ -270,8 +522,57 @@ class MaterialController extends Controller
         $categories = self::getManagedCategories();
         $typologies = self::resolveArraySetting('material_lab_typologies', self::getDefaultTypologies());
         $surfaces = self::resolveArraySetting('material_lab_surfaces', self::getDefaultSurfaces());
+        $areaLabels = self::resolveArraySetting('material_lab_area_labels', self::getDefaultAreaLabels());
 
-        return view('cms.material-lab.index', compact('materials', 'categories', 'typologies', 'surfaces'));
+        return view('cms.material-lab.index', compact('materials', 'categories', 'typologies', 'surfaces', 'areaLabels'));
+    }
+
+    /**
+     * Build hierarchical Typology -> Surfaces -> Distinct Areas map.
+     */
+    public static function getTypologyAreaHierarchy(array $typologies, array $surfaces, array $areaMatrix, array $areaLabels): array
+    {
+        $hierarchy = [];
+        $aliases = self::getAreaAliases();
+
+        foreach ($typologies as $t) {
+            $tKey = is_array($t) ? ($t['en'] ?? '') : $t;
+            if (!$tKey) {
+                continue;
+            }
+
+            $surfsForTypo = $areaMatrix[$tKey] ?? [];
+            $allAreasForTypo = [];
+
+            foreach ($surfaces as $s) {
+                $sKey = is_array($s) ? ($s['en'] ?? '') : $s;
+                $rawList = $surfsForTypo[$sKey] ?? [];
+
+                foreach ($rawList as $rawArea) {
+                    $canonKey = $aliases[$rawArea] ?? $rawArea;
+                    if (!isset($allAreasForTypo[$canonKey])) {
+                        $allAreasForTypo[$canonKey] = [
+                            'en' => $canonKey,
+                            'vi' => $areaLabels[$canonKey] ?? ($areaLabels[$rawArea] ?? $canonKey),
+                            'surfaces' => [],
+                        ];
+                    }
+                    if (!in_array($sKey, $allAreasForTypo[$canonKey]['surfaces'], true)) {
+                        $allAreasForTypo[$canonKey]['surfaces'][] = $sKey;
+                    }
+                }
+            }
+
+            $hierarchy[$tKey] = [
+                'key' => $tKey,
+                'vi' => is_array($t) ? ($t['vi'] ?? $tKey) : $t,
+                'icon' => is_array($t) ? ($t['icon'] ?? '') : '',
+                'desc' => is_array($t) ? ($t['desc'] ?? '') : '',
+                'areas' => array_values($allAreasForTypo),
+            ];
+        }
+
+        return $hierarchy;
     }
 
     /**
@@ -286,6 +587,32 @@ class MaterialController extends Controller
         $lifeCycles = self::resolveArraySetting('material_lab_lifecycles', self::getDefaultLifeCycles());
         $budgetLevels = self::resolveArraySetting('material_lab_budgets', self::getDefaultBudgetLevels());
 
+        $typoAreaHierarchy = self::getTypologyAreaHierarchy($typologies, $surfaces, $areaMatrix, $areaLabels);
+
+        // Build typoSurfaceMatrix with contextual labels
+        $typoSurfaceMatrix = [];
+        foreach ($typologies as $t) {
+            $tKey = is_array($t) ? ($t['en'] ?? '') : $t;
+            if (!$tKey) {
+                continue;
+            }
+
+            $typoSurfaceMatrix[$tKey] = [];
+            foreach ($surfaces as $s) {
+                $sKey = is_array($s) ? ($s['en'] ?? '') : $s;
+                $rawList = $areaMatrix[$tKey][$sKey] ?? [];
+                $cleanList = [];
+                foreach ($rawList as $rawArea) {
+                    $canon = self::canonicalizeArea($rawArea);
+                    $cleanList[] = [
+                        'en' => $canon,
+                        'vi' => self::getContextualAreaLabel($canon, $sKey, $areaLabels),
+                    ];
+                }
+                $typoSurfaceMatrix[$tKey][$sKey] = $cleanList;
+            }
+        }
+
         // Collect all unique areas across areaMatrix + areaLabels
         $allAreaKeys = array_keys($areaLabels);
         foreach ($areaMatrix as $surfMap) {
@@ -293,8 +620,9 @@ class MaterialController extends Controller
                 foreach ($surfMap as $areaList) {
                     if (is_array($areaList)) {
                         foreach ($areaList as $aKey) {
-                            if (! in_array($aKey, $allAreaKeys, true)) {
-                                $allAreaKeys[] = $aKey;
+                            $canon = self::canonicalizeArea($aKey);
+                            if (! in_array($canon, $allAreaKeys, true)) {
+                                $allAreaKeys[] = $canon;
                             }
                         }
                     }
@@ -334,11 +662,18 @@ class MaterialController extends Controller
         $finishes = array_values(array_unique(array_filter(array_merge($defaultFinishes, $dbFinishes, $current && $current->finish ? [$current->finish] : []))));
         sort($finishes);
 
+        $materialCompatibility = $current
+            ? $current->resolveCompatibilityMatrix()
+            : self::getDefaultCompatibilityMatrix();
+
         return compact(
             'typologies',
             'surfaces',
             'areaMatrix',
             'areaLabels',
+            'typoAreaHierarchy',
+            'typoSurfaceMatrix',
+            'materialCompatibility',
             'allAreas',
             'lifeCycles',
             'budgetLevels',
@@ -446,9 +781,12 @@ class MaterialController extends Controller
         $validated['sort_order'] = $request->filled('sort_order')
             ? (int) $request->input('sort_order')
             : (int) (Material::max('sort_order') ?? 0) + 1;
-        $validated['suitable_typologies'] = array_values(array_filter($request->input('suitable_typologies', [])));
-        $validated['suitable_locations'] = array_values(array_filter($request->input('suitable_locations', [])));
-        $validated['suitable_areas'] = array_values(array_filter($request->input('suitable_areas', [])));
+
+        $compatPayload = self::buildCompatibilityPayload($request);
+        $validated['compatibility_matrix'] = $compatPayload['compatibility_matrix'];
+        $validated['suitable_typologies'] = $compatPayload['suitable_typologies'];
+        $validated['suitable_locations'] = $compatPayload['suitable_locations'];
+        $validated['suitable_areas'] = $compatPayload['suitable_areas'];
 
         Material::create($validated);
 
@@ -536,9 +874,12 @@ class MaterialController extends Controller
         $validated['experience_description'] = $validated['ws_experience'] ?? null;
         $validated['application'] = isset($validated['ws_experience']) ? Str::limit(trim((string) $validated['ws_experience']), 250) : null;
 
-        $validated['suitable_typologies'] = array_values(array_filter($request->input('suitable_typologies', [])));
-        $validated['suitable_locations'] = array_values(array_filter($request->input('suitable_locations', [])));
-        $validated['suitable_areas'] = array_values(array_filter($request->input('suitable_areas', [])));
+        $compatPayload = self::buildCompatibilityPayload($request);
+        $validated['compatibility_matrix'] = $compatPayload['compatibility_matrix'];
+        $validated['suitable_typologies'] = $compatPayload['suitable_typologies'];
+        $validated['suitable_locations'] = $compatPayload['suitable_locations'];
+        $validated['suitable_areas'] = $compatPayload['suitable_areas'];
+
         $validated['sort_order'] = $request->filled('sort_order')
             ? (int) $request->input('sort_order')
             : ($material->sort_order ?? 0);
@@ -650,7 +991,7 @@ class MaterialController extends Controller
                         $cleanTypologies[] = [
                             'en' => $en,
                             'vi' => $vi,
-                            'icon' => trim((string) ($item['icon'] ?? '🏢')) ?: '🏢',
+                            'icon' => trim((string) ($item['icon'] ?? '')) ?: '',
                             'desc' => trim((string) ($item['desc'] ?? '')),
                         ];
                     }

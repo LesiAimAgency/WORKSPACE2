@@ -803,22 +803,92 @@
         get filteredMaterials() {
           let list = this.allMaterials;
 
-          // Step 1: Filter by Typology (if material specifies suitableTypologies)
-          if (this.selectedTypology) {
-            const typo = this.selectedTypology.en;
-            list = list.filter(m => !Array.isArray(m.suitableTypologies) || m.suitableTypologies.length === 0 || m.suitableTypologies.includes(typo));
-          }
+          const typoKey = this.selectedTypology ? this.selectedTypology.en : null;
+          const surfKey = this.selectedSurface ? this.selectedSurface.en : null;
+          const areaKey = this.selectedArea ? this.selectedArea.en : null;
 
-          // Step 2: Filter by Surface / Location
-          if (this.selectedSurface) {
-            const surf = this.selectedSurface.en;
-            list = list.filter(m => Array.isArray(m.suitableLocations) && m.suitableLocations.includes(surf));
-          }
+          const aliasMap = {
+            'Reception Desk': 'Reception',
+            'Meeting Table': 'Meeting Room',
+            'Pantry Counter': 'Pantry',
+            'Executive Desk': 'Executive',
+            'Corridor Handrail': 'Corridor',
+            'Classroom Desk': 'Classroom',
+            'Library Shelf': 'Library',
+            'Canteen Counter': 'Canteen',
+            'Cashier Counter': 'Cashier',
+            'Kitchen Counter': 'Kitchen',
+            'Stair Handrail': 'Stair',
+            'Wardrobe Surface': 'Wardrobe',
+            'Bath Vanity': 'WC',
+            'Facade Cladding': 'Facade',
+            'Fitting Bench': 'Fitting Room',
+            'Window Display': 'Display Shelf',
+            'Balcony Railing': 'Balcony',
+          };
+          const canonTarget = areaKey ? (aliasMap[areaKey] || areaKey) : null;
 
-          // Step 3: Filter by Functional Area (if material restricts suitableAreas)
-          if (this.selectedArea) {
-            const area = this.selectedArea.en;
-            list = list.filter(m => !Array.isArray(m.suitableAreas) || m.suitableAreas.length === 0 || m.suitableAreas.includes(area));
+          // 3-tier compatibility check: Typology -> Surface -> Area
+          if (typoKey || surfKey || areaKey) {
+            list = list.filter(m => {
+              const compat = m.compatibility || null;
+
+              if (compat && typeof compat === 'object') {
+                // Tier 1: Typology
+                if (typoKey) {
+                  const typoConf = compat[typoKey];
+                  if (!typoConf || !typoConf.enabled) {
+                    return false;
+                  }
+
+                  // Tier 2: Surface within this Typology
+                  if (surfKey) {
+                    const surfConf = typoConf.surfaces ? typoConf.surfaces[surfKey] : null;
+                    if (!surfConf || !surfConf.enabled) {
+                      return false;
+                    }
+
+                    // Tier 3: Area within this (Typology + Surface) pair
+                    if (areaKey) {
+                      const areas = Array.isArray(surfConf.areas) ? surfConf.areas : [];
+                      // Empty array = applies to ALL areas of this surface in this typology
+                      if (areas.length > 0) {
+                        const hasMatch = areas.some(a => {
+                          const cA = aliasMap[a] || a;
+                          return cA === canonTarget || a === areaKey;
+                        });
+                        if (!hasMatch) {
+                          return false;
+                        }
+                      }
+                    }
+                  }
+                }
+                return true;
+              }
+
+              // Fallback to legacy fields if compatibility matrix is missing
+              if (typoKey) {
+                if (Array.isArray(m.suitableTypologies) && m.suitableTypologies.length > 0 && !m.suitableTypologies.includes(typoKey)) {
+                  return false;
+                }
+              }
+              if (surfKey) {
+                if (!Array.isArray(m.suitableLocations) || !m.suitableLocations.includes(surfKey)) {
+                  return false;
+                }
+              }
+              if (areaKey) {
+                if (Array.isArray(m.suitableAreas) && m.suitableAreas.length > 0) {
+                  const hasMatch = m.suitableAreas.some(a => {
+                    const cA = aliasMap[a] || a;
+                    return cA === canonTarget || a === areaKey;
+                  });
+                  if (!hasMatch) return false;
+                }
+              }
+              return true;
+            });
           }
 
           if (this.selectedDurability) {

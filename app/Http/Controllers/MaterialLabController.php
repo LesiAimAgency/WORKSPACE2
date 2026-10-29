@@ -39,6 +39,7 @@ class MaterialLabController extends Controller
                     'suitableTypologies' => is_array($m->suitable_typologies) ? $m->suitable_typologies : [],
                     'suitableLocations' => is_array($m->suitable_locations) ? $m->suitable_locations : [],
                     'suitableAreas' => is_array($m->suitable_areas) ? $m->suitable_areas : [],
+                    'compatibility' => $m->resolveCompatibilityMatrix(),
                     'category' => $m->category,
                     'origin' => $m->origin,
                     'originLabel' => match ($m->origin) {

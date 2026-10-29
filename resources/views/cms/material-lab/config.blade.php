@@ -105,7 +105,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center p-3 bg-gray-50 rounded-xl border border-gray-200">
                             <div class="md:col-span-1">
                                 <label class="block text-[10px] text-gray-500 mb-0.5">Icon</label>
-                                <input type="text" x-model="item.icon" class="w-full px-2 py-1.5 text-center text-sm border border-gray-300 rounded-lg bg-white" placeholder="🏢">
+                                <input type="text" x-model="item.icon" class="w-full px-2 py-1.5 text-center text-sm border border-gray-300 rounded-lg bg-white" placeholder="icon">
                             </div>
                             <div class="md:col-span-3">
                                 <label class="block text-[10px] text-gray-500 mb-0.5">Tên tiếng Việt (Hiển thị chính)</label>
@@ -218,7 +218,7 @@
                                 @click="activeMatrixTypo = typo.en; ensureMatrixTypo(typo.en)"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                                 :class="activeMatrixTypo === typo.en ? 'bg-gray-900 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
-                            <span x-text="(typo.icon || '🏢') + ' ' + typo.vi"></span>
+                            <span x-text="typo.vi"></span>
                         </button>
                     </template>
                 </div>
@@ -442,7 +442,7 @@ function materialLabConfigEditor() {
 
         addTypology() {
             this.typologies.push({
-                icon: '🏢',
+                icon: '',
                 vi: 'Loại hình mới',
                 en: 'NewTypology_' + (this.typologies.length + 1),
                 desc: 'Mô tả loại hình không gian...'

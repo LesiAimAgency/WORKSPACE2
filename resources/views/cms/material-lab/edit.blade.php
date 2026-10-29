@@ -92,6 +92,48 @@
                         <input type="text" name="name" value="{{ old('name', $material->name) }}" required placeholder="Ví dụ: Sàn nhựa vinyl hèm khóa (LVT)..." class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
                     </div>
 
+                    <!-- Brand Select -->
+                    @php
+                        $currentBrand = old('brand', $material->brand ?? '');
+                    @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-gray-700">
+                                Thương hiệu / Nhà cung cấp <span class="text-rose-500">*</span>
+                            </label>
+                            <a href="{{ route('admin.material-lab.brands') }}" class="text-[11px] text-rose-600 hover:text-rose-700 hover:underline font-medium">
+                                Quản lý &rarr;
+                            </a>
+                        </div>
+                        <select name="brand" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
+                            <option value="">-- Chọn thương hiệu / nhà cung cấp --</option>
+                            @foreach($brands as $b)
+                                <option value="{{ $b }}" {{ $currentBrand === $b ? 'selected' : '' }}>{{ $b }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Category Select -->
+                    @php
+                        $currentCategory = old('category', $material->category ?? '');
+                    @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-gray-700">
+                                Phân loại danh mục <span class="text-rose-500">*</span>
+                            </label>
+                            <a href="{{ route('admin.material-lab.categories') }}" class="text-[11px] text-indigo-600 hover:text-indigo-700 hover:underline font-medium">
+                                Quản lý &rarr;
+                            </a>
+                        </div>
+                        <select name="category" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
+                            <option value="">-- Chọn phân loại danh mục --</option>
+                            @foreach($categories as $c)
+                                <option value="{{ $c }}" {{ $currentCategory === $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Active Toggle -->
                     <div class="pt-2 border-t border-gray-100">
                         <label class="flex items-center gap-2.5 cursor-pointer p-3 bg-gray-50 hover:bg-gray-100/80 rounded-lg border border-gray-200 transition-colors">
@@ -139,216 +181,318 @@
                     if (!is_array($selectedAreas)) {
                         $selectedAreas = [];
                     }
+                    $selectedAreas = array_values(array_unique(array_map(fn($a) => \App\Http\Controllers\Admin\MaterialController::canonicalizeArea((string)$a), $selectedAreas)));
                 @endphp
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-5"
+                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-6"
                      x-data="{
-                        selectedTypos: @js(array_values($selectedTypologies)),
-                        selectedSurfs: @js(array_values($selectedLocs)),
-                        selectedAreas: @js(array_values($selectedAreas)),
+                        compat: @js($materialCompatibility ?? ($material->resolveCompatibilityMatrix())),
+                        activeTypoTab: @js($defaultTypologyKeys[0] ?? 'Office'),
+                        activeSurfaceTab: 'Floor',
+                        newAreaInput: '',
+                        
+                        allTypos: @js($typologies),
+                        allSurfs: @js($surfaces),
                         areaMatrix: @js($areaMatrix ?? []),
                         areaLabels: @js($areaLabels ?? []),
-                        allTypos: @js($defaultTypologyKeys),
-                        allSurfs: @js(collect($surfaces)->map(fn($s) => is_array($s) ? ($s['en'] ?? '') : $s)->filter()->values()->toArray()),
-                        get availableAreas() {
-                            const set = new Set();
-                            const typos = this.selectedTypos.length ? this.selectedTypos : this.allTypos;
-                            const surfs = this.selectedSurfs.length ? this.selectedSurfs : this.allSurfs;
-                            typos.forEach(t => {
-                                surfs.forEach(s => {
-                                    if (this.areaMatrix[t] && Array.isArray(this.areaMatrix[t][s])) {
-                                        this.areaMatrix[t][s].forEach(a => set.add(a));
-                                    }
-                                });
-                            });
-                            return Array.from(set).map(en => ({
-                                en: en,
-                                vi: this.areaLabels[en] || en
-                            }));
+
+                        // --- Helper: Typology (Bước 1) ---
+                        isTypoEnabled(tKey) {
+                            return Boolean(this.compat[tKey] && this.compat[tKey].enabled);
+                        },
+                        toggleTypo(tKey) {
+                            if (!this.compat[tKey]) {
+                                this.compat[tKey] = { enabled: false, surfaces: {} };
+                            }
+                            this.compat[tKey].enabled = !this.compat[tKey].enabled;
+                            this.activeTypoTab = tKey;
                         },
                         toggleAllTypos() {
-                            if (this.selectedTypos.length === this.allTypos.length) {
-                                this.selectedTypos = [];
-                            } else {
-                                this.selectedTypos = [...this.allTypos];
+                            const allEnabled = this.allTypos.every(t => this.isTypoEnabled(t.en || t));
+                            this.allTypos.forEach(t => {
+                                const k = t.en || t;
+                                if (!this.compat[k]) this.compat[k] = { enabled: false, surfaces: {} };
+                                this.compat[k].enabled = !allEnabled;
+                            });
+                        },
+
+                        // --- Helper: Surface (Bước 2) ---
+                        isSurfaceEnabled(sKey, tKey = null) {
+                            const typoKey = tKey || this.activeTypoTab;
+                            const typo = this.compat[typoKey];
+                            return Boolean(typo && typo.surfaces && typo.surfaces[sKey] && typo.surfaces[sKey].enabled);
+                        },
+                        toggleSurface(sKey, tKey = null) {
+                            const typoKey = tKey || this.activeTypoTab;
+                            if (!this.compat[typoKey]) {
+                                this.compat[typoKey] = { enabled: true, surfaces: {} };
+                            }
+                            if (!this.compat[typoKey].surfaces[sKey]) {
+                                this.compat[typoKey].surfaces[sKey] = { enabled: false, areas: [] };
+                            }
+                            this.compat[typoKey].surfaces[sKey].enabled = !this.compat[typoKey].surfaces[sKey].enabled;
+                            this.activeTypoTab = typoKey;
+                            this.activeSurfaceTab = sKey;
+                        },
+                        selectSurfaceTab(sKey, tKey = null) {
+                            if (tKey) {
+                                this.activeTypoTab = tKey;
+                            }
+                            this.activeSurfaceTab = sKey;
+                            if (!this.isSurfaceEnabled(sKey, this.activeTypoTab)) {
+                                if (!this.compat[this.activeTypoTab]) {
+                                    this.compat[this.activeTypoTab] = { enabled: true, surfaces: {} };
+                                }
+                                if (!this.compat[this.activeTypoTab].surfaces[sKey]) {
+                                    this.compat[this.activeTypoTab].surfaces[sKey] = { enabled: true, areas: [] };
+                                } else {
+                                    this.compat[this.activeTypoTab].surfaces[sKey].enabled = true;
+                                }
                             }
                         },
-                        toggleAllSurfs() {
-                            if (this.selectedSurfs.length === this.allSurfs.length) {
-                                this.selectedSurfs = [];
+                        toggleAllSurfacesForCurrentTypo(tKey = null) {
+                            const typoKey = tKey || this.activeTypoTab;
+                            const allEnabled = this.allSurfs.every(s => this.isSurfaceEnabled(s.en || s, typoKey));
+                            this.allSurfs.forEach(s => {
+                                const k = s.en || s;
+                                if (!this.compat[typoKey]) {
+                                    this.compat[typoKey] = { enabled: true, surfaces: {} };
+                                }
+                                if (!this.compat[typoKey].surfaces[k]) {
+                                    this.compat[typoKey].surfaces[k] = { enabled: false, areas: [] };
+                                }
+                                this.compat[typoKey].surfaces[k].enabled = !allEnabled;
+                            });
+                        },
+
+                        // --- Helper: Area (Bước 3: Phân theo cặp project_type + surface) ---
+                        getCurrentPairAreas() {
+                            const list = (this.areaMatrix[this.activeTypoTab] && this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab]) || [];
+                            return list.map(aKey => ({
+                                en: aKey,
+                                vi: this.areaLabels[aKey] || aKey
+                            }));
+                        },
+                        getSelectedAreasForCurrentPair() {
+                            const surf = this.compat[this.activeTypoTab]?.surfaces?.[this.activeSurfaceTab];
+                            return Array.isArray(surf?.areas) ? surf.areas : [];
+                        },
+                        isAreaSelected(aKey) {
+                            return this.getSelectedAreasForCurrentPair().includes(aKey);
+                        },
+                        toggleArea(aKey) {
+                            if (!this.compat[this.activeTypoTab]) {
+                                this.compat[this.activeTypoTab] = { enabled: true, surfaces: {} };
+                            }
+                            if (!this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab]) {
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab] = { enabled: true, areas: [] };
+                            }
+                            this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].enabled = true;
+
+                            let areas = this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas || [];
+                            if (areas.includes(aKey)) {
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas = areas.filter(k => k !== aKey);
                             } else {
-                                this.selectedSurfs = [...this.allSurfs];
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas.push(aKey);
                             }
                         },
-                        toggleAllAreas() {
-                            const availKeys = this.availableAreas.map(a => a.en);
-                            const allSelected = availKeys.length > 0 && availKeys.every(k => this.selectedAreas.includes(k));
-                            if (allSelected) {
-                                this.selectedAreas = [];
-                            } else {
-                                this.selectedAreas = [...availKeys];
+                        selectAllAreasForCurrentPair() {
+                            const list = (this.areaMatrix[this.activeTypoTab] && this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab]) || [];
+                            if (!this.compat[this.activeTypoTab]) {
+                                this.compat[this.activeTypoTab] = { enabled: true, surfaces: {} };
                             }
+                            if (!this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab]) {
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab] = { enabled: true, areas: [] };
+                            }
+                            this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].enabled = true;
+                            this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas = [...list];
+                        },
+                        applyAllAreasForCurrentPair() {
+                            if (!this.compat[this.activeTypoTab]) {
+                                this.compat[this.activeTypoTab] = { enabled: true, surfaces: {} };
+                            }
+                            if (!this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab]) {
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab] = { enabled: true, areas: [] };
+                            }
+                            this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].enabled = true;
+                            this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas = [];
+                        },
+                        deselectAllAreasForCurrentPair() {
+                            if (this.compat[this.activeTypoTab]?.surfaces?.[this.activeSurfaceTab]) {
+                                this.compat[this.activeTypoTab].surfaces[this.activeSurfaceTab].areas = [];
+                            }
+                        },
+                        addCustomArea() {
+                            const val = (this.newAreaInput || '').trim();
+                            if (!val) return;
+                            const key = val;
+                            this.areaLabels[key] = val;
+
+                            if (!this.areaMatrix[this.activeTypoTab]) this.areaMatrix[this.activeTypoTab] = {};
+                            if (!this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab]) this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab] = [];
+                            if (!this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab].includes(key)) {
+                                this.areaMatrix[this.activeTypoTab][this.activeSurfaceTab].push(key);
+                            }
+
+                            this.toggleArea(key);
+                            this.newAreaInput = '';
+                        },
+
+                        // --- Thống kê ---
+                        countEnabledSurfaces(tKey) {
+                            const typo = this.compat[tKey];
+                            if (!typo || !typo.surfaces) return 0;
+                            return Object.values(typo.surfaces).filter(s => s && s.enabled).length;
+                        },
+                        countSelectedAreas(tKey, sKey) {
+                            const surf = this.compat[tKey]?.surfaces?.[sKey];
+                            if (!surf || !surf.enabled) return 0;
+                            return Array.isArray(surf.areas) ? surf.areas.length : 0;
+                        },
+
+                        // --- Serialize Helpers for Backward-Compatibility Hidden Inputs ---
+                        serializeTypologies() {
+                            return Object.keys(this.compat).filter(t => this.compat[t] && this.compat[t].enabled);
+                        },
+                        serializeSurfaces() {
+                            const surfs = new Set();
+                            Object.keys(this.compat).forEach(t => {
+                                if (this.compat[t] && this.compat[t].enabled && this.compat[t].surfaces) {
+                                    Object.keys(this.compat[t].surfaces).forEach(s => {
+                                        if (this.compat[t].surfaces[s] && this.compat[t].surfaces[s].enabled) {
+                                            surfs.add(s);
+                                        }
+                                    });
+                                }
+                            });
+                            return Array.from(surfs);
+                        },
+                        serializeAreas() {
+                            const areas = new Set();
+                            Object.keys(this.compat).forEach(t => {
+                                if (this.compat[t] && this.compat[t].enabled && this.compat[t].surfaces) {
+                                    Object.keys(this.compat[t].surfaces).forEach(s => {
+                                        if (this.compat[t].surfaces[s] && this.compat[t].surfaces[s].enabled) {
+                                            const list = this.compat[t].surfaces[s].areas || [];
+                                            list.forEach(a => areas.add(a));
+                                        }
+                                    });
+                                }
+                            });
+                            return Array.from(areas);
                         }
                      }">
+
+                    <!-- 3-Tier Compatibility Matrix JSON Submission -->
+                    <input type="hidden" name="compatibility" :value="JSON.stringify(compat)">
+
+                    <!-- Backward Compatible Hidden Inputs -->
+                    <template x-for="typo in serializeTypologies()" :key="'h-typo-' + typo">
+                        <input type="hidden" name="suitable_typologies[]" :value="typo">
+                    </template>
+                    <template x-for="surf in serializeSurfaces()" :key="'h-surf-' + surf">
+                        <input type="hidden" name="suitable_locations[]" :value="surf">
+                    </template>
+                    <template x-for="area in serializeAreas()" :key="'h-area-' + area">
+                        <input type="hidden" name="suitable_areas[]" :value="area">
+                    </template>
+
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-                        <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                            2. Phân loại &amp; Vị trí áp dụng theo từng bước (/material-lab)
-                        </h3>
+                        <div>
+                            <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                                2. Ma trận tương thích vật liệu theo 3 tầng chuẩn (/material-lab)
+                            </h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Quy tắc chuẩn: <strong>Loại công trình → Vị trí bề mặt → Khu vực chức năng</strong> (Bước 3 phụ thuộc vào cặp Bước 1 + Bước 2).</p>
+                        </div>
                         <a href="{{ route('admin.material-lab.config') }}" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
-                            Sửa danh sách câu hỏi / lựa chọn Wizard &rarr;
+                            Cấu hình danh mục câu hỏi Wizard &rarr;
                         </a>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Brand Select -->
-                        @php
-                            $currentBrand = old('brand', $material->brand ?? '');
-                        @endphp
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="block text-xs font-semibold text-gray-700">
-                                    Thương hiệu / Nhà cung cấp <span class="text-rose-500">*</span>
-                                </label>
-                                <a href="{{ route('admin.material-lab.brands') }}" class="text-[11px] text-rose-600 hover:text-rose-700 hover:underline font-medium">
-                                    Quản lý thương hiệu &rarr;
-                                </a>
-                            </div>
-                            <select name="brand" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
-                                <option value="">-- Chọn thương hiệu / nhà cung cấp --</option>
-                                @foreach($brands as $b)
-                                    <option value="{{ $b }}" {{ $currentBrand === $b ? 'selected' : '' }}>{{ $b }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Category Select -->
-                        @php
-                            $currentCategory = old('category', $material->category ?? '');
-                        @endphp
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="block text-xs font-semibold text-gray-700">
-                                    Phân loại danh mục <span class="text-rose-500">*</span>
-                                </label>
-                                <a href="{{ route('admin.material-lab.categories') }}" class="text-[11px] text-indigo-600 hover:text-indigo-700 hover:underline font-medium">
-                                    Quản lý danh mục &rarr;
-                                </a>
-                            </div>
-                            <select name="category" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
-                                <option value="">-- Chọn phân loại danh mục --</option>
-                                @foreach($categories as $c)
-                                    <option value="{{ $c }}" {{ $currentCategory === $c ? 'selected' : '' }}>{{ $c }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- BƯỚC 1: LOẠI HÌNH CÔNG TRÌNH TƯƠNG THÍCH -->
-                    <div class="pt-3 border-t border-gray-100">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <!-- ============================================== -->
+                    <!-- BƯỚC 1: LOẠI HÌNH CÔNG TRÌNH TƯƠNG THÍCH (ACCORDION) -->
+                    <!-- ============================================== -->
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <label class="block text-xs font-bold text-gray-800 flex items-center gap-1.5">
                                     <span class="w-5 h-5 rounded-full bg-rose-600 text-white text-[10px] inline-flex items-center justify-center font-bold">1</span>
                                     Loại hình công trình tương thích (Bộ lọc Bước 1: "{{ $step1Title ?? 'Công trình của bạn là gì?' }}")
                                 </label>
-                                <p class="text-[11px] text-gray-500 mt-0.5 ml-6">{{ $step1Desc ?? 'Chọn loại hình để gợi ý vật liệu phù hợp.' }}</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5 ml-6">{{ $step1Desc ?? 'Chọn loại hình để gợi ý vật liệu phù hợp. Bấm vào từng loại công trình để mở rộng cấu hình Bề mặt và Khu vực chức năng:' }}</p>
                             </div>
                             <button type="button" @click="toggleAllTypos()" class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 transition-colors">
-                                <span x-text="selectedTypos.length === allTypos.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'"></span>
+                                <span x-text="allTypos.every(t => isTypoEnabled(t.en || t)) ? 'Tắt tất cả 6 công trình' : 'Bật tất cả 6 công trình'"></span>
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                        <!-- Danh sách Accordion 6 loại công trình -->
+                        <div class="space-y-3">
                             @foreach($typologies as $typo)
                                 @php
                                     $tKey = is_array($typo) ? ($typo['en'] ?? '') : $typo;
                                     $tLabel = is_array($typo) ? ($typo['vi'] ?? $tKey) : $typo;
-                                    $tIcon = is_array($typo) ? ($typo['icon'] ?? '🏢') : '🏢';
                                     $tDesc = is_array($typo) ? ($typo['desc'] ?? '') : '';
                                 @endphp
-                                <label class="flex items-start gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all select-none bg-white"
-                                       :class="selectedTypos.includes('{{ addslashes($tKey) }}') ? 'border-rose-500 ring-1 ring-rose-500/20 bg-rose-50/20' : 'border-gray-200 hover:border-gray-300'">
-                                    <input type="checkbox" name="suitable_typologies[]" value="{{ $tKey }}" x-model="selectedTypos" class="mt-0.5 rounded border-gray-300 text-rose-600 focus:ring-rose-500">
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center justify-between gap-1">
-                                            <span class="text-xs font-semibold text-gray-800">{{ $tIcon }} {{ $tLabel }}</span>
-                                            <span class="text-[10px] font-mono text-gray-400">{{ $tKey }}</span>
+                                <div class="border rounded-xl transition-all overflow-hidden bg-white"
+                                     :class="activeTypoTab === '{{ addslashes($tKey) }}' ? 'border-rose-400 ring-2 ring-rose-500/10 shadow-sm' : 'border-gray-200 hover:border-gray-300'">
+                                    
+                                    <!-- Accordion Header -->
+                                    <div class="flex items-center justify-between p-3.5 cursor-pointer select-none transition-colors"
+                                         :class="activeTypoTab === '{{ addslashes($tKey) }}' ? 'bg-rose-50/20' : 'hover:bg-gray-50/60'"
+                                         @click="activeTypoTab = (activeTypoTab === '{{ addslashes($tKey) }}' ? '' : '{{ addslashes($tKey) }}')">
+                                        <div class="flex items-start gap-3">
+                                            <input type="checkbox" 
+                                                   :checked="isTypoEnabled('{{ addslashes($tKey) }}')"
+                                                   @click.stop="toggleTypo('{{ addslashes($tKey) }}')"
+                                                   class="mt-0.5 rounded border-gray-300 text-rose-600 focus:ring-rose-500 pointer-events-auto cursor-pointer">
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="font-bold text-xs text-gray-900">{{ $tLabel }}</span>
+                                                    <span class="text-[10px] font-mono text-gray-400">({{ $tKey }})</span>
+                                                    <template x-if="isTypoEnabled('{{ addslashes($tKey) }}')">
+                                                        <span class="text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded">Bật</span>
+                                                    </template>
+                                                    <template x-if="!isTypoEnabled('{{ addslashes($tKey) }}')">
+                                                        <span class="text-[9px] font-semibold text-gray-400 bg-gray-100 px-1.5 py-0.2 rounded">Tắt</span>
+                                                    </template>
+                                                </div>
+                                                @if($tDesc)
+                                                    <p class="text-[10px] text-gray-500 mt-0.5">{{ $tDesc }}</p>
+                                                @endif
+                                            </div>
                                         </div>
-                                        @if($tDesc)
-                                            <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{{ $tDesc }}</p>
-                                        @endif
+
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-[11px] font-mono text-gray-500 hidden sm:inline" x-text="countEnabledSurfaces('{{ addslashes($tKey) }}') + '/5 bề mặt bật'"></span>
+                                            <span class="text-[11px] font-semibold"
+                                                  :class="activeTypoTab === '{{ addslashes($tKey) }}' ? 'text-rose-600' : 'text-gray-400'"
+                                                  x-text="activeTypoTab === '{{ addslashes($tKey) }}' ? 'Đang mở cấu hình' : 'Mở cấu hình &rarr;'"></span>
+                                            <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                                                 :class="activeTypoTab === '{{ addslashes($tKey) }}' ? 'rotate-180 text-rose-600' : ''"
+                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </div>
                                     </div>
-                                </label>
+
+                                    <!-- Accordion Content: BƯỚC 2 & BƯỚC 3 -->
+                                    <div x-show="activeTypoTab === '{{ addslashes($tKey) }}'" 
+                                         x-transition:enter="transition ease-out duration-150"
+                                         x-transition:enter-start="opacity-0 -translate-y-1"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         class="border-t border-gray-100 p-4 bg-gray-50/40 space-y-5">
+                                        @include('cms.material-lab.partials.accordion-step-content', [
+                                            'tKey' => $tKey,
+                                            'tLabel' => $tLabel,
+                                            'surfaces' => $surfaces,
+                                            'step3Title' => $step3Title ?? 'Khu vực chức năng nào?'
+                                        ])
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
-                    </div>
 
-                    <!-- BƯỚC 2: VỊ TRÍ BỀ MẶT TƯƠNG THÍCH -->
-                    <div class="pt-3 border-t border-gray-100">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                                    <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] inline-flex items-center justify-center font-bold">2</span>
-                                    Vị trí bề mặt tương thích (Bộ lọc Bước 2: "{{ $step2Title ?? 'Vị trí nào cần vật liệu?' }}")
-                                </label>
-                                <p class="text-[11px] text-gray-500 mt-0.5 ml-6">{{ $step2Desc ?? 'Chọn bề mặt để lọc vật liệu phù hợp.' }}</p>
-                            </div>
-                            <button type="button" @click="toggleAllSurfs()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors">
-                                <span x-text="selectedSurfs.length === allSurfs.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'"></span>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-                            @foreach($surfaces as $surf)
-                                @php $key = is_array($surf) ? ($surf['en'] ?? '') : $surf; @endphp
-                                @php $label = is_array($surf) ? ($surf['vi'] ?? $key) : $surf; @endphp
-                                <label class="flex flex-col justify-between p-2.5 rounded-lg border cursor-pointer text-xs select-none bg-white transition-all"
-                                       :class="selectedSurfs.includes('{{ addslashes($key) }}') ? 'border-blue-600 ring-1 ring-blue-600/20 bg-blue-50/20' : 'border-gray-200 hover:border-gray-300'">
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" name="suitable_locations[]" value="{{ $key }}" x-model="selectedSurfs" class="rounded border-gray-300 text-rose-600 focus:ring-rose-500">
-                                        <span class="font-semibold text-gray-800">{{ $label }}</span>
-                                    </div>
-                                    <span class="text-[10px] font-mono text-gray-400 mt-1 pl-6">{{ $key }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- BƯỚC 3: KHU VỰC CHỨC NĂNG ÁP DỤNG -->
-                    <div class="pt-3 border-t border-gray-100">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-800 flex items-center gap-1.5">
-                                    <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] inline-flex items-center justify-center font-bold">3</span>
-                                    Khu vực chức năng áp dụng (Bộ lọc Bước 3: "{{ $step3Title ?? 'Khu vực chức năng nào?' }}")
-                                </label>
-                                <p class="text-[11px] text-gray-500 mt-0.5 ml-6">
-                                    Nếu <strong>không tích chọn ô nào</strong> (để trống), vật liệu sẽ tự động hiển thị cho <strong>tất cả khu vực</strong> thuộc Loại hình (Bước 1) &amp; Bề mặt (Bước 2) đã chọn. Nếu chỉ muốn giới hạn ở một số khu vực cụ thể, hãy tích chọn bên dưới:
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[11px] text-gray-500" x-text="selectedAreas.length === 0 ? 'Đang áp dụng: Tất cả khu vực' : ('Đã chọn: ' + selectedAreas.length + ' khu vực')"></span>
-                                <button type="button" @click="toggleAllAreas()" class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 transition-colors">
-                                    Chọn / Bỏ chọn tất cả
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-                            <div x-show="availableAreas.length === 0" class="text-xs text-gray-400 text-center py-2">
-                                Vui lòng chọn ít nhất 1 Loại hình (Bước 1) và 1 Bề mặt (Bước 2) để hiển thị các khu vực chức năng tương ứng.
-                            </div>
-                            <div class="flex flex-wrap gap-2" x-show="availableAreas.length > 0">
-                                <template x-for="area in availableAreas" :key="area.en">
-                                    <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs cursor-pointer select-none transition-all bg-white"
-                                           :class="selectedAreas.includes(area.en) ? 'border-emerald-600 bg-emerald-50/40 text-emerald-900 font-semibold' : 'border-gray-200 text-gray-700 hover:border-gray-300'">
-                                        <input type="checkbox" name="suitable_areas[]" :value="area.en" x-model="selectedAreas" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                                        <span x-text="area.vi"></span>
-                                        <span class="text-[10px] text-gray-400 italic" x-text="'(' + area.en + ')'"></span>
-                                    </label>
-                                </template>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
