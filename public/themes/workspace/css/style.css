@@ -30,12 +30,8 @@
   --h5: 28.4px;
   --h6: 21.3px;
   --h6_B: 21.3px;
-  --h6_b: 21.3px;
-  --h6-b: 21.3px;
   --p: 16px;
   --p_S: 12px;
-  --p_s: 12px;
-  --p-s: 12px;
 
   /* REM Equivalents (1rem = 16px) */
   --h1-rem: 5.6125rem;
@@ -67,8 +63,8 @@
   --text-scale-h2: var(--h2-rem);
   --text-scale-h1: var(--h1-rem);
 
-  --color-page-bg: #ffffff;
-  --color-surface: #ffffff;
+  --color-page-bg: #f2f2f2;
+  --color-surface: #f2f2f2;
   --color-text: #101010;
   --page-gutter: clamp(38px, 6.25vw, 90px);
   --content-indent: clamp(140px, 16vw, 240px);
@@ -1622,6 +1618,7 @@ body.in-workflow-flow .global-workflow-nav {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.62)),
     url("../assets/bg-why.png") center / cover no-repeat;
+  mix-blend-mode: multiply;
 }
 
 .why-layout {
@@ -1807,15 +1804,21 @@ body.in-workflow-flow .global-workflow-nav {
 }
 
 .why-partners {
-  position: absolute;
+
   top: 67vh;
-  left: 50%;
+  /* left: 50%;
   width: min(960px, 82vw);
   min-width: 0;
   padding-bottom: 0;
   overflow: hidden;
   text-align: center;
-  transform: translateX(-50%);
+  transform: translateX(-50%); */
+  position: relative;
+  margin-top: 4vh;
+  width: min(900px, 78vw);
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
 }
 
 .why-partners h3 {
@@ -1915,12 +1918,16 @@ body.in-workflow-flow .global-workflow-nav {
   transform: translateY(-2px);
 }
 
+
+
 .connect-surface {
   place-items: stretch;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.62)),
     url("../assets/bg-why.png") center / cover no-repeat;
+  mix-blend-mode: multiply;
 }
+
 
 .connect-layout {
   position: relative;
@@ -1967,9 +1974,9 @@ body.in-workflow-flow .global-workflow-nav {
   row-gap: 10px;
   width: min(960px, 78vw);
   min-height: 0;
-  padding: 42px 44px 42px;
+  padding: 42px 44px 0;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.58);
+  background: white;
   box-shadow: 0 18px 54px rgba(255, 255, 255, 0.42);
 }
 
@@ -4197,7 +4204,7 @@ body.in-section-flow .global-section-nav {
 .coverflow-media {
   width: 100%;
   aspect-ratio: 16 / 8.4;
-  max-height: 460px;
+  max-height: 500px;
   border-radius: 22px;
   overflow: hidden;
   background-color: #e5e5ea;
@@ -4550,17 +4557,15 @@ body.in-section-flow .global-section-nav {
   display: block;
   width: auto;
   min-width: 100%;
-  max-width: none;
-  height: 520px;
-  max-height: 550px;
+
+  height: 531px;
+
   border-radius: 12px;
   object-fit: cover;
   transition: transform 0.4s ease;
 }
 
-#coverflowService .coverflowService-media:hover .coverflowService-image {
-  transform: scale(1.02);
-}
+
 
 /* Responsive Breakpoints */
 @media (max-width: 1199px) {
