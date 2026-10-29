@@ -33,24 +33,28 @@ class RepeatableField extends BaseFieldType
             $items = $merged;
         }
 
+        $rawFieldName = $config['name'] ?? 'unnamed';
+        $safeSuffix = preg_replace('/[^a-zA-Z0-9_]/', '_', $rawFieldName);
+        $placeholder = '__INDEX_' . $safeSuffix . '__';
+
         // Generate template for JavaScript
-        $templateHtml = $allowAdd ? $this->renderRepeatableItem($config['name'], '__INDEX__', [], $subFields, $allowDelete) : '';
+        $templateHtml = $allowAdd ? $this->renderRepeatableItem($rawFieldName, $placeholder, [], $subFields, $allowDelete) : '';
         $templateHtml = str_replace(["\n", "\r"], ['', ''], $templateHtml);
         $templateEncoded = htmlspecialchars($templateHtml, ENT_QUOTES, 'UTF-8');
 
         $fieldHtml = "<div class=\"repeatable-field\" data-max-items=\"{$maxItems}\" data-min-items=\"{$minItems}\">";
 
         // Items container with template stored in data attribute
-        $fieldHtml .= "<div id=\"{$fieldId}_container\" class=\"space-y-4 mb-4\" data-template=\"{$templateEncoded}\">";
+        $fieldHtml .= "<div id=\"{$fieldId}_container\" class=\"space-y-4 mb-4\" data-template=\"{$templateEncoded}\" data-placeholder=\"{$placeholder}\" data-field-name=\"{$rawFieldName}\">";
 
         foreach ($items as $index => $item) {
-            $fieldHtml .= $this->renderRepeatableItem($config['name'], $index, $item, $subFields, $allowDelete);
+            $fieldHtml .= $this->renderRepeatableItem($rawFieldName, $index, $item, $subFields, $allowDelete);
         }
 
         // Add empty item if no items exist and min_items > 0
         if (empty($items) && $minItems > 0) {
             for ($i = 0; $i < $minItems; $i++) {
-                $fieldHtml .= $this->renderRepeatableItem($config['name'], $i, [], $subFields, $allowDelete);
+                $fieldHtml .= $this->renderRepeatableItem($rawFieldName, $i, [], $subFields, $allowDelete);
             }
         }
 
@@ -58,7 +62,7 @@ class RepeatableField extends BaseFieldType
 
         // Add button - only if allow_add is true
         if ($allowAdd) {
-            $fieldHtml .= "<button type=\"button\" onclick=\"addRepeatableItem('{$fieldId}', '{$config['name']}')\" class=\"inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors\">";
+            $fieldHtml .= "<button type=\"button\" onclick=\"addRepeatableItem('{$fieldId}', '{$rawFieldName}', '{$placeholder}')\" class=\"inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors\">";
             $fieldHtml .= '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>';
             $fieldHtml .= 'Thêm mục';
             $fieldHtml .= '</button>';
@@ -69,10 +73,15 @@ class RepeatableField extends BaseFieldType
         return $this->renderFieldWrapper($config, $fieldHtml);
     }
 
+    protected function getFieldId(array $config): string
+    {
+        return 'field_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $config['name'] ?? 'unnamed');
+    }
+
     protected function renderRepeatableItem(string $fieldName, int|string $index, array $item, array $subFields, bool $allowDelete = true): string
     {
         $displayIndex = \is_int($index) ? $index + 1 : $index;
-        $isExpanded = ($index === 0 || $index === '0') ? 'true' : 'false';
+        $isExpanded = ($index === 0 || $index === '0' || str_contains((string) $index, '__INDEX')) ? 'true' : 'false';
 
         $html = '<div x-data="{ expanded: '.$isExpanded.' }" class="repeatable-item border border-gray-200 rounded-lg bg-white shadow-sm mb-4 overflow-hidden transition-all duration-200" data-index="'.$index.'">';
 
@@ -186,6 +195,8 @@ class RepeatableField extends BaseFieldType
             'textarea' => (new TextareaField)->validate($value, $rules),
             'select' => (new SelectField($fieldConfig))->validate($value, $rules),
             'checkbox' => (new CheckboxField)->validate($value, $rules),
+            'repeatable', 'repeater' => (new RepeatableField($fieldConfig))->validate($value, $rules),
+            'image' => (new ImageField)->validate($value, $rules),
             default => true,
         };
     }

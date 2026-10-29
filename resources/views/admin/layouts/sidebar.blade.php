@@ -10,6 +10,12 @@
             $newSubmissionsCount = \App\Models\FormSubmission::where('status', 'new')->orWhere('status', 'unread')->count();
         }
     } catch (\Throwable $e) {}
+
+    $sidebarAppName = config('app.name') ?: env('APP_NAME', 'Admin');
+    $nameWords = array_values(array_filter(explode(' ', trim($sidebarAppName))));
+    $sidebarAppInitials = count($nameWords) >= 2 
+        ? mb_strtoupper(mb_substr($nameWords[0], 0, 1) . mb_substr($nameWords[1], 0, 1))
+        : mb_strtoupper(mb_substr($sidebarAppName, 0, 2));
 @endphp
 
 <aside id="admin-sidebar" class="w-72 bg-[#0B1528] text-slate-300 h-screen flex flex-col border-r border-slate-800 shadow-2xl overflow-hidden select-none">
@@ -17,10 +23,10 @@
     <div class="p-5 border-b border-slate-800/80 bg-[#080E1C] flex items-center justify-between">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 group">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-950/40 text-white font-extrabold text-lg tracking-wider group-hover:scale-105 transition-transform duration-300">
-                ĐP
+                {{ $sidebarAppInitials }}
             </div>
             <div>
-                <h2 class="text-base font-bold text-white tracking-wide leading-tight group-hover:text-amber-400 transition-colors">ĐẠI PHÚC 68</h2>
+                <h2 class="text-base font-bold text-white tracking-wide leading-tight group-hover:text-amber-400 transition-colors">{{ $sidebarAppName }}</h2>
                 <div class="flex items-center space-x-1.5 mt-0.5">
                     <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span class="text-[11px] font-medium text-emerald-400 uppercase tracking-wider">Admin Portal</span>
