@@ -320,7 +320,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 });
 
 // ============================================
-// 3. CMS COMPATIBILITY ALIAS ROUTES
+// 3. CMS COMPATIBILITY ALIAS ROUTES1
 // ============================================
 Route::prefix('cms')->name('cms.')->middleware('auth')->group(function () {
     Route::resource('posts', PostController::class);
