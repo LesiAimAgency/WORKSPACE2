@@ -36,12 +36,14 @@
       @if(!empty($kicker) && $kicker !== 'We')
         <p class="workflow-kicker">{{ $kicker }}</p>
       @endif
+      <p class="workflow-script-ontop">We</p>
       <h2>
         <span class="workflow-script">{{ $script }}</span>
         @if(!empty($suffix) && $suffix !== 'Spaces')
           <span class="workflow-suffix">{{ $suffix }}</span>
         @endif
       </h2>
+      <p class="workflow-script-bottom">Spaces</p>
       <span class="workflow-accent" aria-hidden="true"></span>
       <p class="workflow-desc">{{ $desc }}</p>
     </div>

@@ -89,8 +89,11 @@ Route::controller(Daiphuc68Controller::class)->group(function () {
     // Trang tĩnh (Pages)
     Route::get('/pages/{slug}', 'pageDetail')->name('pages.show');
     Route::get('/page/{slug}', fn (string $slug) => redirect()->route('pages.show', $slug, 301));
-
-});
+    Route::get('/coverflow', fn () => view('themes.workspace.widgets.coverflow'));
+    Route::get('/coverflow-service', fn () => view('themes.workspace.widgets.coverflow_service'));
+    Route::get('/coverflow-project', fn () => view('themes.workspace.widgets.coverflow_project'));
+   
+}); 
 
 
 
