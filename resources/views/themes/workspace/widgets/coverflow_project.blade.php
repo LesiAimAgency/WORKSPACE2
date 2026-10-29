@@ -101,6 +101,9 @@
                 <button type="button" class="coverflowProject-nav-tab is-active">
                     <span class="coverflowProject-nav-text">PROJECTS</span>
                 </button>
+                <a href="{{ url('/about-expert') }}" class="coverflowProject-nav-tab">
+                    <span class="coverflowProject-nav-text">EXPERTS</span>
+                </a>
             </div>
         </div>
     </section>

@@ -92,7 +92,8 @@ Route::controller(Daiphuc68Controller::class)->group(function () {
     Route::get('/coverflow', fn () => view('themes.workspace.widgets.coverflow'));
     Route::get('/coverflow-service', fn () => view('themes.workspace.widgets.coverflow_service'));
     Route::get('/coverflow-project', fn () => view('themes.workspace.widgets.coverflow_project'));
-   
+    Route::get('/about-expert', fn () => view('themes.workspace.widgets.aboutExpert'));
+    
 }); 
 
 

@@ -54,9 +54,12 @@
                         <button type="button" class="coverflowService-nav-tab is-active" data-slide="0">
                             <span class="coverflowService-nav-text">INTRODUCTIONS</span>
                         </button>
-                        <button type="button" class="coverflowService-nav-tab" data-slide="1">
+                        <a href="{{ url('/coverflow-project') }}" class="coverflowService-nav-tab">
                             <span class="coverflowService-nav-text">PROJECTS</span>
-                        </button>
+                        </a>
+                        <a href="{{ url('/about-expert') }}" class="coverflowService-nav-tab">
+                            <span class="coverflowService-nav-text">EXPERTS</span>
+                        </a>
                     </div>
                 </div>
 
