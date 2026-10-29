@@ -258,7 +258,7 @@ a {
 .menu-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 1.08rem;
   min-width: 54px;
   padding: 0;
   border: 0;
@@ -321,9 +321,19 @@ a {
   padding: 0;
   font-family: var(--font-nav);
   font-size: var(--text-scale-base, 1rem);
-  font-weight: 300;
   line-height: 1;
   letter-spacing: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+.site-header * {
+  font-weight: 400;
 }
 
 .fullpage {
@@ -4092,11 +4102,10 @@ body.in-section-flow .global-section-nav {
   cursor: pointer;
 }
 
-.coverflow-badge {
-  margin-left: -10% !important;
-}
+/* Vị trí badge so với trang coverflow */
 
-/* Trang coverflow */
+
+/* nút View more của Trang coverflow */
 .coverflow-badge .view-more-btn {
   display: inline-flex;
   align-items: center;
@@ -4115,10 +4124,11 @@ body.in-section-flow .global-section-nav {
 
 /* Base Container & Section */
 .panel-coverflow {
+  margin-top: 30px;
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background-color: #f7f7f9;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4147,8 +4157,9 @@ body.in-section-flow .global-section-nav {
 .coverflow-chips {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 22px;
+  justify-items: center;
+
+  margin: 0 auto 10px;
   width: 100%;
 }
 
@@ -4156,12 +4167,13 @@ body.in-section-flow .global-section-nav {
   background: transparent;
   border: none;
   padding: 0;
+  width: 50%;
   text-align: left;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.2;
   color: #909094;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   transition: color 0.25s ease;
 }
@@ -4185,7 +4197,7 @@ body.in-section-flow .global-section-nav {
 .coverflow-media {
   width: 100%;
   aspect-ratio: 16 / 8.4;
-  max-height: 520px;
+  max-height: 460px;
   border-radius: 22px;
   overflow: hidden;
   background-color: #e5e5ea;
@@ -4203,17 +4215,24 @@ body.in-section-flow .global-section-nav {
 /* 3. Floating Red Overlay Card (Overlapping bottom-left of image) */
 .coverflow-badge {
   position: absolute;
-  bottom: -16%;
-  left: 9%;
+  bottom: -24.7%;
+
+  /*Vị trí của badge so với Trang main*/
+  left: -1.5%;
+
   z-index: 10;
-  width: 25%;
-  background: #850d11;
+  width: 25.5%;
+  /* Do height phải phụ thuộc các text bên trong (Tùy biến) */
+
+  background: #930C10;
   border-radius: 18px;
-  padding: 2.6rem 4rem;
+  /* padding: 2.6rem 4rem; */
+  padding: 32px 20px;
   color: #ffffff;
   box-shadow: 0 14px 35px rgba(133, 13, 17, 0.38);
   display: flex;
   flex-direction: column;
+  justify-content: left;
   box-sizing: border-box;
 }
 
@@ -4221,49 +4240,60 @@ body.in-section-flow .global-section-nav {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-
-  margin-bottom: 14px;
+  /* Dòng điều chỉnh khoảng cách giữa num (01) và Title */
+  margin-bottom: 3.2rem;
 }
 
 .badge-num {
-  font-size: 3.25rem;
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+  font-size: 3.2rem;
+  font-weight: 500;
+  line-height: 35%;
+  letter-spacing: -0.03em;
   color: #ffffff;
+
+}
+
+.badge-title {
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 110%;
+  color: #ffffff;
+
+  /* Khoảng từ trái qua so với cả phần badge */
+  width: 90%;
+
+  margin: 0;
+  padding: 0;
+  bottom: -50%;
+  text-align: left;
 }
 
 .view-more-btn {
-  display: inline-flex;
+  /* display: inline-flex; */
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  color: #111111;
-  font-size: 0.6875rem;
-  font-weight: 600;
+  background: black;
+  color: white;
+  font-size: 1.33rem;
+  font-weight: 300;
   padding: 5px 14px;
   border-radius: 999px;
   text-decoration: none;
   line-height: 1;
   transition: background-color 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
-  margin-top: 4px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .view-more-btn:hover {
-  background-color: #f0f0f0;
-  transform: translateY(-1px);
+  background-color: gray;
+
 }
 
-.badge-title {
-  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
-  font-weight: 700;
-  line-height: 100%;
-  color: #ffffff;
-  margin: 0;
-  text-transform: capitalize;
-  width: 25rem;
-}
 
 /* Phần Mô tả */
 .coverflow-footer {
@@ -4278,7 +4308,7 @@ body.in-section-flow .global-section-nav {
 
 .coverflow-desc {
   flex: 1;
-  max-width: 530px;
+  max-width: 30rem;
   font-size: 0.84rem;
   line-height: 1.55;
   color: #333333;

@@ -124,7 +124,7 @@
         </span>
         <span>MENU</span>
       </button>
-      <a href="#connect" class="contact-link" style="pointer-events: auto;">CONTACT</a>
+      <a href="#connect" class="contact-link">CONTACT</a>
     </header>
 
     @if(setting('contact_pdf_link', setting('company_profile_pdf')))

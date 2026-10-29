@@ -6,8 +6,19 @@
     <title>Coverflow</title>
 
     <link rel="stylesheet" href="./themes/workspace/css/style.css">
-</head>
+   
+  </head>
 <body>
+  <header class="site-header" aria-label="Dieu huong chinh">
+      <button class="menu-trigger" type="button" aria-label="Mo menu" aria-controls="menuOverlay" aria-expanded="false">
+        <span class="menu-icon" aria-hidden="true">
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </span>
+        <span>MENU</span>
+      </button>
+      <a href="#connect" class="contact-link">CONTACT</a>
+    </header>
     
 
 <section class="panel panel-coverflow" id="coverflow" data-ui="light">
@@ -39,27 +50,25 @@
           <img src="{{ asset('themes/workspace/coverflow/frame1.png') }}"/>
         </div>
 
-        <!-- Floating Red Badge / Overlay Card -->
+        <!-- badge -->
         <div class="coverflow-badge">
           <div class="badge-header">
             <span class="badge-num">01</span>
-            <a href="#" class="view-more-btn">
-              <span>View more</span>
-            </a>
           </div>
           <h3 class="badge-title">
             Interior Advisory and Project Setup
           </h3>
         </div>
+
       </div>
 
-      <!-- 3. Bottom Description & Navigation Arrows -->
+      <!-- Bottom Description & Navigation Arrows -->
       <div class="coverflow-footer">
         <p class="coverflow-desc">
           Providing comprehensive strategic solutions aimed at orienting design concepts, optimizing budget, allocating implementation personnel, and establishing operational standards for interior projects.
         </p>
 
-        <div class="coverflow-controls">
+        <!-- <div class="coverflow-controls">
           <button class="coverflow-arrow coverflow-prev" type="button">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
@@ -70,7 +79,15 @@
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
+        </div> -->
+
+        <!-- Nút View more -->
+        <div class="coverflow-view-more">
+          <a href="#" class="view-more-btn">
+              <span>View more</span>
+            </a>
         </div>
+
       </div>
 
     </div>
