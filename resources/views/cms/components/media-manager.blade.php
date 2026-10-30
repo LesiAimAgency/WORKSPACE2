@@ -61,11 +61,11 @@
 
                 <!-- Breadcrumb -->
                 <div class="px-4 py-2 bg-gray-50 border-b flex items-center gap-2 text-sm">
-                    <button @click="navigateToFolder('')" class="text-blue-600 hover:underline">Root</button>
+                    <button type="button" @click.prevent.stop="navigateToFolder('')" class="text-blue-600 hover:underline">Root</button>
                     <template x-for="(part, index) in currentPath.split('/').filter(p => p)" :key="index">
                         <div class="flex items-center gap-2">
                             <span>/</span>
-                            <button @click="navigateToFolder(currentPath.split('/').slice(0, index + 2).join('/'))" 
+                            <button type="button" @click.prevent.stop="navigateToFolder(currentPath.split('/').filter(p => p).slice(0, index + 1).join('/'))" 
                                     class="text-blue-600 hover:underline" x-text="part"></button>
                         </div>
                     </template>
@@ -104,21 +104,22 @@
                         <!-- Folders -->
                         <div x-show="folders.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             <template x-for="folder in folders" :key="folder.name">
-                                <div @dblclick="navigateToFolder(folder.path)"
+                                <div @click="navigateToFolder(folder.path)"
+                                     @dblclick="navigateToFolder(folder.path)"
                                      draggable="true"
                                      @dragstart="dragStartFolder($event, folder)"
                                      @dragover.prevent="folder.dragOver = true"
                                      @dragleave="folder.dragOver = false"
                                      @drop.prevent="handleDrop($event, folder.path); folder.dragOver = false"
                                      :class="{'border-blue-500 bg-blue-50 scale-105': folder.dragOver, 'opacity-50': folder.dragging}"
-                                     class="relative border-2 rounded-lg p-4 cursor-move hover:border-blue-500 transition-all duration-200 group">
+                                     class="relative border-2 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-all duration-200 group">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-16 h-16 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
                                         </svg>
                                         <span class="mt-2 text-sm text-center truncate w-full" x-text="folder.name"></span>
                                     </div>
-                                    <button @click.stop="deleteFolder(folder.path)" 
+                                    <button type="button" @click.stop="deleteFolder(folder.path)" 
                                             class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -132,18 +133,22 @@
                         <div x-show="filteredMedia.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             <template x-for="item in filteredMedia" :key="item.id">
                                 <div @click="selectMedia(item)"
+                                     @dblclick.prevent.stop="selectMedia(item); if (!isInline) confirmSelection($event)"
                                      draggable="true"
                                      @dragstart="dragStart($event, item)"
                                      @dragend="item.dragging = false"
-                                     :class="{'ring-4 ring-blue-500': isSelected(item.id), 'opacity-50 scale-95': item.dragging}"
-                                     class="relative aspect-square border-2 rounded-lg overflow-hidden cursor-move hover:border-blue-500 hover:scale-105 transition-all duration-200 group">
-                                    <img :src="item.url" :alt="item.name" class="w-full h-full object-cover">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center">
-                                        <svg x-show="isSelected(item.id)" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                        </svg>
+                                     :class="{'ring-4 ring-blue-500 border-blue-600': isSelected(item.id), 'opacity-50 scale-95': item.dragging}"
+                                     class="relative aspect-square border-2 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500 hover:scale-105 transition-all duration-200 group">
+                                    <img :src="item.url" :alt="item.name" draggable="false" class="w-full h-full object-contain p-1 select-none pointer-events-none">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition flex items-center justify-center pointer-events-none"
+                                         :class="{'bg-blue-600/15': isSelected(item.id)}">
+                                        <div x-show="isSelected(item.id)" class="bg-blue-600 text-white rounded-full p-1 shadow-md">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <button @click.stop="deleteMedia(item.id)" 
+                                    <button type="button" @click.stop="deleteMedia(item.id)" 
                                             class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -295,13 +300,21 @@ function mediaManager(isInline = false) {
                 this.loadMedia();
             }
             window.addEventListener('open-media-manager', (e) => {
-                this.targetField = (e.detail && e.detail.field) ? e.detail.field : 'ckeditor';
-                this.multiple = (e.detail && e.detail.multiple !== undefined) ? !!e.detail.multiple : true;
+                const detail = e.detail || {};
+                this.targetField = detail.field || detail.target || 'ckeditor';
+                this.multiple = detail.multiple !== undefined ? !!detail.multiple : false;
+                if (detail.folder !== undefined && detail.folder !== null) {
+                    this.currentPath = String(detail.folder).replace(/^\/+|\/+$/g, '');
+                }
                 this.openModal();
             });
             window.addEventListener('open-media-picker', (e) => {
-                this.targetField = (e.detail && e.detail.field) ? e.detail.field : 'ckeditor';
-                this.multiple = (e.detail && e.detail.multiple !== undefined) ? !!e.detail.multiple : true;
+                const detail = e.detail || {};
+                this.targetField = detail.field || detail.target || 'ckeditor';
+                this.multiple = detail.multiple !== undefined ? !!detail.multiple : false;
+                if (detail.folder !== undefined && detail.folder !== null) {
+                    this.currentPath = String(detail.folder).replace(/^\/+|\/+$/g, '');
+                }
                 this.openModal();
             });
         },
@@ -806,11 +819,18 @@ function mediaManager(isInline = false) {
             }));
             const result = {
                 field: this.targetField || 'ckeditor',
+                target: this.targetField || 'ckeditor',
+                url: urls[0] || '',
+                value: urls[0] || '',
+                file: files[0] || null,
                 urls: this.multiple ? urls : urls[0],
                 files: files,
                 folders: []
             };
             window.dispatchEvent(new CustomEvent('media-selected', {
+                detail: result
+            }));
+            window.dispatchEvent(new CustomEvent('media-picker-selected', {
                 detail: result
             }));
             this.closeModal();

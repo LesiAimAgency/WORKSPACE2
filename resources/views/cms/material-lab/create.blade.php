@@ -137,6 +137,7 @@
                     <div class="font-semibold text-gray-700 mb-1">Mẫu vật liệu mới</div>
                     <p>• Mã định danh sẽ được hệ thống tự động sinh từ tên vật liệu.</p>
                 </div>
+                
             </div>
 
             <!-- ============================================== -->
@@ -663,16 +664,7 @@
                      </div>
                  </div>
 
-                <!-- Bottom Action Buttons -->
-                <div class="flex items-center justify-end gap-3 pt-2">
-                    <a href="{{ route('admin.material-lab.index') }}" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors">
-                        Hủy bỏ
-                    </a>
-                    <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Thêm mới vật liệu
-                    </button>
-                </div>
+             
             </div>
 
         </div>

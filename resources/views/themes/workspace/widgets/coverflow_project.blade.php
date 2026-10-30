@@ -19,6 +19,7 @@
   $slug = $activeService['slug'] ?? '';
   
   $projects = $projects ?? ($activeService['projects'] ?? []);
+  $specFields = \App\Http\Controllers\Admin\ServiceController::getSpecFields();
   
   $formatImg = function (?string $path) {
       if (empty($path)) return '';
@@ -29,7 +30,7 @@
   };
 
   if (!isset($projectsFormatted)) {
-      $projectsFormatted = array_map(function ($p) use ($formatImg) {
+      $projectsFormatted = array_map(function ($p) use ($formatImg, $specFields) {
           return [
               'title' => $p['title'] ?? 'PROJECT',
               'area' => $p['area'] ?? '',
@@ -37,6 +38,7 @@
               'typology' => $p['typology'] ?? '',
               'style' => $p['style'] ?? '',
               'tech' => $p['tech'] ?? '',
+              'specs' => \App\Http\Controllers\Admin\ServiceController::normalizeProjectSpecs($p, $specFields),
               'coverImg' => $formatImg($p['cover_image'] ?? ($p['coverImg'] ?? 'themes/workspace/coverflow/frame1.png')),
               'designImg' => $formatImg($p['design_image'] ?? ($p['designImg'] ?? 'themes/workspace/workflow/design.png')),
               'resultImg' => $formatImg($p['result_image'] ?? ($p['resultImg'] ?? 'themes/workspace/workflow/build.png')),
@@ -51,6 +53,13 @@
       'typology' => 'Office',
       'style' => 'Modern',
       'tech' => 'Integrated Smart-home system',
+      'specs' => \App\Http\Controllers\Admin\ServiceController::normalizeProjectSpecs([
+          'area' => '125 m²',
+          'location' => 'District 2, Ho Chi Minh City',
+          'typology' => 'Office',
+          'style' => 'Modern',
+          'tech' => 'Integrated Smart-home system',
+      ], $specFields),
       'coverImg' => asset('themes/workspace/coverflow/frame1.png'),
       'designImg' => asset('themes/workspace/workflow/design.png'),
       'resultImg' => asset('themes/workspace/workflow/build.png')
@@ -292,28 +301,14 @@
                         <span class="coverflowProject-separator"></span>
                     </div>
 
-                    <!-- Bảng thông tin dự án (5 dòng) -->
-                    <div class="coverflowProject-info">
-                        <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">{{ $settings['label_area'] ?? 'Total Area' }}</span>
-                            <span class="coverflowProject-info-value" id="projectArea">{{ $firstProject['area'] }}</span>
-                        </div>
-                        <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">{{ $settings['label_location'] ?? 'Location' }}</span>
-                            <span class="coverflowProject-info-value" id="projectLocation">{{ $firstProject['location'] }}</span>
-                        </div>
-                        <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">{{ $settings['label_typology'] ?? 'Typology' }}</span>
-                            <span class="coverflowProject-info-value" id="projectTypology">{{ $firstProject['typology'] }}</span>
-                        </div>
-                        <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">{{ $settings['label_style'] ?? 'Style' }}</span>
-                            <span class="coverflowProject-info-value" id="projectStyle">{{ $firstProject['style'] }}</span>
-                        </div>
-                        <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">{{ $settings['label_tech'] ?? 'Tech solution' }}</span>
-                            <span class="coverflowProject-info-value" id="projectTech">{{ $firstProject['tech'] }}</span>
-                        </div>
+                    <!-- Bảng thông tin dự án (Repeatable) -->
+                    <div class="coverflowProject-info" id="coverflowProjectSpecsList">
+                        @foreach(($firstProject['specs'] ?? []) as $specRow)
+                            <div class="coverflowProject-info-row">
+                                <span class="coverflowProject-info-label">{{ $specRow['label'] ?? '' }}</span>
+                                <span class="coverflowProject-info-value">{{ $specRow['value'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                     </div>
 
                     <!-- Nút Mở Modal So sánh Before-After -->
@@ -377,13 +372,11 @@
                 <!-- Hình 1: Design (Before) -->
                 <div class="before-image">
                     <img src="{{ !empty($firstProject['designImg']) ? $firstProject['designImg'] : asset('themes/workspace/workflow/design.png') }}" id="modalDesignImg" alt="Design 3D">
-                 
                 </div>
 
                 <!-- Hình 2: Result (After) -->
                 <div class="after-image">
                     <img src="{{ !empty($firstProject['resultImg']) ? $firstProject['resultImg'] : asset('themes/workspace/workflow/build.png') }}" id="modalResultImg" alt="Result Thực Tế">
-                 
                 </div>
 
                 <!-- Thanh trượt & Nút kéo -->
@@ -405,7 +398,6 @@
 
 <script>
     (function () {
-        // 1. Đưa Modal ra trực tiếp document.body để thoát khỏi CSS transform của #fullpage
         function ensureModalInBody() {
             const modalEl = document.getElementById('comparisonModal');
             if (modalEl && modalEl.parentNode !== document.body) {
@@ -414,10 +406,10 @@
             return modalEl;
         }
 
-        // 2. Dữ liệu tĩnh dự phòng an toàn tuyệt đối
         const fallbackDesign = "{{ asset('themes/workspace/workflow/design.png') }}";
         const fallbackResult = "{{ asset('themes/workspace/workflow/build.png') }}";
         const fallbackCover = "{{ asset('themes/workspace/coverflow/frame1.png') }}";
+        const defaultSpecFields = @json($specFields);
 
         const defaultProjects = [
             {
@@ -449,22 +441,38 @@
         let currentSlide = 0;
         let totalSlides = projects.length;
 
-        // Elements điều khiển dự án
         const prevBtn = document.querySelector('#coverflowProject .coverflowProject-arrow.prev');
         const nextBtn = document.querySelector('#coverflowProject .coverflowProject-arrow.next');
         const progressBar = document.querySelector('#coverflowProject .coverflowProject-progress-bar');
 
         const elCoverImg = document.getElementById('projectCoverImage');
         const elTitle = document.getElementById('projectTitle');
-        const elArea = document.getElementById('projectArea');
-        const elLocation = document.getElementById('projectLocation');
-        const elTypology = document.getElementById('projectTypology');
-        const elStyle = document.getElementById('projectStyle');
-        const elTech = document.getElementById('projectTech');
+        const elSpecsList = document.getElementById('coverflowProjectSpecsList');
         const elBadge = document.getElementById('projectServiceBadge');
 
         const elModalDesignImg = document.getElementById('modalDesignImg');
         const elModalResultImg = document.getElementById('modalResultImg');
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function buildSpecsList(p) {
+            if (Array.isArray(p.specs) && p.specs.length) {
+                return p.specs;
+            }
+            return (defaultSpecFields || []).map(function (sf) {
+                return {
+                    key: sf.key,
+                    label: sf.label,
+                    value: p[sf.key] || ''
+                };
+            });
+        }
 
         function updateProject(index) {
             if (!projects || projects.length === 0) projects = defaultProjects;
@@ -478,11 +486,15 @@
             }
 
             if (elTitle) elTitle.textContent = p.title || 'PROJECT';
-            if (elArea) elArea.textContent = p.area || '125 m²';
-            if (elLocation) elLocation.textContent = p.location || 'District 2, Ho Chi Minh City';
-            if (elTypology) elTypology.textContent = p.typology || 'Office';
-            if (elStyle) elStyle.textContent = p.style || 'Modern';
-            if (elTech) elTech.textContent = p.tech || 'Integrated Smart-home system';
+            if (elSpecsList) {
+                const specs = buildSpecsList(p);
+                elSpecsList.innerHTML = specs.map(function (row) {
+                    return '<div class="coverflowProject-info-row">' +
+                        '<span class="coverflowProject-info-label">' + escapeHtml(row.label) + '</span>' +
+                        '<span class="coverflowProject-info-value">' + escapeHtml(row.value) + '</span>' +
+                    '</div>';
+                }).join('');
+            }
 
             if (elCoverImg) elCoverImg.src = p.coverImg || fallbackCover;
             if (elModalDesignImg) elModalDesignImg.src = p.designImg || fallbackDesign;
@@ -496,7 +508,6 @@
         if (prevBtn) prevBtn.addEventListener('click', () => updateProject(currentSlide - 1));
         if (nextBtn) nextBtn.addEventListener('click', () => updateProject(currentSlide + 1));
 
-        // Lắng nghe đổi service từ Coverflow
         window.addEventListener('workspace:service-changed', function (event) {
             const data = event.detail;
             if (!data || !data.service) return;
@@ -515,6 +526,7 @@
                         typology: p.typology || '',
                         style: p.style || '',
                         tech: p.tech || '',
+                        specs: Array.isArray(p.specs) && p.specs.length ? p.specs : buildSpecsList(p),
                         coverImg: p.cover_image || p.coverImg || service.image || fallbackCover,
                         designImg: p.design_image || p.designImg || fallbackDesign,
                         resultImg: p.result_image || p.resultImg || fallbackResult
@@ -524,9 +536,6 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // Bộ điều khiển Before-After Slider
-        // -------------------------------------------------------------
         function setupSlider() {
             const sliderContainer = document.getElementById('modalSlider');
             const sliderHandle = document.getElementById('sliderHandle');
@@ -614,9 +623,6 @@
             return { initCenter, updateSliderPosition };
         }
 
-        // -------------------------------------------------------------
-        // Xử lý Mở / Đóng Modal
-        // -------------------------------------------------------------
         window.openComparisonModal = function (e) {
             if (e) {
                 e.preventDefault();
@@ -652,7 +658,6 @@
             modalEl.setAttribute('aria-hidden', 'true');
         };
 
-        // Gắn sự kiện click
         const openBtn = document.getElementById('openComparisonModalBtn');
         if (openBtn) {
             openBtn.addEventListener('click', window.openComparisonModal);
@@ -677,7 +682,6 @@
             }
         });
 
-        // Badge quay lại coverflowService (trượt ngang về Introductions)
         const projectBackBtn = document.getElementById('coverflowProjectBackBtn');
         if (projectBackBtn) {
             projectBackBtn.addEventListener('click', function (e) {
@@ -693,7 +697,6 @@
             });
         }
 
-        // Khởi tạo
         ensureModalInBody();
         updateProject(0);
         window.sliderController = setupSlider();

@@ -21,6 +21,7 @@
      x-show="isOpen"
      x-cloak
      @open-media-picker.window="openPicker($event.detail)"
+     @media-selected.window="closePicker()"
      @keydown.escape.window="closePicker()"
      class="fixed inset-0 overflow-y-auto"
      style="display: none; z-index: 99999;">
@@ -286,10 +287,14 @@ function mediaPickerModal(id, multiple, listUrl, uploadUrl, deleteUrl) {
         uploadCurrent: 0,
         
         openPicker(detail) {
-            this.targetField = detail.field || null;
+            detail = detail || {};
+            this.targetField = detail.field || detail.target || null;
             this.targetComponent = detail.component || null;
             this.multiple = (detail.multiple !== undefined) ? !!detail.multiple : this.multiple;
-            this.mediaType = detail.mediaType || null;
+            this.mediaType = detail.mediaType || detail.type || null;
+            if (detail.folder !== undefined && detail.folder !== null) {
+                this.currentPath = String(detail.folder).replace(/^\/+|\/+$/g, '');
+            }
             this.selectedFiles = [];
             this.isOpen = true;
             this.loadMedia();
@@ -510,15 +515,20 @@ function mediaPickerModal(id, multiple, listUrl, uploadUrl, deleteUrl) {
             if (this.selectedFiles.length === 0) return;
             
             const urls = this.selectedFiles.map(f => f.url);
-            
+            const payload = {
+                field: this.targetField,
+                target: this.targetField,
+                url: urls[0] || '',
+                value: urls[0] || '',
+                file: this.selectedFiles[0] || null,
+                urls: this.multiple ? urls : urls[0],
+                files: this.selectedFiles
+            };
+
+            window.dispatchEvent(new CustomEvent('media-selected', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('media-picker-selected', { detail: payload }));
+
             if (this.targetField) {
-                window.dispatchEvent(new CustomEvent('media-selected', {
-                    detail: {
-                        field: this.targetField,
-                        urls: this.multiple ? urls : urls[0],
-                        files: this.selectedFiles
-                    }
-                }));
                 
                 if (this.targetComponent) {
                     try {

@@ -97,6 +97,17 @@
     .fullpage .panel-coverflow .coverflow-surface {
         overflow: visible !important;
         width: 100% !important;
+        will-change: transform, opacity;
+    }
+
+    .fullpage > .panel.panel-coverflow.is-sliding-out-left {
+        z-index: 5 !important;
+        background: transparent !important;
+        pointer-events: none !important;
+    }
+
+    .fullpage > .panel.panel-coverflow.is-sliding-out-left::before {
+        display: none !important;
     }
 
     .fullpage .panel-coverflow .coverflow-layout {
@@ -691,6 +702,7 @@
     if (elViewMore) {
       elViewMore.addEventListener('click', function (e) {
         e.preventDefault();
+        e.stopPropagation();
         if (typeof window.openServiceDetail === 'function') {
           window.openServiceDetail();
         }

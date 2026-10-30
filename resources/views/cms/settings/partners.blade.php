@@ -11,8 +11,6 @@
 @endpush
 
 @section('content')
-<x-media-picker-modal />
-
 @include('cms.settings.partials.back-link')
 
 @php
@@ -70,6 +68,7 @@
 
 <div x-data="partnersManager()"
      @media-picker-selected.window="handleMediaSelected($event.detail)"
+     @media-selected.window="handleMediaSelected($event.detail)"
      class="space-y-6 max-w-7xl mx-auto pb-16">
 
     <form action="{{ $settingsSaveUrl }}" method="POST" enctype="multipart/form-data">
@@ -424,13 +423,22 @@ function partnersManager() {
             window.dispatchEvent(new CustomEvent('open-media-picker', {
                 detail: {
                     type: 'image',
-                    target: 'partner_image_' + index
+                    mediaType: 'image',
+                    multiple: false,
+                    field: 'partner_image_' + index,
+                    target: 'partner_image_' + index,
+                    folder: 'partners'
                 }
             }));
         },
 
         handleMediaSelected(detail) {
-            const url = detail.url || detail.value || (detail.file ? detail.file.url : '');
+            if (!detail) return;
+            const url = detail.url
+                || detail.value
+                || (Array.isArray(detail.urls) ? detail.urls[0] : detail.urls)
+                || (detail.file ? detail.file.url : '')
+                || (Array.isArray(detail.files) && detail.files[0] ? (detail.files[0].url || detail.files[0].path) : '');
             if (url && this.activeMediaTargetIndex !== null && this.items[this.activeMediaTargetIndex]) {
                 this.items[this.activeMediaTargetIndex].image = url;
                 this.activeMediaTargetIndex = null;

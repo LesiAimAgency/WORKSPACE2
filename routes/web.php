@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WidgetController;
 use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\SurveyController;
 use App\Http\Controllers\Admin\SurveyInvitationController;
 use App\Http\Controllers\MaterialLabController;
@@ -326,6 +328,27 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('surveys/{survey}/invitations', [SurveyInvitationController::class, 'send'])->name('surveys.invitations.send');
     Route::post('surveys/invitations/{invitation}/retry', [SurveyInvitationController::class, 'retry'])->name('surveys.invitations.retry');
     Route::delete('surveys/invitations/{invitation}', [SurveyInvitationController::class, 'destroy'])->name('surveys.invitations.destroy');
+
+    // Workspace Services (Danh mục Dịch vụ, Thông tin Coverflow, Chi tiết Introductions & Projects)
+    Route::get('services/categories', [ServiceController::class, 'categories'])->name('services.categories');
+    Route::post('services/categories', [ServiceController::class, 'saveCategories'])->name('services.save-categories');
+    Route::get('services/config', [ServiceController::class, 'config'])->name('services.config');
+    Route::post('services/config', [ServiceController::class, 'saveConfig'])->name('services.save-config');
+    Route::post('services/reset-defaults', [ServiceController::class, 'resetDefaults'])->name('services.reset-defaults');
+    Route::post('services/toggle', [ServiceController::class, 'toggleActive'])->name('services.toggle');
+    Route::post('services/toggle-active', [ServiceController::class, 'toggleActive'])->name('services.toggle-active');
+    Route::post('services/save', [ServiceController::class, 'save'])->name('services.save');
+    Route::resource('services', ServiceController::class)->parameters([
+        'services' => 'service',
+    ])->except(['show']);
+
+    // Workspace Projects (Quản lý Dự án Tiêu biểu liên kết với Dịch vụ)
+    Route::post('projects/toggle', [ProjectController::class, 'toggleActive'])->name('projects.toggle');
+    Route::post('projects/toggle-active', [ProjectController::class, 'toggleActive'])->name('projects.toggle-active');
+    Route::resource('projects', ProjectController::class)->parameters([
+        'projects' => 'project',
+    ])->except(['show']);
+
 });
 
 // ============================================

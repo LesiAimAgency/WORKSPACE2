@@ -28,9 +28,10 @@
   };
 
   $projects = $projects ?? ($activeService['projects'] ?? []);
+  $specFields = \App\Http\Controllers\Admin\ServiceController::getSpecFields();
 
   if (!isset($projectsFormatted)) {
-      $projectsFormatted = array_map(function ($p) use ($formatImg) {
+      $projectsFormatted = array_map(function ($p) use ($formatImg, $specFields) {
           return [
               'title' => $p['title'] ?? 'PROJECT 01',
               'area' => $p['area'] ?? '',
@@ -38,6 +39,7 @@
               'typology' => $p['typology'] ?? '',
               'style' => $p['style'] ?? '',
               'tech' => $p['tech'] ?? '',
+              'specs' => \App\Http\Controllers\Admin\ServiceController::normalizeProjectSpecs($p, $specFields),
               'coverImg' => $formatImg($p['cover_image'] ?? ($p['coverImg'] ?? 'themes/workspace/coverflow/frame1.png')),
               'designImg' => $formatImg($p['design_image'] ?? ($p['designImg'] ?? 'themes/workspace/workflow/design.png')),
               'resultImg' => $formatImg($p['result_image'] ?? ($p['resultImg'] ?? 'themes/workspace/workflow/build.png')),
@@ -52,6 +54,13 @@
       'typology' => 'Office',
       'style' => 'Modern',
       'tech' => 'Integrated Smart-home system',
+      'specs' => \App\Http\Controllers\Admin\ServiceController::normalizeProjectSpecs([
+          'area' => '125m²',
+          'location' => 'District 2, Ho Chi Minh City',
+          'typology' => 'Office',
+          'style' => 'Modern',
+          'tech' => 'Integrated Smart-home system',
+      ], $specFields),
       'coverImg' => asset('themes/workspace/coverflow/frame1.png'),
       'designImg' => asset('themes/workspace/workflow/design.png'),
       'resultImg' => asset('themes/workspace/workflow/build.png'),
@@ -79,6 +88,11 @@
         background-color: #F2F2F7;
         overflow: hidden !important;
         font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        z-index: 4;
+    }
+
+    #coverflowService.is-hidden {
+        display: none !important;
     }
 
     /* Surface = vùng nội dung 80vh (padding 10vh trên/dưới, 72px trái/phải do .panel).
@@ -88,6 +102,7 @@
         background: transparent !important;
         overflow: visible !important;
         display: block !important;
+        will-change: transform, opacity;
     }
 
     #coverflowService .svc-stage {
@@ -263,6 +278,9 @@
 
     #coverflowService .svc-specs {
         margin-top: calc(var(--u) * 19);
+        max-height: calc(var(--u) * 265);
+        overflow-y: auto;
+        padding-right: calc(var(--u) * 4);
     }
 
     #coverflowService .svc-spec-row {
@@ -475,6 +493,7 @@
         #coverflowService .svc-stage.is-step-project .svc-image--intro { display: none; }
         #coverflowService .svc-stage.is-step-project .svc-info { display: flex; margin-top: 18px; }
         #coverflowService .svc-project-title { font-size: 22px; line-height: 28px; }
+        #coverflowService .svc-specs { max-height: none; overflow-y: visible; }
         #coverflowService .svc-spec-row { font-size: 14px; line-height: 20px; }
         #coverflowService .svc-spec-label { flex-basis: 110px; }
         #coverflowService .svc-compare { height: 30px; font-size: 13px; padding: 0 14px; border-radius: 15px; }
@@ -698,27 +717,13 @@
                     <h3 class="svc-project-title" id="projectTitle">{{ $firstProject['title'] }}</h3>
                     <span class="svc-underline" aria-hidden="true"></span>
 
-                    <div class="svc-specs">
-                        <div class="svc-spec-row">
-                            <span class="svc-spec-label">{{ $settings['label_area'] ?? 'Total Area' }}</span>
-                            <span class="svc-spec-value" id="projectArea">{{ $firstProject['area'] }}</span>
-                        </div>
-                        <div class="svc-spec-row">
-                            <span class="svc-spec-label">{{ $settings['label_location'] ?? 'Location' }}</span>
-                            <span class="svc-spec-value" id="projectLocation">{{ $firstProject['location'] }}</span>
-                        </div>
-                        <div class="svc-spec-row">
-                            <span class="svc-spec-label">{{ $settings['label_typology'] ?? 'Typology' }}</span>
-                            <span class="svc-spec-value" id="projectTypology">{{ $firstProject['typology'] }}</span>
-                        </div>
-                        <div class="svc-spec-row">
-                            <span class="svc-spec-label">{{ $settings['label_style'] ?? 'Style' }}</span>
-                            <span class="svc-spec-value" id="projectStyle">{{ $firstProject['style'] }}</span>
-                        </div>
-                        <div class="svc-spec-row">
-                            <span class="svc-spec-label">{{ $settings['label_tech'] ?? 'Tech Solution' }}</span>
-                            <span class="svc-spec-value" id="projectTech">{{ $firstProject['tech'] }}</span>
-                        </div>
+                    <div class="svc-specs" id="projectSpecsList">
+                        @foreach(($firstProject['specs'] ?? []) as $specRow)
+                            <div class="svc-spec-row">
+                                <span class="svc-spec-label">{{ $specRow['label'] ?? '' }}</span>
+                                <span class="svc-spec-value">{{ $specRow['value'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                     </div>
 
                     <button type="button" class="svc-compare" id="openComparisonModalBtn">{{ $settings['compare_button_text'] ?? 'Comparison Design and Result' }}</button>
@@ -767,12 +772,10 @@
             <div class="slider-container" id="modalSlider">
                 <div class="before-image" id="modalBeforeImage">
                     <img src="{{ !empty($firstProject['designImg']) ? $firstProject['designImg'] : asset('themes/workspace/workflow/design.png') }}" id="modalDesignImg" alt="Design 3D">
-                  
                 </div>
 
                 <div class="after-image">
                     <img src="{{ !empty($firstProject['resultImg']) ? $firstProject['resultImg'] : asset('themes/workspace/workflow/build.png') }}" id="modalResultImg" alt="Result">
-                    
                 </div>
 
                 <div class="slider-handle" id="sliderHandle"></div>
@@ -794,6 +797,7 @@
 <script>
     (function () {
         const serviceTitles = @json($serviceTitles);
+        const defaultSpecFields = @json($specFields);
         const baseUrl = @json(url('/')) + '/';
 
         let currentProjects = @json($projectsFormatted);
@@ -887,6 +891,27 @@
         }
 
         // ---------------- Dự án ----------------
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function buildSpecsList(p) {
+            if (Array.isArray(p.specs) && p.specs.length) {
+                return p.specs;
+            }
+            return (defaultSpecFields || []).map(function (sf) {
+                return {
+                    key: sf.key,
+                    label: sf.label,
+                    value: p[sf.key] || ''
+                };
+            });
+        }
+
         function renderProject(idx) {
             if (!currentProjects || !currentProjects.length) return;
             currentProjectIndex = (idx + currentProjects.length) % currentProjects.length;
@@ -898,11 +923,17 @@
             };
             set('projectTitle', p.title || 'PROJECT');
             set('projectCurrentNum', p.title || 'PROJECT');
-            set('projectArea', p.area);
-            set('projectLocation', p.location);
-            set('projectTypology', p.typology);
-            set('projectStyle', p.style);
-            set('projectTech', p.tech);
+
+            const specsContainer = document.getElementById('projectSpecsList');
+            if (specsContainer) {
+                const specs = buildSpecsList(p);
+                specsContainer.innerHTML = specs.map(function (row) {
+                    return '<div class="svc-spec-row">' +
+                        '<span class="svc-spec-label">' + escapeHtml(row.label) + '</span>' +
+                        '<span class="svc-spec-value">' + escapeHtml(row.value) + '</span>' +
+                    '</div>';
+                }).join('');
+            }
 
             const bar = document.getElementById('projectProgressBar');
             if (bar) bar.style.width = (((currentProjectIndex + 1) / currentProjects.length) * 100) + '%';
@@ -941,8 +972,8 @@
                 }).join('');
             }
 
-            if (service.detail_image || service.image) { serviceImage = resolveUrl(service.detail_image || service.image, 'themes/workspace/coverflow/frame1.png'); } else if (false) {
-                serviceImage = resolveUrl(service.image, 'themes/workspace/coverflow/frame1.png');
+            if (service.detail_image || service.image) {
+                serviceImage = resolveUrl(service.detail_image || service.image, 'themes/workspace/coverflow/frame1.png');
             }
 
             if (Array.isArray(service.projects) && service.projects.length) {
@@ -954,6 +985,7 @@
                         typology: p.typology || '',
                         style: p.style || '',
                         tech: p.tech || '',
+                        specs: Array.isArray(p.specs) && p.specs.length ? p.specs : buildSpecsList(p),
                         coverImg: resolveUrl(p.cover_image || p.coverImg, 'themes/workspace/coverflow/frame1.png'),
                         designImg: resolveUrl(p.design_image || p.designImg, 'themes/workspace/workflow/design.png'),
                         resultImg: resolveUrl(p.result_image || p.resultImg, 'themes/workspace/workflow/build.png')

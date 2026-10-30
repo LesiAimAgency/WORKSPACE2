@@ -157,6 +157,21 @@
                         <span class="font-medium text-gray-700">{{ $material->updated_at ? $material->updated_at->format('d/m/Y H:i') : 'Mới' }}</span>
                     </div>
                 </div>
+                 <!-- Bottom Action Buttons -->
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" onclick="if(confirm('Bạn có chắc chắn muốn xóa vật liệu này?')) document.getElementById('delete-material-form').submit();" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Xóa vật liệu
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                       
+                        <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Cập nhật thay đổi
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- ============================================== -->
@@ -665,23 +680,7 @@
                      </div>
                  </div>
 
-                <!-- Bottom Action Buttons -->
-                <div class="flex items-center justify-between pt-2">
-                    <button type="button" onclick="if(confirm('Bạn có chắc chắn muốn xóa vật liệu này?')) document.getElementById('delete-material-form').submit();" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        Xóa vật liệu
-                    </button>
-
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('admin.material-lab.index') }}" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors">
-                            Hủy bỏ
-                        </a>
-                        <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Cập nhật thay đổi
-                        </button>
-                    </div>
-                </div>
+               
             </div>
 
         </div>

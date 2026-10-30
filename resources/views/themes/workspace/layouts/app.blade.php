@@ -52,8 +52,9 @@
         height: 100svh ;
       }
     
-      .panel.panel-detail-flow.is-hidden {
-        display: none ;
+      .panel.panel-detail-flow.is-hidden,
+      #coverflowService.is-hidden {
+        display: none !important;
       }
       .panel.panel-detail-flow:not(.is-hidden) {
         display: flex ;

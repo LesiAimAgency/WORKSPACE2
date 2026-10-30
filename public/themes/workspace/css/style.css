@@ -5273,6 +5273,11 @@ body.is-scrolled-past-home .pdf-profile-link {
   padding-right: var(--frame-gutter) !important;
 }
 
+.fullpage>.panel.panel-detail-flow.is-hidden,
+#coverflowService.is-hidden {
+  display: none !important;
+}
+
 .fullpage>.panel.panel-detail-flow:not(.is-hidden) {
   display: block !important;
 }

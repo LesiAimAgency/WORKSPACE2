@@ -7,11 +7,8 @@ document.body.scrollTop = 0;
 
 const fullpage = document.querySelector("#fullpage");
 
-let isDetailFlowActive = (
-  window.location.hash === "#coverflowService" ||
-  window.location.hash === "#coverflowProject"
-);
-let currentDetailPane = (window.location.hash === "#coverflowProject") ? "project" : "intro";
+let isDetailFlowActive = false;
+let currentDetailPane = "intro";
 
 let panels = [];
 
@@ -63,8 +60,8 @@ const projectPanels = Array.from(document.querySelectorAll(".panel-project"));
 const expertPanels = Array.from(document.querySelectorAll(".panel-expert"));
 
 let initialHash = window.location.hash;
-if (initialHash === "#coverflowProject") {
-  initialHash = "#coverflowService";
+if (initialHash === "#coverflowProject" || initialHash === "#coverflowService") {
+  initialHash = "#coverflow";
 }
 let currentIndex = Math.max(
   0,
@@ -988,64 +985,216 @@ document.addEventListener("click", function(event) {
     const pane = tab.dataset.pane || (href === "#coverflowProject" ? "project" : "intro");
 
     const srvIdx = panels.findIndex(p => p.id === "coverflowService");
-    if (currentIndex !== srvIdx && srvIdx !== -1) {
-      if (!isDetailFlowActive) {
-        isDetailFlowActive = true;
-        refreshPanels();
-      }
-      goToSection(srvIdx);
+    if (currentIndex !== srvIdx) {
+      window.openServiceDetail(null, pane);
+      return;
     }
 
     window.setDetailPane(pane, true);
   }
 });
 
+let detailTransitionTimer = 0;
+
+function resetDetailSurfaceStyles() {
+  const coverflowPanel = document.getElementById("coverflow");
+  const servicePanel = document.getElementById("coverflowService");
+  const coverflowSurface = coverflowPanel?.querySelector(".coverflow-surface");
+  const serviceSurface = servicePanel?.querySelector(".coverflowService-surface");
+
+  if (coverflowPanel) {
+    coverflowPanel.classList.remove("is-sliding-out-left");
+    coverflowPanel.style.transform = "";
+  }
+  if (coverflowSurface) {
+    coverflowSurface.style.transition = "";
+    coverflowSurface.style.transform = "";
+    coverflowSurface.style.opacity = "";
+  }
+  if (serviceSurface) {
+    serviceSurface.style.transition = "";
+    serviceSurface.style.transform = "";
+    serviceSurface.style.opacity = "";
+  }
+}
+
 window.openServiceDetail = function(slug, targetPane = "intro") {
+  if (locked) return;
+
+  const coverflowPanel = document.getElementById("coverflow");
+  const servicePanel = document.getElementById("coverflowService");
+
   if (!isDetailFlowActive) {
     isDetailFlowActive = true;
     refreshPanels();
-    const coverflowIdx = panels.findIndex((p) => p.id === "coverflow");
-    if (coverflowIdx !== -1) {
-      currentIndex = coverflowIdx;
-      fullpage.style.transition = "none";
-      applyFullpageTransform();
-      void fullpage.offsetHeight;
-      fullpage.style.transition = "";
-    }
   }
 
   const srvIdx = panels.findIndex((p) => p.id === "coverflowService");
-  if (srvIdx !== -1) {
-    goToSection(srvIdx);
-    window.setDetailPane(targetPane, true);
+  if (srvIdx === -1 || !servicePanel) {
+    return;
+  }
+
+  window.setDetailPane(targetPane, true);
+
+  if (currentIndex === srvIdx) {
+    return;
+  }
+
+  locked = true;
+  window.clearTimeout(detailTransitionTimer);
+  resetDetailSurfaceStyles();
+
+  const wasAtCoverflow = Boolean(coverflowPanel && panels[currentIndex]?.id === "coverflow");
+  currentIndex = srvIdx;
+
+  // Nhảy thẳng tới vị trí của coverflowService (không cuộn dọc xuống)
+  fullpage.style.transition = "none";
+  applyFullpageTransform();
+  void fullpage.offsetHeight;
+  fullpage.style.transition = "";
+
+  const cleanPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  const targetHash = currentDetailPane === "project" ? "#coverflowProject" : "#coverflowService";
+  window.history.replaceState(null, "", `${cleanPath}${targetHash}`);
+
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  if (fullpage) {
+    fullpage.scrollTop = 0;
+    fullpage.scrollLeft = 0;
+  }
+
+  updateControls();
+  syncLeadContext();
+
+  const coverflowSurface = coverflowPanel?.querySelector(".coverflow-surface");
+  const serviceSurface = servicePanel.querySelector(".coverflowService-surface");
+  const easing = "750ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+  if (wasAtCoverflow && coverflowPanel && coverflowSurface && serviceSurface) {
+    const deltaY = servicePanel.offsetTop - coverflowPanel.offsetTop;
+
+    coverflowPanel.classList.add("is-sliding-out-left");
+    coverflowPanel.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+
+    coverflowSurface.style.transition = "none";
+    coverflowSurface.style.transform = "translate3d(0, 0, 0)";
+    coverflowSurface.style.opacity = "1";
+
+    serviceSurface.style.transition = "none";
+    serviceSurface.style.transform = "translate3d(35%, 0, 0)";
+    serviceSurface.style.opacity = "0";
+
+    void serviceSurface.offsetWidth;
+
+    coverflowSurface.style.transition = `transform ${easing}, opacity ${easing}`;
+    serviceSurface.style.transition = `transform ${easing}, opacity ${easing}`;
+
+    coverflowSurface.style.transform = "translate3d(-35%, 0, 0)";
+    coverflowSurface.style.opacity = "0";
+
+    serviceSurface.style.transform = "translate3d(0, 0, 0)";
+    serviceSurface.style.opacity = "1";
+
+    detailTransitionTimer = window.setTimeout(() => {
+      resetDetailSurfaceStyles();
+      locked = false;
+    }, 760);
+  } else if (serviceSurface) {
+    serviceSurface.style.transition = "none";
+    serviceSurface.style.transform = "translate3d(35%, 0, 0)";
+    serviceSurface.style.opacity = "0";
+
+    void serviceSurface.offsetWidth;
+
+    serviceSurface.style.transition = `transform ${easing}, opacity ${easing}`;
+    serviceSurface.style.transform = "translate3d(0, 0, 0)";
+    serviceSurface.style.opacity = "1";
+
+    detailTransitionTimer = window.setTimeout(() => {
+      resetDetailSurfaceStyles();
+      locked = false;
+    }, 760);
+  } else {
+    locked = false;
   }
 };
 
 window.closeServiceDetail = function() {
-  if (isDetailFlowActive) {
-    isDetailFlowActive = false;
-    refreshPanels();
-    currentIndex = Math.max(0, panels.findIndex((p) => p.id === "coverflow"));
-    fullpage.style.transition = "none";
-    applyFullpageTransform();
-    void fullpage.offsetHeight;
-    fullpage.style.transition = "";
-    updateControls();
-    window.setDetailPane("intro", false);
+  if (!isDetailFlowActive || locked) return;
+
+  const coverflowPanel = document.getElementById("coverflow");
+  const servicePanel = document.getElementById("coverflowService");
+  const coverflowSurface = coverflowPanel?.querySelector(".coverflow-surface");
+  const serviceSurface = servicePanel?.querySelector(".coverflowService-surface");
+
+  const isCurrentlyAtService = Boolean(servicePanel && panels[currentIndex]?.id === "coverflowService");
+
+  if (isCurrentlyAtService && coverflowPanel && coverflowSurface && serviceSurface) {
+    locked = true;
+    window.clearTimeout(detailTransitionTimer);
+    resetDetailSurfaceStyles();
+
+    const deltaY = servicePanel.offsetTop - coverflowPanel.offsetTop;
+    const easing = "750ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+    coverflowPanel.classList.add("is-sliding-out-left");
+    coverflowPanel.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+
+    coverflowSurface.style.transition = "none";
+    coverflowSurface.style.transform = "translate3d(-35%, 0, 0)";
+    coverflowSurface.style.opacity = "0";
+
+    serviceSurface.style.transition = "none";
+    serviceSurface.style.transform = "translate3d(0, 0, 0)";
+    serviceSurface.style.opacity = "1";
+
+    void serviceSurface.offsetWidth;
+
+    coverflowSurface.style.transition = `transform ${easing}, opacity ${easing}`;
+    serviceSurface.style.transition = `transform ${easing}, opacity ${easing}`;
+
+    coverflowSurface.style.transform = "translate3d(0, 0, 0)";
+    coverflowSurface.style.opacity = "1";
+
+    serviceSurface.style.transform = "translate3d(35%, 0, 0)";
+    serviceSurface.style.opacity = "0";
+
+    const cleanPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    window.history.replaceState(null, "", `${cleanPath}#coverflow`);
+
+    detailTransitionTimer = window.setTimeout(() => {
+      resetDetailSurfaceStyles();
+      isDetailFlowActive = false;
+      refreshPanels();
+      currentIndex = Math.max(0, panels.findIndex((p) => p.id === "coverflow"));
+      fullpage.style.transition = "none";
+      applyFullpageTransform();
+      void fullpage.offsetHeight;
+      fullpage.style.transition = "";
+      updateControls();
+      window.setDetailPane("intro", false);
+      locked = false;
+    }, 760);
+    return;
   }
+
+  resetDetailSurfaceStyles();
+  isDetailFlowActive = false;
+  refreshPanels();
+  currentIndex = Math.max(0, panels.findIndex((p) => p.id === "coverflow"));
+  fullpage.style.transition = "none";
+  applyFullpageTransform();
+  void fullpage.offsetHeight;
+  fullpage.style.transition = "";
+  updateControls();
+  window.setDetailPane("intro", false);
 };
 
 window.goToSectionById = function(id) {
   if (id === "coverflowService" || id === "coverflowProject") {
-    if (!isDetailFlowActive) {
-      isDetailFlowActive = true;
-      refreshPanels();
-    }
-    const targetIdx = panels.findIndex((p) => p.id === "coverflowService");
-    if (targetIdx !== -1) {
-      goToSection(targetIdx);
-      window.setDetailPane(id === "coverflowProject" ? "project" : "intro", true);
-    }
+    window.openServiceDetail(null, id === "coverflowProject" ? "project" : "intro");
     return;
   }
   const targetIdx = panels.findIndex((p) => p.id === id);
@@ -1174,7 +1323,7 @@ function handleWheel(event) {
         window.setTimeout(() => { locked = false; }, 650);
         return;
       } else {
-        goToSection(currentIndex - 1);
+        window.closeServiceDetail();
         return;
       }
     }
@@ -1251,7 +1400,7 @@ function handleKeydown(event) {
         window.setTimeout(() => { locked = false; }, 650);
         return;
       } else {
-        goToSection(currentIndex - 1);
+        window.closeServiceDetail();
         return;
       }
     }
@@ -1614,8 +1763,8 @@ window.addEventListener(
             locked = true;
             window.setTimeout(() => { locked = false; }, 650);
             return;
-          } else if (distance < -42) {
-            goToSection(currentIndex - 1);
+          } else {
+            window.closeServiceDetail();
             return;
           }
         }

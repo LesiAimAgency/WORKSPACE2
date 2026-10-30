@@ -368,16 +368,16 @@
             <div class="px-3 mb-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 <span>Dịch Vụ &amp; Trình Diễn</span>
             </div>
-            <ul class="space-y-1" x-data="{ openServicesMenu: true }">
+            <ul class="space-y-1" x-data="{ openServicesMenu: true, openProjectsMenu: true }">
                 <li>
                     <button @click="openServicesMenu = !openServicesMenu"
                             type="button"
-                            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all duration-200 {{ (request()->is('coverflow*') || (request()->routeIs('admin.widgets.*') && request('search') === 'Dịch Vụ')) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold shadow-md shadow-emerald-950/30' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all duration-200 {{ (request()->routeIs('admin.services.*') || request()->routeIs('admin.projects.*') || request()->is('coverflow*')) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold shadow-md shadow-emerald-950/30' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3 flex-shrink-0 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <span>Dịch Vụ (Services)</span>
+                            <span>Dịch Vụ &amp; Dự Án</span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <span class="text-[10px] bg-slate-800/80 px-1.5 py-0.5 rounded text-emerald-300 font-mono">5 SV</span>
@@ -388,23 +388,38 @@
                     </button>
 
                     <div x-show="openServicesMenu" x-collapse class="pl-9 pr-2 py-1.5 space-y-1">
-                        <a href="{{ route('admin.widgets.index', ['search' => 'Dịch Vụ']) }}"
-                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ (request()->routeIs('admin.widgets.*') && request('search') === 'Dịch Vụ') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
-                            • Cấu hình Widget Dịch Vụ
+                        <a href="{{ route('admin.services.index') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.index') || request()->routeIs('admin.services.edit') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Tất cả dịch vụ
                         </a>
-                        <a href="{{ route('coverflow.index') }}" target="_blank"
+                        <a href="{{ route('admin.services.create') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.create') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Thêm dịch vụ mới
+                        </a>
+                        <a href="{{ route('admin.services.categories') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.categories') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Phân loại danh mục
+                        </a>
+                        <a href="{{ route('admin.projects.index') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.projects.index') || request()->routeIs('admin.projects.edit') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Quản lý dự án (Projects)
+                        </a>
+                        <a href="{{ route('admin.projects.create') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.projects.create') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Thêm dự án mới
+                        </a>
+                        <a href="{{ route('admin.services.config') }}"
+                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.config') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
+                            • Cấu hình hiển thị
+                        </a>
+                        <a href="{{ url('/#coverflow') }}" target="_blank"
                            class="flex items-center justify-between px-3 py-1.5 rounded-md text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
-                            <span>• Coverflow Tổng Quan</span>
+                            <span>• Xem ngoài Trang chủ</span>
                             <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </a>
-                        <a href="{{ route('coverflow.service') }}" target="_blank"
-                           class="flex items-center justify-between px-3 py-1.5 rounded-md text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
-                            <span>• Giới Thiệu (Introductions)</span>
-                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                        </a>
-                        <a href="{{ route('coverflow.project') }}" target="_blank"
-                           class="flex items-center justify-between px-3 py-1.5 rounded-md text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/40">
-                            <span>• Dự Án & So Sánh (Projects)</span>
+                    </div>
+                </li>
+                <li class="hidden"><div><a><span></span>
                             <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </a>
                     </div>

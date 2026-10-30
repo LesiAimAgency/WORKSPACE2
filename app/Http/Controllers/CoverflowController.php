@@ -225,9 +225,23 @@ class CoverflowController extends Controller
 
         $dbSettings = $widget && is_array($widget->settings) ? $widget->settings : [];
 
+        $savedLabels = [];
+        try {
+            $rawLabels = setting('workspace_services_labels');
+            if (is_string($rawLabels) && $rawLabels !== '') {
+                $decoded = json_decode($rawLabels, true);
+                if (is_array($decoded)) {
+                    $savedLabels = $decoded;
+                }
+            } elseif (is_array($rawLabels)) {
+                $savedLabels = $rawLabels;
+            }
+        } catch (\Throwable $e) {
+        }
+
         return array_merge([
             'view_more_text' => 'View more',
-        ], $dbSettings, is_array($overrideSettings) ? $overrideSettings : []);
+        ], $dbSettings, $savedLabels, is_array($overrideSettings) ? $overrideSettings : []);
     }
 
     /**
@@ -243,6 +257,20 @@ class CoverflowController extends Controller
 
         $dbSettings = $widget && is_array($widget->settings) ? $widget->settings : [];
 
+        $savedLabels = [];
+        try {
+            $rawLabels = setting('workspace_services_labels');
+            if (is_string($rawLabels) && $rawLabels !== '') {
+                $decoded = json_decode($rawLabels, true);
+                if (is_array($decoded)) {
+                    $savedLabels = $decoded;
+                }
+            } elseif (is_array($rawLabels)) {
+                $savedLabels = $rawLabels;
+            }
+        } catch (\Throwable $e) {
+        }
+
         return array_merge([
             'pill_text' => 'Services',
             'tab_intro_text' => 'Introductions',
@@ -254,14 +282,28 @@ class CoverflowController extends Controller
             'label_typology' => 'Typology',
             'label_style' => 'Style',
             'label_tech' => 'Tech Solution',
-        ], $dbSettings, is_array($overrideSettings) ? $overrideSettings : []);
+        ], $dbSettings, $savedLabels, is_array($overrideSettings) ? $overrideSettings : []);
     }
 
     /**
-     * Resolve and normalize services from widget settings in DB or fallback.
+     * Resolve and normalize services from Admin Services settings, widget settings in DB, or fallback.
      */
-    public static function getServicesData(?array $overrideSettings = null): array
+    public static function getServicesData(?array $overrideSettings = null, bool $onlyActive = true): array
     {
+        $savedServices = [];
+        try {
+            $rawSaved = setting('workspace_services_data');
+            if (is_string($rawSaved) && $rawSaved !== '') {
+                $decoded = json_decode($rawSaved, true);
+                if (is_array($decoded)) {
+                    $savedServices = array_values($decoded);
+                }
+            } elseif (is_array($rawSaved)) {
+                $savedServices = array_values($rawSaved);
+            }
+        } catch (\Throwable $e) {
+        }
+
         $serviceWidget = Widget::withoutGlobalScopes()
             ->where('type', 'workspace_service')
             ->orderByDesc('is_active')
@@ -284,7 +326,6 @@ class CoverflowController extends Controller
 
         if (! empty($overrideSettings['services']) && is_array($overrideSettings['services'])) {
             $overrideList = array_values($overrideSettings['services']);
-            // Check if override comes from CoverflowServiceWidget (has intro_items or projects) or ServiceWidget
             $firstOverride = $overrideList[0] ?? [];
             if (isset($firstOverride['intro_items']) || isset($firstOverride['projects'])) {
                 $detailServices = $overrideList;
@@ -294,6 +335,11 @@ class CoverflowController extends Controller
         }
 
         $defaults = self::getDefaultServices();
+
+        if (! empty($savedServices)) {
+            $overviewServices = $savedServices;
+            $detailServices = $savedServices;
+        }
 
         if (empty($overviewServices) && empty($detailServices)) {
             return $defaults;
@@ -320,6 +366,11 @@ class CoverflowController extends Controller
             if (! is_array($s)) {
                 continue;
             }
+            $isActive = isset($s['is_active']) ? (bool) $s['is_active'] : true;
+            if ($onlyActive && ! $isActive) {
+                continue;
+            }
+
             $def = $defaults[$idx] ?? $defaults[0];
             $num = ! empty($s['number']) ? (string) $s['number'] : sprintf('%02d', $idx + 1);
             $title = ! empty($s['title']) ? (string) $s['title'] : ($def['title'] ?? 'Service '.$num);
@@ -338,9 +389,11 @@ class CoverflowController extends Controller
                 ? (string) $s['image']
                 : (! empty($detailMatch['image']) ? (string) $detailMatch['image'] : ($def['image'] ?? 'themes/workspace/coverflow/frame1.png'));
 
-            $detailImage = ! empty($detailMatch['image'])
-                ? (string) $detailMatch['image']
-                : $image;
+            $detailImage = ! empty($s['detail_image'])
+                ? (string) $s['detail_image']
+                : (! empty($detailMatch['detail_image'])
+                    ? (string) $detailMatch['detail_image']
+                    : (! empty($detailMatch['image']) ? (string) $detailMatch['image'] : $image));
 
             $chipLine1 = ! empty($s['chip_line_1']) ? (string) $s['chip_line_1'] : ($def['chip_line_1'] ?? '');
             $chipLine2 = ! empty($s['chip_line_2']) ? (string) $s['chip_line_2'] : ($def['chip_line_2'] ?? '');
@@ -397,12 +450,13 @@ class CoverflowController extends Controller
                 'desc' => $desc,
                 'image' => $image,
                 'detail_image' => $detailImage,
+                'is_active' => $isActive,
                 'intro_items' => $introItems,
                 'projects' => $projects,
             ];
         }
 
-        return ! empty($normalized) ? $normalized : $defaults;
+        return ! empty($normalized) ? array_values($normalized) : $defaults;
     }
 
     /**
