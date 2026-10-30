@@ -99,22 +99,48 @@ class ServiceController extends Controller
      */
     public static function splitTitleIntoLines(string $title): array
     {
+        $trimmed = trim($title);
         foreach (self::getDefaultCategories() as $def) {
-            if (strcasecmp($def['name'], $title) === 0) {
+            if ($def['name'] === $trimmed) {
                 return [$def['chip_line_1'], $def['chip_line_2']];
             }
         }
 
-        $words = preg_split('/\s+/', trim($title)) ?: [$title];
-        if (count($words) <= 1) {
-            return [$title, ''];
+        $words = preg_split('/\s+/', $trimmed) ?: [$trimmed];
+        $count = count($words);
+        if ($count <= 1) {
+            return [$trimmed, ''];
         }
-        $mid = (int) ceil(count($words) / 2);
+
+        // Find the split index that best balances the character length of both lines
+        $bestIdx = (int) ceil($count / 2);
+        $bestDiff = PHP_INT_MAX;
+
+        for ($i = 1; $i < $count; $i++) {
+            $l1 = implode(' ', array_slice($words, 0, $i));
+            $l2 = implode(' ', array_slice($words, $i));
+            $diff = abs(mb_strlen($l1) - mb_strlen($l2));
+            if ($diff < $bestDiff) {
+                $bestDiff = $diff;
+                $bestIdx = $i;
+            }
+        }
 
         return [
-            implode(' ', array_slice($words, 0, $mid)),
-            implode(' ', array_slice($words, $mid)),
+            implode(' ', array_slice($words, 0, $bestIdx)),
+            implode(' ', array_slice($words, $bestIdx)),
         ];
+    }
+
+    /**
+     * Check whether chip_line_1 + chip_line_2 actually represent the given title.
+     */
+    public static function chipLinesMatchTitle(string $chipLine1, string $chipLine2, string $title): bool
+    {
+        $combined = preg_replace('/\s+/', ' ', trim($chipLine1.' '.$chipLine2)) ?? '';
+        $normalizedTitle = preg_replace('/\s+/', ' ', trim($title)) ?? '';
+
+        return $combined !== '' && $combined === $normalizedTitle;
     }
 
     /**
@@ -138,12 +164,19 @@ class ServiceController extends Controller
             $def = $defaults[$idx] ?? $defaults[0];
             $num = sprintf('%02d', count($result) + 1);
             $title = ! empty($s['title']) ? trim((string) $s['title']) : ($def['title'] ?? 'Service '.$num);
-            $category = ! empty($s['category']) ? trim((string) $s['category']) : $title;
+            $category = $title;
             $slug = ! empty($s['slug']) ? Str::slug((string) $s['slug']) : Str::slug($title);
 
-            [$defLine1, $defLine2] = self::splitTitleIntoLines($category);
-            $chipLine1 = ! empty($s['chip_line_1']) ? trim((string) $s['chip_line_1']) : $defLine1;
-            $chipLine2 = ! empty($s['chip_line_2']) ? trim((string) $s['chip_line_2']) : $defLine2;
+            [$defLine1, $defLine2] = self::splitTitleIntoLines($title);
+            $rawChip1 = ! empty($s['chip_line_1']) ? trim((string) $s['chip_line_1']) : '';
+            $rawChip2 = ! empty($s['chip_line_2']) ? trim((string) $s['chip_line_2']) : '';
+            if (! self::chipLinesMatchTitle($rawChip1, $rawChip2, $title)) {
+                $chipLine1 = $defLine1;
+                $chipLine2 = $defLine2;
+            } else {
+                $chipLine1 = $rawChip1;
+                $chipLine2 = $rawChip2;
+            }
 
             $result[] = [
                 'id' => count($result) + 1,
@@ -352,16 +385,19 @@ class ServiceController extends Controller
             $def = $defaults[$idx] ?? $defaults[0];
             $num = ! empty($s['number']) ? trim((string) $s['number']) : sprintf('%02d', $idx + 1);
             $title = ! empty($s['title']) ? trim((string) $s['title']) : ($def['title'] ?? 'Service '.$num);
-            $category = ! empty($s['category']) ? trim((string) $s['category']) : $title;
+            $category = $title;
             $slug = ! empty($s['slug']) ? Str::slug((string) $s['slug']) : Str::slug($title);
 
-            [$defLine1, $defLine2] = self::splitTitleIntoLines($category);
-            $chipLine1 = isset($s['chip_line_1']) && trim((string) $s['chip_line_1']) !== ''
-                ? trim((string) $s['chip_line_1'])
-                : $defLine1;
-            $chipLine2 = isset($s['chip_line_2']) && trim((string) $s['chip_line_2']) !== ''
-                ? trim((string) $s['chip_line_2'])
-                : $defLine2;
+            [$defLine1, $defLine2] = self::splitTitleIntoLines($title);
+            $rawChip1 = isset($s['chip_line_1']) ? trim((string) $s['chip_line_1']) : '';
+            $rawChip2 = isset($s['chip_line_2']) ? trim((string) $s['chip_line_2']) : '';
+            if (! self::chipLinesMatchTitle($rawChip1, $rawChip2, $title)) {
+                $chipLine1 = $defLine1;
+                $chipLine2 = $defLine2;
+            } else {
+                $chipLine1 = $rawChip1;
+                $chipLine2 = $rawChip2;
+            }
 
             $desc = isset($s['desc']) ? trim(strip_tags((string) $s['desc'])) : ($def['desc'] ?? '');
             $image = ! empty($s['image']) ? trim((string) $s['image']) : ($def['image'] ?? 'themes/workspace/coverflow/frame1.png');
@@ -1140,13 +1176,27 @@ class ServiceController extends Controller
         }
 
         $title = trim((string) $request->input('title', $existing['title'] ?? $def['title']));
-        $category = trim((string) $request->input('category', '')) ?: $title;
+        $category = $title;
         $slug = trim((string) $request->input('slug', ''));
         $slug = $slug !== '' ? Str::slug($slug) : Str::slug($title);
 
-        [$defLine1, $defLine2] = self::splitTitleIntoLines($category);
-        $chipLine1 = trim((string) $request->input('chip_line_1', '')) ?: $defLine1;
-        $chipLine2 = trim((string) $request->input('chip_line_2', '')) ?: $defLine2;
+        [$defLine1, $defLine2] = self::splitTitleIntoLines($title);
+        $rawChip1 = trim((string) $request->input('chip_line_1', ''));
+        $rawChip2 = trim((string) $request->input('chip_line_2', ''));
+
+        // If title changed and chip lines still hold the old values (or don't match title), auto-split from new title
+        $existingTitle = trim((string) ($existing['title'] ?? ''));
+        $existingChip1 = trim((string) ($existing['chip_line_1'] ?? ''));
+        $existingChip2 = trim((string) ($existing['chip_line_2'] ?? ''));
+        $chipUnchangedFromOld = ($title !== $existingTitle && $rawChip1 === $existingChip1 && $rawChip2 === $existingChip2);
+
+        if ($chipUnchangedFromOld || ($rawChip1 === '' && $rawChip2 === '')) {
+            $chipLine1 = $defLine1;
+            $chipLine2 = $defLine2;
+        } else {
+            $chipLine1 = $rawChip1;
+            $chipLine2 = $rawChip2;
+        }
 
         $desc = trim((string) $request->input('desc', $existing['desc'] ?? ''));
         $image = trim((string) $request->input('image', $existing['image'] ?? 'themes/workspace/coverflow/frame1.png'));

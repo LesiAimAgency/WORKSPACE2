@@ -270,9 +270,19 @@ function serviceFormApp() {
                 this.chipLine1 = t;
                 this.chipLine2 = '';
             } else {
-                const mid = Math.ceil(words.length / 2);
-                this.chipLine1 = words.slice(0, mid).join(' ');
-                this.chipLine2 = words.slice(mid).join(' ');
+                let bestIdx = Math.ceil(words.length / 2);
+                let bestDiff = Infinity;
+                for (let i = 1; i < words.length; i++) {
+                    const l1 = words.slice(0, i).join(' ');
+                    const l2 = words.slice(i).join(' ');
+                    const diff = Math.abs(l1.length - l2.length);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestIdx = i;
+                    }
+                }
+                this.chipLine1 = words.slice(0, bestIdx).join(' ');
+                this.chipLine2 = words.slice(bestIdx).join(' ');
             }
         },
         addIntroItem() {

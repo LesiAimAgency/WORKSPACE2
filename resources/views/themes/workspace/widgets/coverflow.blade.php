@@ -47,34 +47,9 @@
 
   $totalServices = count($servicesFormatted);
 
-  // Format title thành 2 dòng chuẩn cho tất cả button chips theo Service (1).svg
+  // Format title thành 2 dòng cân đối cho tất cả button chips
   $formatChipTitle = function (string $title): array {
-      $customMap = [
-          // Tiêu đề đầy đủ từ Database / CoverflowController
-          'Interior Advisory and Project Setup' => ['Interior Advisory', 'and Project Setup'],
-          'Interior Design and FF&E Consultancy' => ['Interior Design and', 'FF&E Consultancy'],
-          'Fit-Out and Finishing Works' => ['Fit-Out and', 'Finishing Works'],
-          'Joinery Manufacturer and FF&E Installation' => ['Joinery Manufacturer and', 'FF&E Installation'],
-          'Material Library and Competency Management' => ['Material Library and', 'Competency Management'],
-
-          // Tiêu đề rút gọn dự phòng
-          'Design and FF&E Consultancy' => ['Design', 'and FF&E Consultancy'],
-          'Finishing Works' => ['Finishing', 'Works'],
-          'Procurement and FF&E Installation' => ['Procurement', 'and FF&E Installation'],
-          'Competency Management' => ['Competency', 'Management'],
-      ];
-      if (isset($customMap[$title])) {
-          return $customMap[$title];
-      }
-      $words = explode(' ', trim($title));
-      if (count($words) <= 1) {
-          return [$title, ''];
-      }
-      $mid = (int) ceil(count($words) / 2);
-      return [
-          implode(' ', array_slice($words, 0, $mid)),
-          implode(' ', array_slice($words, $mid))
-      ];
+      return \App\Http\Controllers\Admin\ServiceController::splitTitleIntoLines($title);
   };
 @endphp
 
@@ -124,16 +99,15 @@
     .panel-coverflow .coverflow-chips {
         display: grid;
         grid-template-columns: repeat({{ max(1, $totalServices) }}, minmax(0, 1fr));
-        gap: 16px;
-        width: 100%;
-        max-width: 1100px;
+        gap: 12px;
+        width: calc(100% - 180px);
+        max-width: 1260px;
         margin: 0 auto 16px;
         justify-content: center;
         align-items: center;
         text-align: center;
         position: relative;
         z-index: 20;
-        font-size:1rem;
     }
     .panel-coverflow .coverflow-chip {
         display: flex;
@@ -145,18 +119,21 @@
         border: none;
         padding: 4px 6px;
         font-family: var(--font-main, inherit);
-        font-size: var(--p_S, 12px); /* Root Token --p_S: 12px / --p_S-rem: 0.75rem */
+        font-size: clamp(12px, 0.85rem, 14px);
         line-height: 1.35;
         color: #32323280;
         font-weight: 500;
         cursor: pointer;
         transition: color 0.22s ease, transform 0.2s ease;
         min-height: 50px; /* Cố định chiều cao 2 dòng đều nhau */
-        font-size:1rem;
+        min-width: 0;
     }
     .panel-coverflow .coverflow-chip .chip-line {
         display: block;
         white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .panel-coverflow .coverflow-chip:hover {
         color: #18181b;
@@ -408,7 +385,7 @@
 
     .panel-coverflow .badge-title {
         font-family: var(--font-main, inherit);
-        font-size: var(--h6, 21.3px); /* Root Token --h6: 21.3px / --h6-rem: 1.33125rem */
+        font-size: clamp(16px, 1.15rem, 19px);
         font-weight: 700;
         line-height: 1.25;
         color: #ffffff !important;
@@ -416,7 +393,11 @@
         width: 100%;
         max-width: 100%;
         word-break: break-word;
-        text-transform: none !important; /* Chuẩn Figma Service (1).svg: 'and Project Setup' */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-transform: none !important;
     }
 
     .panel-coverflow .coverflow-desc {

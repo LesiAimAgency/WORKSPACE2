@@ -428,13 +428,7 @@ class CoverflowController extends Controller
                 $detailMatch = [];
             }
 
-            $category = ! empty($s['category'])
-                ? (string) $s['category']
-                : (! empty($detailMatch['category']) ? (string) $detailMatch['category'] : $title);
-
-            $catMeta = $categoryMap[mb_strtolower(trim($category))]
-                ?? $categoryMap[mb_strtolower(trim($title))]
-                ?? null;
+            $category = $title;
 
             $desc = ! empty($s['desc'])
                 ? strip_tags((string) $s['desc'])
@@ -450,12 +444,16 @@ class CoverflowController extends Controller
                     ? (string) $detailMatch['detail_image']
                     : (! empty($detailMatch['image']) ? (string) $detailMatch['image'] : $image));
 
-            $chipLine1 = ! empty($s['chip_line_1'])
-                ? (string) $s['chip_line_1']
-                : (! empty($catMeta['chip_line_1']) ? (string) $catMeta['chip_line_1'] : ($def['chip_line_1'] ?? ''));
-            $chipLine2 = ! empty($s['chip_line_2'])
-                ? (string) $s['chip_line_2']
-                : (! empty($catMeta['chip_line_2']) ? (string) $catMeta['chip_line_2'] : ($def['chip_line_2'] ?? ''));
+            [$defLine1, $defLine2] = \App\Http\Controllers\Admin\ServiceController::splitTitleIntoLines($title);
+            $rawChip1 = ! empty($s['chip_line_1']) ? trim((string) $s['chip_line_1']) : '';
+            $rawChip2 = ! empty($s['chip_line_2']) ? trim((string) $s['chip_line_2']) : '';
+            if (! \App\Http\Controllers\Admin\ServiceController::chipLinesMatchTitle($rawChip1, $rawChip2, $title)) {
+                $chipLine1 = $defLine1;
+                $chipLine2 = $defLine2;
+            } else {
+                $chipLine1 = $rawChip1;
+                $chipLine2 = $rawChip2;
+            }
 
             $rawIntros = ! empty($detailMatch['intro_items']) && is_array($detailMatch['intro_items'])
                 ? $detailMatch['intro_items']

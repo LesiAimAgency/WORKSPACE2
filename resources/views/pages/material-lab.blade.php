@@ -46,8 +46,8 @@
       cursor: pointer; 
     }
     
-    @keyframes slideInRight { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideInLeft { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideInRight { from { transform: translateX(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes slideInLeft { from { transform: translateX(-16px); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes popIn { from { transform: translateY(6px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
     
     .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #C1272D #E8E2D8; }
@@ -66,7 +66,7 @@
   <header class="sticky top-0 z-40 border-b border-[#1F1E1C]/10 bg-[#F9F6F0]/95 backdrop-blur-xl">
     <div class="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3 md:px-8">
       <div class="flex items-center gap-3">
-        <a href="{{ route('material-lab') }}" class="flex items-center gap-3">
+        <a href="{{ route('home') }}" class="flex items-center gap-3">
           <img src="{{ file_exists(public_path('images/workspace-logo-mat.png')) ? asset('images/workspace-logo-mat.png') : asset('Logo.png') }}"
                alt="Workspace Logo"
                class="h-8 w-auto object-contain">
@@ -102,8 +102,7 @@
   <main class="mx-auto max-w-[1280px] px-5 md:px-8 pb-16">
     <div class="relative min-h-[60vh]">
       <div id="wizard-scroll-container"
-           class="mx-auto w-full max-w-[1120px] min-h-[60vh] overflow-y-auto max-h-[86vh] md:max-h-[82vh] px-1 py-6 md:py-8 pb-10 scrollbar-thin"
-           style="-webkit-overflow-scrolling: touch;">
+           class="mx-auto w-full max-w-[1120px] min-h-[60vh] px-1 py-6 md:py-8 pb-10">
         
         <div class="w-full max-w-5xl mx-auto px-2 md:px-4 py-2"
              :style="'animation: ' + (slideDir > 0 ? 'slideInRight 0.2s ease' : 'slideInLeft 0.2s ease')">
@@ -527,10 +526,10 @@
             </div>
 
             <!-- Main Results Layout (2 Columns) -->
-            <div class="mt-5 grid grid-cols-12 gap-4">
+            <div class="mt-5 grid grid-cols-12 gap-4 items-start">
               <!-- Left Column: Standards / Field Insights -->
-              <div class="col-span-12 md:col-span-5">
-                <div class="rounded-[16px] bg-[#1F1E1C] p-5 text-[#F9F6F0] transition-all">
+              <div class="col-span-12 md:col-span-5 md:sticky md:top-[72px] self-start md:max-h-[calc(100vh-88px)] md:overflow-y-auto scrollbar-thin space-y-3">
+                <div class="rounded-[16px] bg-[#1F1E1C] p-4 md:p-5 text-[#F9F6F0] transition-all">
                   <div class="flex items-center justify-between gap-2">
                     <div class="sans text-[10px] font-bold uppercase tracking-widest text-white/50"
                          x-text="activeTab === 'ai' ? 'Tiêu chuẩn kỹ thuật' : 'Kinh nghiệm Workspace'"></div>
@@ -540,7 +539,7 @@
                     </template>
                   </div>
                   
-                  <div class="sans mt-3 text-[20px] font-semibold leading-[1.2]">
+                  <div class="sans mt-2.5 text-[18px] md:text-[20px] font-semibold leading-[1.2]">
                     <span x-text="activeMaterial ? activeMaterial.name : (selectedTypology ? selectedTypology.vi : '')"></span>
                   </div>
                   <div class="sans mt-1 text-[11px] text-white/60">
@@ -550,10 +549,10 @@
                   </div>
 
                   <!-- Tab 1: AI / Tiêu chuẩn (Theo từng sản phẩm được click) -->
-                  <div x-show="activeTab === 'ai'" class="mt-4 space-y-3">
+                  <div x-show="activeTab === 'ai'" class="mt-3.5 space-y-2.5">
                     <div class="rounded-xl bg-white/10 p-3">
                       <div class="sans text-[10px] uppercase tracking-widest text-white/50">Căn cứ áp dụng</div>
-                      <div class="sans mt-2 space-y-1.5 text-[11px] leading-[1.6] text-white/80">
+                      <div class="sans mt-1.5 space-y-1.5 text-[11px] leading-[1.55] text-white/80 max-h-[180px] overflow-y-auto scrollbar-thin pr-1">
                         <template x-for="(line, lIdx) in getMaterialStandardsLines(activeMaterial)" :key="lIdx">
                           <div x-html="line"></div>
                         </template>
@@ -561,12 +560,12 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                      <div class="rounded-xl bg-white/10 p-3">
+                      <div class="rounded-xl bg-white/10 p-2.5">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/50">Yêu cầu cháy</div>
-                        <div class="sans mt-1 text-[12px] font-medium leading-tight"
+                        <div class="sans mt-1 text-[11px] font-medium leading-tight"
                              x-text="getMaterialFireRequirement(activeMaterial)"></div>
                       </div>
-                      <div class="rounded-xl bg-[#C1272D] p-3">
+                      <div class="rounded-xl bg-[#C1272D] p-2.5">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/70">Chỉ số</div>
                         <div class="sans mt-1 text-[11px] leading-tight"
                              x-text="getMaterialMetrics(activeMaterial)"></div>
@@ -575,10 +574,10 @@
                   </div>
 
                   <!-- Tab 2: Workspace Field Experience (Theo từng sản phẩm được click) -->
-                  <div x-show="activeTab === 'workspace'" class="mt-4 space-y-3">
+                  <div x-show="activeTab === 'workspace'" class="mt-3.5 space-y-2.5">
                     <div class="rounded-xl bg-white/10 p-3">
                       <div class="sans text-[10px] uppercase tracking-widest text-white/50">Thực tế thi công</div>
-                      <div class="sans mt-2 space-y-1.5 text-[11px] leading-[1.6] text-white/80">
+                      <div class="sans mt-1.5 space-y-1.5 text-[11px] leading-[1.55] text-white/80 max-h-[180px] overflow-y-auto scrollbar-thin pr-1">
                         <template x-for="(line, wIdx) in getMaterialExperienceLines(activeMaterial)" :key="wIdx">
                           <div x-html="line"></div>
                         </template>
@@ -586,12 +585,12 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                      <div class="rounded-xl bg-white/10 p-3">
+                      <div class="rounded-xl bg-white/10 p-2.5">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/50">Lỗi thường gặp</div>
                         <div class="sans mt-1 text-[10px] leading-tight"
                              x-text="getMaterialCommonErrors(activeMaterial)"></div>
                       </div>
-                      <div class="rounded-xl bg-[#C1272D] p-3">
+                      <div class="rounded-xl bg-[#C1272D] p-2.5">
                         <div class="sans text-[9px] uppercase tracking-widest text-white/70">Mẹo</div>
                         <div class="sans mt-1 text-[10px] leading-tight"
                              x-text="getMaterialTips(activeMaterial)"></div>
@@ -601,14 +600,14 @@
                 </div>
 
                 <!-- Breadcrumb Path & Action Buttons -->
-                <div class="mt-4 rounded-[12px] border border-[#1F1E1C]/10 bg-white p-4">
+                <div class="rounded-[12px] border border-[#1F1E1C]/10 bg-white p-3.5">
                   <div class="sans text-[10px] font-bold uppercase tracking-widest text-[#1F1E1C]/40">Đường dẫn</div>
-                  <div class="mt-2 flex flex-wrap gap-2">
+                  <div class="mt-2 flex flex-wrap gap-1.5">
                     <button type="button" @click="goToStep(1, -1)" class="sans rounded-full bg-[#1F1E1C] px-3 py-1 text-[11px] text-white" x-text="selectedTypology ? selectedTypology.vi : ''"></button>
                     <button type="button" @click="goToStep(2, -1)" class="sans rounded-full bg-[#1F1E1C]/10 px-3 py-1 text-[11px]" x-text="selectedSurface ? selectedSurface.vi : ''"></button>
                     <button type="button" @click="goToStep(3, -1)" class="sans rounded-full border px-3 py-1 text-[11px]" x-text="selectedArea ? selectedArea.vi : ''"></button>
                   </div>
-                  <div class="mt-3 flex gap-2">
+                  <div class="mt-2.5 flex gap-2">
                     <button type="button" @click="resetAll()" class="sans rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors">Làm lại từ đầu</button>
                     <button type="button" @click="goToStep(4, -1)" class="sans rounded-full bg-[#C1272D] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#a81f25] transition-colors">Sửa nhu cầu</button>
                   </div>

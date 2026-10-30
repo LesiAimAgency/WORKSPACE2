@@ -55,10 +55,7 @@
         @endforeach
       </div>
 
-      <div class="expert-actions">
-        <a href="{{ $contactLink }}" class="expert-btn expert-btn-primary">{{ $contactButtonText }}</a>
-        <a href="{{ $projectsLink }}" class="expert-btn expert-btn-secondary">{{ $projectsButtonText }}</a>
-      </div>
+
 
       <div class="expert-footer-profile">
         <div class="expert-profile-info">

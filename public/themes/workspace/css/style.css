@@ -5536,3 +5536,16 @@ body.is-scrolled-past-home .pdf-profile-link {
     min-height: 0;
   }
 }
+
+.workspace-lab {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.workspace-lab>a {
+  font-size: 16px;
+  padding: 8px 16px;
+  text-transform: uppercase;
+}

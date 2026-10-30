@@ -158,7 +158,11 @@
         </span>
         <span>MENU</span>
       </button>
-      <a href="#connect" class="contact-link" style="pointer-events: auto;">CONTACT</a>
+      <div class="workspace-lab">
+          <a href="/material-lab" class="view-more-btn" tyle="pointer-events: auto;">Material Lab</a>
+          <a href="#connect" class="contact-link" style="pointer-events: auto;">CONTACT</a>
+      </div>
+     
     </header>
 
     <!-- @if(setting('contact_pdf_link', setting('company_profile_pdf')))

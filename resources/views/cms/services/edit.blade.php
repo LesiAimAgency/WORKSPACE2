@@ -87,7 +87,7 @@
                     <!-- Title -->
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-1">Tiêu đề Danh mục / Dịch vụ <span class="text-rose-500">*</span></label>
-                        <input type="text" name="title" x-model="title" @input="autoSlug()" required placeholder="VD: Fit-Out and Finishing Works" class="w-full px-3 py-2 text-xs font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                        <input type="text" name="title" x-model="title" @input="autoSlugAndChips()" required placeholder="VD: Fit-Out and Finishing Works" class="w-full px-3 py-2 text-xs font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
                     </div>
 
                     <!-- Number & Slug -->
@@ -250,12 +250,32 @@ function serviceEditApp() {
         chipLine2: @js(old('chip_line_2', $service['chip_line_2'] ?? '')),
         introItems: @js($service['intro_items'] ?? []),
 
-        autoSlug() {
-            this.slug = (this.title || '')
+        autoSlugAndChips() {
+            const t = (this.title || '').trim();
+            this.slug = t
                 .toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, '')
                 .trim()
                 .replace(/\s+/g, '-');
+            const words = t.split(/\s+/).filter(Boolean);
+            if (words.length <= 1) {
+                this.chipLine1 = t;
+                this.chipLine2 = '';
+            } else {
+                let bestIdx = Math.ceil(words.length / 2);
+                let bestDiff = Infinity;
+                for (let i = 1; i < words.length; i++) {
+                    const l1 = words.slice(0, i).join(' ');
+                    const l2 = words.slice(i).join(' ');
+                    const diff = Math.abs(l1.length - l2.length);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestIdx = i;
+                    }
+                }
+                this.chipLine1 = words.slice(0, bestIdx).join(' ');
+                this.chipLine2 = words.slice(bestIdx).join(' ');
+            }
         },
         addIntroItem() {
             this.introItems.push({ title: '', desc: '' });

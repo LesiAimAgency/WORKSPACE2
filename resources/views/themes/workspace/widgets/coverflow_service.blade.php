@@ -171,19 +171,24 @@
     }
 
     #coverflowService .svc-title {
-        width: calc(var(--u) * 440);
-        margin: calc(var(--u) * 17) 0 0;
-        font-size: calc(var(--u) * 50.5);
+        width: calc(var(--u) * 760);
+        max-width: 100%;
+        margin: calc(var(--u) * 14) 0 0;
+        font-size: calc(var(--u) * 42);
         font-weight: 500;
-        line-height: calc(var(--u) * 59);
+        line-height: calc(var(--u) * 50);
         letter-spacing: 0;
         color: #000;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     #coverflowService .svc-underline {
         display: block;
         flex-shrink: 0;
-        margin-top: calc(var(--u) * 15);
+        margin-top: calc(var(--u) * 14);
         width: calc(var(--u) * 205);
         height: calc(var(--u) * 4);
         border-radius: calc(var(--u) * 2);
@@ -191,7 +196,7 @@
     }
 
     #coverflowService .svc-items {
-        margin-top: calc(var(--u) * 59);
+        margin-top: calc(var(--u) * 38);
         width: 100%;
         display: flex;
         flex-wrap: wrap;
