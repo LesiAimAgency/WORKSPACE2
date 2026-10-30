@@ -220,10 +220,13 @@ class WidgetRegistry implements WidgetRegistryInterface
             }
         }
 
-        // Add discovered widgets (skip aliases and duplicate classes)
+        // Add discovered widgets (skip aliases, hidden legacy widgets, and duplicate classes)
         $seenClasses = [];
         foreach ($discovered as $type => $widget) {
             if (! empty($widget['is_alias'])) {
+                continue;
+            }
+            if (! empty($widget['metadata']['hidden'])) {
                 continue;
             }
             if (isset($seenClasses[$widget['class']])) {
@@ -285,6 +288,16 @@ class WidgetRegistry implements WidgetRegistryInterface
                 ],
             ];
         }
+
+        foreach ($categories as $category => &$categoryWidgets) {
+            usort($categoryWidgets, static function (array $a, array $b): int {
+                $orderA = (int) ($a['metadata']['sort_order'] ?? 999);
+                $orderB = (int) ($b['metadata']['sort_order'] ?? 999);
+
+                return $orderA <=> $orderB;
+            });
+        }
+        unset($categoryWidgets);
 
         return $categories;
     }

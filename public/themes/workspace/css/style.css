@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 @import url('https://db.onlinewebfonts.com/c/5005dc6e6f51d029cdbfd327415ec8fc?family=Beautique+Display+Condensed');
+@import url('fonts/NVN-Motherland-Signature.ttf');
+
+@font-face {
+  font-family: 'NVN Motherland Signature';
+  src: url('fonts/NVN-Motherland-Signature.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* ==========================================================================
@@ -74,6 +83,12 @@
   --nav-top: clamp(24px, 6vh, 54px);
   --typo-small: 12px;
   --typo-section: clamp(30px, 8vw, 89.8px);
+}
+
+button,
+a {
+
+  text-decoration: none !important;
 }
 
 /* ==========================================================================
@@ -325,6 +340,7 @@ a {
   font-weight: 300;
   line-height: 1;
   letter-spacing: 0;
+  color: var(--color-text);
 }
 
 .fullpage {
@@ -1318,15 +1334,7 @@ body.in-workflow-flow .global-workflow-nav {
   line-height: 1.16;
 }
 
-.expert-visual {
-  position: absolute;
-  top: 8vh;
-  right: clamp(54px, 8vw, 142px);
-  display: grid;
-  width: min(520px, 42vw);
-  height: 92vh;
-  place-items: end center;
-}
+
 
 .expert-visual img {
   display: block;
@@ -1707,15 +1715,18 @@ body.in-workflow-flow .global-workflow-nav {
   min-width: 0;
   min-height: 158px;
   align-self: start;
+
 }
+
 
 .why-statement p {
   margin: 0 0 8px;
   color: #101010;
-  font-family: var(--font-main);
+  font-family: 'NVN Motherland Signature', cursive;
   font-size: 2.25rem;
   font-weight: 400;
   line-height: 0.9;
+
 }
 
 .why-statement strong {
@@ -1756,6 +1767,7 @@ body.in-workflow-flow .global-workflow-nav {
   transition:
     opacity 240ms ease,
     transform 360ms cubic-bezier(0.76, 0, 0.24, 1);
+  font-size: 1rem;
 }
 
 .why-controls {
@@ -1819,7 +1831,7 @@ body.in-workflow-flow .global-workflow-nav {
 
 .why-progress span {
   display: block;
-  width: 30%;
+  width: 25%;
   height: 2px;
   background: #ed1b24;
   transition: width 360ms cubic-bezier(0.76, 0, 0.24, 1);
@@ -2164,7 +2176,7 @@ body.in-workflow-flow .global-workflow-nav {
 
 .menu-backdrop {
   position: relative;
-  width: 100%;
+  width: 30%;
   background: #1f1f1f99;
   opacity: 0;
   height: 100%;
@@ -2191,17 +2203,16 @@ body.in-workflow-flow .global-workflow-nav {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 38px;
+  gap: 36px;
   width: var(--layout-width);
-  /* margin: 0 auto;
-  padding: 9vh 0 0 clamp(24px, 3vw, 34px); */
+
 }
 
 .menu-panel a {
   width: max-content;
   color: #ffffff;
   font-size: 2.36875rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1;
   opacity: 0;
   transform: translateY(22px);
@@ -2363,10 +2374,7 @@ body.in-workflow-flow .global-workflow-nav {
     width: min(390px, 40vw);
   }
 
-  .expert-visual {
-    right: clamp(38px, 6vw, 86px);
-    width: min(470px, 42vw);
-  }
+
 }
 
 @media (max-width: 980px) {
@@ -2657,10 +2665,7 @@ body.in-workflow-flow .global-workflow-nav {
     width: min(390px, 46vw);
   }
 
-  .expert-visual {
-    right: clamp(0px, 4vw, 36px);
-    width: min(430px, 46vw);
-  }
+
 
   .why-layout,
   .connect-layout {
@@ -2974,13 +2979,6 @@ body.in-workflow-flow .global-workflow-nav {
     height: 38px;
   }
 
-  .expert-visual {
-    top: 15vh;
-    right: -32px;
-    width: 58vw;
-    height: 85vh;
-    opacity: 0.92;
-  }
 
   .service-layout {
     display: grid;
@@ -3490,13 +3488,7 @@ body.in-workflow-flow .global-workflow-nav {
     font-size: 0.6875rem;
   }
 
-  .expert-visual {
-    top: 18vh;
-    right: -110px;
-    width: 82vw;
-    height: 80vh;
-    opacity: 0.42;
-  }
+
 }
 
 @media (min-width: 900px) {
@@ -3781,30 +3773,36 @@ body.in-section-flow .global-section-nav {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 100vh;
+  max-height: 100%;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
+  gap: clamp(24px, 3vw, 48px);
+  background: transparent;
   color: #101010;
-  padding: 0 var(--page-gutter, 90px);
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .expert-content-col {
   position: relative;
   z-index: 2;
-  width: min(480px, 45vw);
-  margin-left: clamp(20px, 4vw, 60px);
+  flex: 0 1 460px;
+  width: min(460px, 38%);
+  max-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  justify-content: center;
+  gap: clamp(0.65rem, 1.5vh, 1.15rem);
 }
 
 .expert-header-block .expert-title {
   margin: 0;
   color: #000000;
   font-family: 'Roboto', sans-serif;
-  font-size: 3.1575rem;
+  font-size: clamp(2.25rem, 3.5vw, 3.1575rem);
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: 0;
@@ -3814,7 +3812,7 @@ body.in-section-flow .global-section-nav {
   display: block;
   width: 214px;
   height: 5px;
-  margin: 1rem 0;
+  margin: clamp(0.5rem, 1.2vh, 1rem) 0;
   background: linear-gradient(90deg, #EB2026 0%, rgba(217, 217, 217, 0) 100%);
   border-radius: 2px;
 }
@@ -3825,15 +3823,15 @@ body.in-section-flow .global-section-nav {
   font-family: 'Roboto', sans-serif;
   font-size: 1rem;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
   max-width: 377px;
 }
 
 .expert-skills-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 0.5rem;
+  gap: clamp(0.5rem, 1.2vh, 0.9rem);
+  margin-top: 0.25rem;
   max-width: 360px;
 }
 
@@ -3871,7 +3869,7 @@ body.in-section-flow .global-section-nav {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: clamp(0.35rem, 1vh, 0.85rem);
 }
 
 .expert-btn {
@@ -3881,7 +3879,7 @@ body.in-section-flow .global-section-nav {
   padding: 0.35rem 1.5rem;
   border-radius: 999px;
   font-family: 'Roboto', sans-serif;
-  font-size: 1.333rem;
+  font-size: clamp(1rem, 1.4vw, 1.333rem);
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -3916,7 +3914,7 @@ body.in-section-flow .global-section-nav {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  margin-top: 1.5rem;
+  margin-top: clamp(0.5rem, 1.4vh, 1.25rem);
   max-width: 460px;
 }
 
@@ -3960,18 +3958,30 @@ body.in-section-flow .global-section-nav {
 .expert-visual {
   position: relative;
   z-index: 1;
-  flex: 1;
-  height: 90vh;
+  flex: 0 0 58.33%;
+  width: 58.33%;
+  max-width: 756px;
+  height: min(86.8%, 625px);
+  max-height: 100%;
+  background: #930C10;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
 
 .expert-visual img {
-  max-height: 95%;
+  position: absolute;
+  top: 6.4%;
+  right: 11.64%;
+  height: 125.6%;
   width: auto;
+  max-width: none;
+  max-height: none;
   object-fit: contain;
-  object-position: bottom;
+  object-position: top center;
+  pointer-events: none;
 }
 
 
@@ -3990,7 +4000,7 @@ body.in-section-flow .global-section-nav {
 
 .why-statement p {
   font-size: 2rem;
-  font-family: var(--font-main);
+  /* font-family: var(--font-main); */
 }
 
 .why-statement strong {
@@ -4140,8 +4150,9 @@ body.in-section-flow .global-section-nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  color: #111111;
+
+  background: var(--color-text);
+  color: var(--color-surface);
   font-size: 0.6875rem;
   font-weight: 600;
   padding: 5px 14px;
@@ -4162,6 +4173,7 @@ body.in-section-flow .global-section-nav {
   justify-content: center;
   font-family: 'Roboto';
   box-sizing: border-box;
+  height: 100vh;
 }
 
 .coverflow-surface {
@@ -4182,11 +4194,19 @@ body.in-section-flow .global-section-nav {
 
 /* 1. Top Category Tabs (Chips) */
 .coverflow-chips {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  align-items: center;
+  /* Căn giữa theo chiều dọc nếu cần */
   gap: 16px;
   margin-bottom: 22px;
   width: 100%;
+  height: 50px;
+}
+
+.coverflow-chips>* {
+  flex: 1;
+  /* Chia đều không gian cho đúng 5 phần tử */
+  height: 100%;
 }
 
 .coverflow-chip {
@@ -4246,7 +4266,7 @@ body.in-section-flow .global-section-nav {
   border-radius: 18px;
   padding: 2.6rem 4rem;
   color: #ffffff;
-  box-shadow: 0 14px 35px rgba(133, 13, 17, 0.38);
+
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -4272,26 +4292,27 @@ body.in-section-flow .global-section-nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  color: #111111;
+  background: var(--color-text);
+  color: var(--color-surface);
   font-size: 0.6875rem;
   font-weight: 600;
-  padding: 5px 14px;
   border-radius: 999px;
   text-decoration: none;
   line-height: 1;
   transition: background-color 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
-  margin-top: 4px;
+  font-size: var(--h6);
+  padding: 4px 16px;
 }
 
 .view-more-btn:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-text);
+  color: var(--color-surface);
   transform: translateY(-1px);
 }
 
 .badge-title {
-  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+
   font-weight: 700;
   line-height: 100%;
   color: #ffffff;
@@ -4307,20 +4328,21 @@ body.in-section-flow .global-section-nav {
   max-width: 100%;
   width: 100%;
   transform: translateY(50%);
+  z-index: 99;
 }
 
 /* Phần Mô tả */
 .coverflow-footer {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-end;
   box-sizing: border-box;
   gap: 30px;
-
-
   box-sizing: border-box;
 
 }
+
+
 
 .coverflow-desc {
   flex: 1;
@@ -5262,6 +5284,8 @@ body.is-scrolled-past-home .pdf-profile-link {
   max-height: 100%;
   background: transparent !important;
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 .fullpage>.panel-home {
@@ -5270,6 +5294,10 @@ body.is-scrolled-past-home .pdf-profile-link {
 
 .fullpage>.panel-core {
   background: #ffffff;
+}
+
+.fullpage>.panel-expert {
+  background: #F2F2F7;
 }
 
 .fullpage>.panel-why,
@@ -5364,12 +5392,16 @@ body.is-scrolled-past-home .pdf-profile-link {
     overflow: visible;
     border-radius: 0;
     max-height: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .fullpage .coverflow-media {
     height: 100%;
     max-height: none;
     aspect-ratio: auto;
+    /* width: 0%; */
   }
 
   .fullpage .coverflow-footer {
@@ -5478,5 +5510,24 @@ body.is-scrolled-past-home .pdf-profile-link {
     height: 100%;
     max-height: 100%;
     transform: none;
+  }
+
+  .expert-surface {
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .expert-content-col {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .expert-visual {
+    flex: 1 1 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
   }
 }

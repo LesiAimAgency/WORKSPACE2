@@ -11,13 +11,14 @@ class WhyWidget extends BaseWidget
     public static function getConfig(): array
     {
         return [
-            'name' => 'Lý Do Chọn Chúng Tôi (Workspace Why Us & Connect)',
-            'description' => 'Section lý do chọn Workspace với slider 4 tiêu chuẩn (Quality, Progress, Cost, Solving) kết hợp form đăng ký tư vấn và logo đối tác',
+            'name' => 'Lý Do Chọn Chúng Tôi (Workspace Why Choose Us)',
+            'description' => 'Section lý do chọn Workspace với slider 4 tiêu chuẩn (Quality, Progress, Cost Effective, Problem-Solving) và thanh trượt logo đối tác',
             'category' => 'Workspace',
             'version' => '1.0.0',
             'author' => 'Workspace',
             'icon' => 'star',
             'group' => 'workspace_why',
+            'sort_order' => 6,
             'fields' => [
                 [
                     'name' => 'heading1',
@@ -59,47 +60,6 @@ class WhyWidget extends BaseWidget
                         [
                             'name' => 'bullet_3',
                             'label' => 'Ý cam kết 3',
-                            'type' => 'text',
-                        ],
-                    ],
-                ],
-                [
-                    'name' => 'connect_heading1',
-                    'label' => 'Tiêu đề kết nối dòng 1',
-                    'type' => 'text',
-                    'default' => 'CONNECT',
-                ],
-                [
-                    'name' => 'connect_heading2',
-                    'label' => 'Tiêu đề kết nối dòng 2',
-                    'type' => 'text',
-                    'default' => 'WORKSPACE',
-                ],
-                [
-                    'name' => 'button_text',
-                    'label' => 'Chữ nút gửi liên hệ',
-                    'type' => 'text',
-                    'default' => 'CONNECT WITH US',
-                ],
-                [
-                    'name' => 'partners_heading',
-                    'label' => 'Tiêu đề khối đối tác',
-                    'type' => 'text',
-                    'default' => 'OUR CUSTOMERS - PARTNERS',
-                ],
-                [
-                    'name' => 'partners',
-                    'label' => 'Danh sách Logo đối tác / Khách hàng',
-                    'type' => 'repeatable',
-                    'fields' => [
-                        [
-                            'name' => 'image',
-                            'label' => 'Hình ảnh Logo',
-                            'type' => 'image',
-                        ],
-                        [
-                            'name' => 'alt',
-                            'label' => 'Tên đối tác',
                             'type' => 'text',
                         ],
                     ],

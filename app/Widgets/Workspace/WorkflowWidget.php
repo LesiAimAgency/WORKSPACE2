@@ -18,6 +18,7 @@ class WorkflowWidget extends BaseWidget
             'author' => 'Workspace',
             'icon' => 'arrow-path',
             'group' => 'workspace_workflow',
+            'hidden' => true,
             'fields' => [
                 [
                     'name' => 'section_id',

@@ -245,6 +245,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('settings/test-email', [SettingsController::class, 'testEmail'])->name('settings.test-email');
     Route::get('settings/social', [SettingsController::class, 'social'])->name('settings.social');
     Route::post('settings/social', [SettingsController::class, 'save'])->name('settings.social.save');
+    Route::get('settings/partners', [SettingsController::class, 'partners'])->name('settings.partners');
+    Route::post('settings/partners', [SettingsController::class, 'save'])->name('settings.partners.save');
     Route::get('settings/{group}', [SettingsController::class, 'group'])->name('settings.group');
     Route::match(['put', 'post'], 'settings/{group}', [SettingsController::class, 'updateGroup'])->name('settings.group.update');
 

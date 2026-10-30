@@ -414,7 +414,7 @@ window.formatMediaUrl = function(url) {
 };
 
 // Global Repeatable Field Functions (for widget field rendering)
-function addRepeatableItem(fieldId, fieldName) {
+function addRepeatableItem(fieldId, fieldName, placeholder) {
     const container = document.getElementById(fieldId + '_container');
     if (!container) {
         console.error('Container not found:', fieldId + '_container');
@@ -423,7 +423,7 @@ function addRepeatableItem(fieldId, fieldName) {
     
     const maxItemsAttr = container.parentElement?.dataset?.maxItems;
     const maxItems = (maxItemsAttr !== undefined && maxItemsAttr !== '' && maxItemsAttr !== null) ? parseInt(maxItemsAttr, 10) : 0;
-    const currentItems = container.children.length;
+    const currentItems = Array.from(container.children).filter(el => el.classList.contains('repeatable-item')).length;
 
     if (maxItems > 0 && currentItems >= maxItems) {
         alert('Tối đa ' + maxItems + ' mục');
@@ -438,7 +438,8 @@ function addRepeatableItem(fieldId, fieldName) {
     }
     
     const index = currentItems;
-    let itemHtml = template.replace(/__INDEX__/g, index);
+    const placeholderToken = placeholder || container.dataset.placeholder || '__INDEX__';
+    let itemHtml = template.split(placeholderToken).join(index).replace(/__INDEX__/g, index).replace(new RegExp('Mục ' + index + '\\b'), 'Mục ' + (index + 1));
     // Fix the display text
     itemHtml = itemHtml.replace(/Mục __INDEX__/g, 'Mục ' + (index + 1));
     
@@ -481,7 +482,7 @@ function addRepeatableItem(fieldId, fieldName) {
     }
     
     // Re-index all items & re-init sortable
-    reindexRepeatableItems(container, fieldName);
+    reindexRepeatableItems(container, fieldName || container.dataset.fieldName);
     initRepeatableSortable(container.parentElement);
 }
 
@@ -495,7 +496,8 @@ function removeRepeatableItem(button) {
     }
     
     const minItems = parseInt(container.dataset?.minItems || 0);
-    const currentItems = container.querySelectorAll('.repeatable-item').length;
+    const itemsContainer = container.querySelector(':scope > [id$="_container"]') || container.querySelector('[id$="_container"]');
+    const currentItems = itemsContainer ? Array.from(itemsContainer.children).filter(el => el.classList.contains('repeatable-item')).length : container.querySelectorAll('.repeatable-item').length;
 
     if (currentItems <= minItems) {
         alert('Tối thiểu ' + minItems + ' mục');
@@ -504,13 +506,13 @@ function removeRepeatableItem(button) {
 
     // Get field name from container's data or first input
     const firstInput = container.querySelector('input[name], select[name], textarea[name]');
-    let fieldName = '';
-    if (firstInput) {
+    let fieldName = itemsContainer?.dataset?.fieldName || '';
+    if (!fieldName && firstInput) {
         const match = firstInput.name.match(/^([^\[]+)/);
         if (match) fieldName = match[1];
     }
 
-    const itemsContainer = container.querySelector('[id$="_container"]');
+
     item.remove();
     
     // Re-index remaining items & re-init sortable
@@ -523,9 +525,10 @@ function removeRepeatableItem(button) {
 function reindexRepeatableItems(container, fieldName) {
     if (!container) return;
 
+    if (!fieldName) { fieldName = container.dataset?.fieldName || ''; }
     if (!fieldName) {
         const firstInput = container.querySelector('input[name], select[name], textarea[name]');
-        if (firstInput) {
+        if (!fieldName && firstInput) {
             const match = firstInput.name.match(/^([^\[]+)/);
             if (match) fieldName = match[1];
         }
@@ -548,18 +551,39 @@ function reindexRepeatableItems(container, fieldName) {
         }
 
         if (fieldName) {
+            const escapedFieldName = fieldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const safeFieldId = 'field_' + fieldName.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const escapedFieldId = safeFieldId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const nameRegex = new RegExp(`^${escapedFieldName}\\[[^\\]]+\\]`);
+            const idRegex = new RegExp(`^${escapedFieldId}_[^_]+_`);
+            item.querySelectorAll('[data-field-name]').forEach(nestedContainer => {
+                const nestedName = nestedContainer.dataset.fieldName || '';
+                if (nameRegex.test(nestedName)) {
+                    const updatedNestedName = nestedName.replace(nameRegex, `${fieldName}[${index}]`);
+                    const updatedNestedId = 'field_' + updatedNestedName.replace(/[^a-zA-Z0-9_-]/g, '_');
+                    nestedContainer.dataset.fieldName = updatedNestedName;
+                    nestedContainer.id = updatedNestedId + '_container';
+                    const addBtn = nestedContainer.parentElement?.querySelector(':scope > button[onclick*="addRepeatableItem"]');
+                    if (addBtn) {
+                        const ph = nestedContainer.dataset.placeholder || '__INDEX__';
+                        addBtn.setAttribute('onclick', `addRepeatableItem('${updatedNestedId}', '${updatedNestedName}', '${ph}')`);
+                    }
+                }
+            });
             // Update all input, select, textarea names and IDs
             const formElements = item.querySelectorAll('input, select, textarea');
             formElements.forEach(input => {
                 if (input.name) {
-                    const regex = new RegExp(`^${fieldName}\\[[^\\]]+\\]`);
+                    const regex = new RegExp(`^${escapedFieldName}\\[[^\\]]+\\]`);
                     if (regex.test(input.name)) {
                         input.name = input.name.replace(regex, `${fieldName}[${index}]`);
                     }
                 }
                 if (input.id) {
-                    const regexId = new RegExp(`^field_${fieldName}\\[[^\\]]+\\]`);
-                    if (regexId.test(input.id)) {
+                    const regexId = new RegExp(`^field_${escapedFieldName}\\[[^\\]]+\\]`);
+                    if (idRegex.test(input.id)) {
+                        input.id = input.id.replace(idRegex, `${safeFieldId}_${index}_`);
+                    } else if (regexId.test(input.id)) {
                         input.id = input.id.replace(regexId, `field_${fieldName}[${index}]`);
                     }
                 }
@@ -571,7 +595,7 @@ function reindexRepeatableItems(container, fieldName) {
                     if (window.Alpine) {
                         const data = window.Alpine.$data(el);
                         if (data && data.fieldName) {
-                            const regex = new RegExp(`^${fieldName}\\[[^\\]]+\\]`);
+                            const regex = new RegExp(`^${escapedFieldName}\\[[^\\]]+\\]`);
                             if (regex.test(data.fieldName)) {
                                 data.fieldName = data.fieldName.replace(regex, `${fieldName}[${index}]`);
                             }
@@ -607,13 +631,13 @@ function initRepeatableSortable(scope) {
                 if (evt.oldIndex === evt.newIndex) return;
 
                 const firstInput = container.querySelector('input[name], select[name], textarea[name]');
-                let fieldName = '';
-                if (firstInput) {
+                let fieldName = itemsContainer?.dataset?.fieldName || '';
+                if (!fieldName && firstInput) {
                     const match = firstInput.name.match(/^([^\[]+)/);
                     if (match) fieldName = match[1];
                 }
 
-                reindexRepeatableItems(container, fieldName);
+                reindexRepeatableItems(container, fieldName || container.dataset.fieldName);
                 container.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });

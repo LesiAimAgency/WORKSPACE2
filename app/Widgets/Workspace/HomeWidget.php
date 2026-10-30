@@ -18,6 +18,7 @@ class HomeWidget extends BaseWidget
             'author' => 'Workspace',
             'icon' => 'home',
             'group' => 'workspace_home',
+            'sort_order' => 1,
             'fields' => [
                 [
                     'name' => 'logo',

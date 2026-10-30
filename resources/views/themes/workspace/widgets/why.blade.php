@@ -1,5 +1,8 @@
 @php
-  $settings = $settings ?? [];
+  if (empty($settings)) {
+      $dbWidget = \App\Models\Widget::withoutGlobalScopes()->where('type', 'workspace_why')->orderByDesc('is_active')->orderByDesc('id')->first();
+      $settings = $dbWidget && is_array($dbWidget->settings) ? $dbWidget->settings : [];
+  }
   $heading1 = $settings['heading1'] ?? 'WHY CHOOSING';
   $heading2 = $settings['heading2'] ?? 'WORKSPACE';
 
@@ -50,6 +53,7 @@
   }
   $firstReason = $reasons->first();
   $whySlides = $reasons->map(fn($r) => [
+      'prefix' => $r['prefix'] ?? 'Because of the',
       'title' => $r['title'] ?? '',
       'bullets' => collect([$r['bullet_1'] ?? null, $r['bullet_2'] ?? null, $r['bullet_3'] ?? null])
           ->filter()
@@ -58,15 +62,25 @@
   ])->values();
   $firstBullets = $whySlides->first()['bullets'] ?? [];
 
-  $partnersHeading = $settings['partners_heading'] ?? 'OUR CUSTOMERS - PARTNERS';
+  $partnersHeading = setting('partners_heading') ?: 'OUR CUSTOMERS - PARTNERS';
   $defaultPartners = [
-      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 1'],
-      ['image' => asset('themes/workspace/assets/parnert2.png'), 'alt' => 'Strategic Partner 2'],
-      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 3'],
-      ['image' => asset('themes/workspace/assets/parnert2.png'), 'alt' => 'Strategic Partner 4'],
-      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 5'],
+      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 1', 'link' => ''],
+      ['image' => asset('themes/workspace/assets/parnert2.png'), 'alt' => 'Strategic Partner 2', 'link' => ''],
+      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 3', 'link' => ''],
+      ['image' => asset('themes/workspace/assets/parnert2.png'), 'alt' => 'Strategic Partner 4', 'link' => ''],
+      ['image' => asset('themes/workspace/assets/parnert1.png'), 'alt' => 'Strategic Partner 5', 'link' => ''],
   ];
-  $partners = !empty($settings['partners']) && is_array($settings['partners']) && count($settings['partners']) > 0
+
+  $rawSettingPartners = setting('partners_items', setting('partners'));
+  if (is_string($rawSettingPartners)) {
+      $rawSettingPartners = json_decode($rawSettingPartners, true) ?: [];
+  }
+
+  $activePartners = is_array($rawSettingPartners)
+      ? array_values(array_filter($rawSettingPartners, fn ($p) => is_array($p) && ($p['is_active'] ?? true) !== false))
+      : [];
+
+  $partners = count($activePartners) > 0
       ? array_map(function ($p) {
           $img = $p['image'] ?? '';
           if (!empty($img) && !Str::startsWith($img, ['http://', 'https://', '/'])) {
@@ -75,9 +89,18 @@
           return [
               'image' => !empty($img) ? $img : asset('themes/workspace/assets/parnert1.png'),
               'alt' => $p['alt'] ?? 'Partner',
+              'link' => $p['link'] ?? '',
           ];
-      }, $settings['partners'])
+      }, $activePartners)
       : $defaultPartners;
+
+  if (count($partners) > 0 && count($partners) < 5) {
+      $originalCount = count($partners);
+      $needed = 5 - $originalCount;
+      for ($i = 0; $i < $needed; $i++) {
+          $partners[] = $partners[$i % $originalCount];
+      }
+  }
 @endphp
 
 <section class="panel panel-why" id="why-workspace" data-ui="light" aria-label="Why choosing Workspace">
@@ -108,7 +131,7 @@
         </div>
 
         <div class="why-progress" aria-hidden="true">
-          <span></span>
+          <span style="width: {{ $whySlides->count() > 0 ? (100 / $whySlides->count()) : 25 }}%;"></span>
         </div>
       </div>
 
@@ -120,7 +143,13 @@
             <div class="partner-track">
               @foreach($partners as $partner)
                 <article class="partner-card">
-                  <img src="{{ $partner['image'] }}" alt="{{ $partner['alt'] }}" />
+                  @if(!empty($partner['link']))
+                    <a href="{{ $partner['link'] }}" target="_blank" rel="noopener noreferrer">
+                      <img src="{{ $partner['image'] }}" alt="{{ $partner['alt'] }}" />
+                    </a>
+                  @else
+                    <img src="{{ $partner['image'] }}" alt="{{ $partner['alt'] }}" />
+                  @endif
                 </article>
               @endforeach
             </div>
@@ -131,4 +160,3 @@
   </div>
 </section>
 <script type="application/json" id="workspace-why-slides">@json($whySlides)</script>
-@include('themes.workspace.widgets.connect', ['settings' => $settings])

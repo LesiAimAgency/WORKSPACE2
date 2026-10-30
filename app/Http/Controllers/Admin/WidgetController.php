@@ -63,6 +63,9 @@ class WidgetController extends Controller
                 $currentProject = Project::find(session('current_project_id'));
             }
         }
+        if (! $currentProject) {
+            $currentProject = Project::where('code', 'daiphuc68')->first() ?? Project::first();
+        }
 
         $projId = $currentProject?->id;
         $tenantId = $currentProject?->tenant_id ?? session('current_tenant_id') ?? $projId;
@@ -249,6 +252,9 @@ class WidgetController extends Controller
                 $currentProject = Project::find(session('current_project_id'));
             }
         }
+        if (! $currentProject) {
+            $currentProject = Project::where('code', 'daiphuc68')->first() ?? Project::first();
+        }
 
         $projId = $currentProject?->id;
         $tenantId = $currentProject?->tenant_id ?? session('current_tenant_id') ?? $projId;
@@ -385,6 +391,9 @@ class WidgetController extends Controller
                     $currentProject = Project::find(session('current_project_id'));
                 }
             }
+            if (! $currentProject) {
+                $currentProject = Project::where('code', 'daiphuc68')->first() ?? Project::first();
+            }
 
             $projId = $currentProject?->id;
             $tenantId = $currentProject?->tenant_id ?? $projId;
@@ -519,6 +528,9 @@ class WidgetController extends Controller
             } elseif (session('current_project_id')) {
                 $currentProject = Project::find(session('current_project_id'));
             }
+        }
+        if (! $currentProject) {
+            $currentProject = Project::where('code', 'daiphuc68')->first() ?? Project::first();
         }
 
         $projId = $currentProject?->id;

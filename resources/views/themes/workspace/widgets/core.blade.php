@@ -1,5 +1,8 @@
 @php
-  $settings = $settings ?? [];
+  if (empty($settings)) {
+      $dbWidget = \App\Models\Widget::withoutGlobalScopes()->where('type', 'workspace_core')->orderByDesc('is_active')->orderByDesc('id')->first();
+      $settings = $dbWidget && is_array($dbWidget->settings) ? $dbWidget->settings : [];
+  }
   $subHeading = $settings['sub_heading'] ?? 'WORKSPACE';
   $heading = $settings['heading'] ?? 'CORE VALUES';
   $description = $settings['description'] ?? 'This combination of core values is flexibly applied by us at each stage of the company, in personnel training, dealing with partners & serving customers!';

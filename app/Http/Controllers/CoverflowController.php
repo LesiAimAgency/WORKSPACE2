@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Models\Widget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 
 class CoverflowController extends Controller
 {
@@ -20,6 +19,8 @@ class CoverflowController extends Controller
             [
                 'number' => '01',
                 'title' => 'Interior Advisory and Project Setup',
+                'chip_line_1' => 'Interior Advisory',
+                'chip_line_2' => 'and Project Setup',
                 'slug' => 'interior-advisory-and-project-setup',
                 'desc' => 'Providing comprehensive strategic solutions aimed at orienting design concepts, optimizing budget, allocating implementation personnel, and establishing operational standards for interior projects.',
                 'image' => 'themes/workspace/coverflow/frame1.png',
@@ -72,6 +73,8 @@ class CoverflowController extends Controller
             [
                 'number' => '02',
                 'title' => 'Interior Design and FF&E Consultancy',
+                'chip_line_1' => 'Interior Design and',
+                'chip_line_2' => 'FF&E Consultancy',
                 'slug' => 'interior-design-and-ffe-consultancy',
                 'desc' => 'Creating bespoke interior design concepts, ergonomic space planning, and curated FF&E selection tailored to brand identity and user well-being.',
                 'image' => 'themes/workspace/build2.png',
@@ -113,6 +116,8 @@ class CoverflowController extends Controller
             [
                 'number' => '03',
                 'title' => 'Fit-Out and Finishing Works',
+                'chip_line_1' => 'Fit-Out and',
+                'chip_line_2' => 'Finishing Works',
                 'slug' => 'fit-out-and-finishing-works',
                 'desc' => 'Turnkey fit-out construction, advanced MEP engineering, and rigorous site management delivering projects on schedule with zero tolerance for defects.',
                 'image' => 'themes/workspace/build3.png',
@@ -143,6 +148,8 @@ class CoverflowController extends Controller
             [
                 'number' => '04',
                 'title' => 'Joinery Manufacturer and FF&E Installation',
+                'chip_line_1' => 'Joinery Manufacturer and',
+                'chip_line_2' => 'FF&E Installation',
                 'slug' => 'joinery-manufacturer-and-ffe-installation',
                 'desc' => 'State-of-the-art joinery manufacturing and seamless on-site installation of custom cabinetry, acoustic panels, and premium loose furniture.',
                 'image' => 'themes/workspace/assets/build2.png',
@@ -173,6 +180,8 @@ class CoverflowController extends Controller
             [
                 'number' => '05',
                 'title' => 'Material Library and Competency Management',
+                'chip_line_1' => 'Material Library and',
+                'chip_line_2' => 'Competency Management',
                 'slug' => 'material-library-and-competency-management',
                 'desc' => 'Curated library of over 100+ sustainable, certified construction materials tested for acoustic, fire safety, and aesthetic standards.',
                 'image' => 'themes/workspace/assets/maintain-crop.png',
@@ -204,50 +213,196 @@ class CoverflowController extends Controller
     }
 
     /**
-     * Resolve and normalize services from widget settings or fallback.
+     * Resolve Coverflow overview widget settings from DB or override.
      */
-    public static function getServicesData(): array
+    public static function getCoverflowSettings(?array $overrideSettings = null): array
     {
-        $widget = Widget::where('id', 18)->orWhere('type', 'workspace_service')->first();
-        $settings = $widget ? ($widget->settings ?? []) : [];
-        $rawServices = $settings['services'] ?? [];
+        $widget = Widget::withoutGlobalScopes()
+            ->where('type', 'workspace_service')
+            ->orderByDesc('is_active')
+            ->orderByDesc('id')
+            ->first();
+
+        $dbSettings = $widget && is_array($widget->settings) ? $widget->settings : [];
+
+        return array_merge([
+            'view_more_text' => 'View more',
+        ], $dbSettings, is_array($overrideSettings) ? $overrideSettings : []);
+    }
+
+    /**
+     * Resolve Service Detail & Projects widget settings from DB or override.
+     */
+    public static function getServiceDetailSettings(?array $overrideSettings = null): array
+    {
+        $widget = Widget::withoutGlobalScopes()
+            ->where('type', 'workspace_coverflow_service')
+            ->orderByDesc('is_active')
+            ->orderByDesc('id')
+            ->first();
+
+        $dbSettings = $widget && is_array($widget->settings) ? $widget->settings : [];
+
+        return array_merge([
+            'pill_text' => 'Services',
+            'tab_intro_text' => 'Introductions',
+            'tab_project_text' => 'Projects',
+            'back_text' => 'Back to Services',
+            'compare_button_text' => 'Comparison Design and Result',
+            'label_area' => 'Total Area',
+            'label_location' => 'Location',
+            'label_typology' => 'Typology',
+            'label_style' => 'Style',
+            'label_tech' => 'Tech Solution',
+        ], $dbSettings, is_array($overrideSettings) ? $overrideSettings : []);
+    }
+
+    /**
+     * Resolve and normalize services from widget settings in DB or fallback.
+     */
+    public static function getServicesData(?array $overrideSettings = null): array
+    {
+        $serviceWidget = Widget::withoutGlobalScopes()
+            ->where('type', 'workspace_service')
+            ->orderByDesc('is_active')
+            ->orderByDesc('id')
+            ->first();
+
+        $detailWidget = Widget::withoutGlobalScopes()
+            ->where('type', 'workspace_coverflow_service')
+            ->orderByDesc('is_active')
+            ->orderByDesc('id')
+            ->first();
+
+        $overviewServices = ($serviceWidget && ! empty($serviceWidget->settings['services']) && is_array($serviceWidget->settings['services']))
+            ? array_values($serviceWidget->settings['services'])
+            : [];
+
+        $detailServices = ($detailWidget && ! empty($detailWidget->settings['services']) && is_array($detailWidget->settings['services']))
+            ? array_values($detailWidget->settings['services'])
+            : [];
+
+        if (! empty($overrideSettings['services']) && is_array($overrideSettings['services'])) {
+            $overrideList = array_values($overrideSettings['services']);
+            // Check if override comes from CoverflowServiceWidget (has intro_items or projects) or ServiceWidget
+            $firstOverride = $overrideList[0] ?? [];
+            if (isset($firstOverride['intro_items']) || isset($firstOverride['projects'])) {
+                $detailServices = $overrideList;
+            } else {
+                $overviewServices = $overrideList;
+            }
+        }
 
         $defaults = self::getDefaultServices();
 
-        if (empty($rawServices) || ! is_array($rawServices)) {
+        if (empty($overviewServices) && empty($detailServices)) {
             return $defaults;
         }
 
+        // Index detail services by slug and by position for seamless merging
+        $detailBySlug = [];
+        foreach ($detailServices as $dIdx => $dService) {
+            if (! is_array($dService)) {
+                continue;
+            }
+            $dSlug = ! empty($dService['slug'])
+                ? Str::slug((string) $dService['slug'])
+                : (! empty($dService['title']) ? Str::slug((string) $dService['title']) : '');
+            if ($dSlug !== '') {
+                $detailBySlug[$dSlug] = $dService;
+            }
+        }
+
+        $baseList = ! empty($overviewServices) ? $overviewServices : $detailServices;
         $normalized = [];
-        foreach ($rawServices as $idx => $s) {
-            $num = $s['number'] ?? sprintf('%02d', $idx + 1);
-            $title = $s['title'] ?? ($defaults[$idx]['title'] ?? 'Service ' . $num);
-            $slug = ! empty($s['slug']) ? Str::slug($s['slug']) : Str::slug($title);
-            $desc = $s['desc'] ?? ($defaults[$idx]['desc'] ?? '');
-            $image = ! empty($s['image']) ? $s['image'] : ($defaults[$idx]['image'] ?? 'themes/workspace/coverflow/frame1.png');
 
-            $introItems = ! empty($s['intro_items']) && is_array($s['intro_items'])
-                ? $s['intro_items']
-                : ($defaults[$idx]['intro_items'] ?? [
+        foreach ($baseList as $idx => $s) {
+            if (! is_array($s)) {
+                continue;
+            }
+            $def = $defaults[$idx] ?? $defaults[0];
+            $num = ! empty($s['number']) ? (string) $s['number'] : sprintf('%02d', $idx + 1);
+            $title = ! empty($s['title']) ? (string) $s['title'] : ($def['title'] ?? 'Service '.$num);
+            $slug = ! empty($s['slug']) ? Str::slug((string) $s['slug']) : Str::slug($title);
+
+            $detailMatch = $detailBySlug[$slug] ?? ($detailServices[$idx] ?? []);
+            if (! is_array($detailMatch)) {
+                $detailMatch = [];
+            }
+
+            $desc = ! empty($s['desc'])
+                ? strip_tags((string) $s['desc'])
+                : (! empty($detailMatch['desc']) ? strip_tags((string) $detailMatch['desc']) : ($def['desc'] ?? ''));
+
+            $image = ! empty($s['image'])
+                ? (string) $s['image']
+                : (! empty($detailMatch['image']) ? (string) $detailMatch['image'] : ($def['image'] ?? 'themes/workspace/coverflow/frame1.png'));
+
+            $detailImage = ! empty($detailMatch['image'])
+                ? (string) $detailMatch['image']
+                : $image;
+
+            $chipLine1 = ! empty($s['chip_line_1']) ? (string) $s['chip_line_1'] : ($def['chip_line_1'] ?? '');
+            $chipLine2 = ! empty($s['chip_line_2']) ? (string) $s['chip_line_2'] : ($def['chip_line_2'] ?? '');
+
+            $rawIntros = ! empty($detailMatch['intro_items']) && is_array($detailMatch['intro_items'])
+                ? $detailMatch['intro_items']
+                : (! empty($s['intro_items']) && is_array($s['intro_items']) ? $s['intro_items'] : ($def['intro_items'] ?? []));
+
+            $introItems = [];
+            foreach ($rawIntros as $intro) {
+                if (! is_array($intro)) {
+                    continue;
+                }
+                $introItems[] = [
+                    'title' => (string) ($intro['title'] ?? $title),
+                    'desc' => strip_tags((string) ($intro['desc'] ?? $desc)),
+                ];
+            }
+            if (empty($introItems)) {
+                $introItems = [
                     ['title' => $title, 'desc' => $desc],
-                ]);
+                ];
+            }
 
-            $projects = ! empty($s['projects']) && is_array($s['projects'])
-                ? $s['projects']
-                : ($defaults[$idx]['projects'] ?? $defaults[0]['projects']);
+            $rawProjects = ! empty($detailMatch['projects']) && is_array($detailMatch['projects'])
+                ? $detailMatch['projects']
+                : (! empty($s['projects']) && is_array($s['projects']) ? $s['projects'] : ($def['projects'] ?? $defaults[0]['projects']));
+
+            $projects = [];
+            foreach ($rawProjects as $pIdx => $proj) {
+                if (! is_array($proj)) {
+                    continue;
+                }
+                $defProj = $def['projects'][$pIdx] ?? ($def['projects'][0] ?? $defaults[0]['projects'][0]);
+                $projects[] = [
+                    'title' => (string) ($proj['title'] ?? $defProj['title'] ?? 'PROJECT '.sprintf('%02d', $pIdx + 1)),
+                    'area' => (string) ($proj['area'] ?? $defProj['area'] ?? ''),
+                    'location' => (string) ($proj['location'] ?? $defProj['location'] ?? ''),
+                    'typology' => (string) ($proj['typology'] ?? $defProj['typology'] ?? ''),
+                    'style' => (string) ($proj['style'] ?? $defProj['style'] ?? ''),
+                    'tech' => (string) ($proj['tech'] ?? $defProj['tech'] ?? ''),
+                    'cover_image' => ! empty($proj['cover_image']) ? (string) $proj['cover_image'] : ($defProj['cover_image'] ?? $image),
+                    'design_image' => ! empty($proj['design_image']) ? (string) $proj['design_image'] : ($defProj['design_image'] ?? $image),
+                    'result_image' => ! empty($proj['result_image']) ? (string) $proj['result_image'] : ($defProj['result_image'] ?? $image),
+                ];
+            }
 
             $normalized[] = [
                 'number' => $num,
                 'title' => $title,
+                'chip_line_1' => $chipLine1,
+                'chip_line_2' => $chipLine2,
                 'slug' => $slug,
                 'desc' => $desc,
                 'image' => $image,
+                'detail_image' => $detailImage,
                 'intro_items' => $introItems,
                 'projects' => $projects,
             ];
         }
 
-        return $normalized;
+        return ! empty($normalized) ? $normalized : $defaults;
     }
 
     /**
@@ -257,6 +412,7 @@ class CoverflowController extends Controller
     {
         if ($request->ajax() || $request->query('embed')) {
             $services = self::getServicesData();
+            $settings = self::getCoverflowSettings();
             $activeSlug = $request->query('service') ?: ($services[0]['slug'] ?? '');
             $activeServiceIndex = 0;
             foreach ($services as $idx => $s) {
@@ -266,13 +422,15 @@ class CoverflowController extends Controller
                 }
             }
             $activeService = $services[$activeServiceIndex] ?? $services[0];
-            return view('themes.workspace.widgets.coverflow', compact('services', 'activeService', 'activeServiceIndex'));
+
+            return view('themes.workspace.widgets.coverflow', compact('services', 'settings', 'activeService', 'activeServiceIndex'));
         }
 
         $slug = $request->query('service');
         if ($slug) {
             session(['active_service_slug' => $slug]);
         }
+
         return redirect()->to(url('/#coverflow'));
     }
 
@@ -284,6 +442,7 @@ class CoverflowController extends Controller
         $targetSlug = $slug ?: $request->query('service');
         if ($request->ajax() || $request->query('embed')) {
             $services = self::getServicesData();
+            $settings = self::getServiceDetailSettings();
             $activeService = null;
             foreach ($services as $s) {
                 if ($s['slug'] === $targetSlug) {
@@ -292,8 +451,10 @@ class CoverflowController extends Controller
                 }
             }
             $activeService = $activeService ?? ($services[0] ?? []);
+
             return view('themes.workspace.widgets.coverflow_service', [
                 'services' => $services,
+                'settings' => $settings,
                 'activeService' => $activeService,
                 'slug' => $activeService['slug'] ?? '',
             ]);
@@ -302,6 +463,7 @@ class CoverflowController extends Controller
         if ($targetSlug) {
             session(['active_service_slug' => $targetSlug]);
         }
+
         return redirect()->to(url('/#coverflowService'));
     }
 
@@ -313,6 +475,7 @@ class CoverflowController extends Controller
         $targetSlug = $slug ?: $request->query('service');
         if ($request->ajax() || $request->query('embed')) {
             $services = self::getServicesData();
+            $settings = self::getServiceDetailSettings();
             $activeService = null;
             foreach ($services as $s) {
                 if ($s['slug'] === $targetSlug) {
@@ -322,8 +485,10 @@ class CoverflowController extends Controller
             }
             $activeService = $activeService ?? ($services[0] ?? []);
             $projects = $activeService['projects'] ?? [];
+
             return view('themes.workspace.widgets.coverflow_project', [
                 'services' => $services,
+                'settings' => $settings,
                 'activeService' => $activeService,
                 'projects' => $projects,
                 'slug' => $activeService['slug'] ?? '',
@@ -333,6 +498,7 @@ class CoverflowController extends Controller
         if ($targetSlug) {
             session(['active_service_slug' => $targetSlug]);
         }
+
         return redirect()->to(url('/#coverflowProject'));
     }
 }

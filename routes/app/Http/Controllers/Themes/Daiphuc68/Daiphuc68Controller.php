@@ -889,11 +889,11 @@ class Daiphuc68Controller extends Controller
             'service' => 'nullable|string|max:150',
             'message' => 'nullable|string|max:3000',
         ], [
-            'fullname.required' => 'Vui lòng nhập họ và tên của bạn.',
-            'fullname.min' => 'Họ và tên phải có ít nhất 2 ký tự.',
-            'phone.required' => 'Vui lòng nhập số điện thoại liên hệ.',
-            'phone.min' => 'Số điện thoại không hợp lệ.',
-            'email.email' => 'Địa chỉ email không đúng định dạng.',
+            'fullname.required' => 'Please enter your full name.',
+            'fullname.min' => 'Your full name must be at least 2 characters.',
+            'phone.required' => 'Please enter your contact phone number.',
+            'phone.min' => 'The phone number is invalid.',
+            'email.email' => 'Please enter a valid email address.',
         ]);
 
         if ($validator->fails()) {

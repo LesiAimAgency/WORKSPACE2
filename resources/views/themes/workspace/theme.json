@@ -8,11 +8,9 @@
     "workspace_home",
     "workspace_core",
     "workspace_service",
-    "workspace_workflow",
-    "workspace_project",
+    "workspace_coverflow_service",
     "workspace_expert",
     "workspace_why",
-    "workspace_connect",
-    "workspace_service_group"
+    "workspace_connect"
   ]
 }

@@ -1,5 +1,8 @@
 @php
-  $settings = $settings ?? [];
+  if (empty($settings)) {
+      $dbWidget = \App\Models\Widget::withoutGlobalScopes()->where('type', 'workspace_home')->orderByDesc('is_active')->orderByDesc('id')->first();
+      $settings = $dbWidget && is_array($dbWidget->settings) ? $dbWidget->settings : [];
+  }
   $logo = !empty($settings['logo']) 
       ? (Str::startsWith($settings['logo'], ['http://', 'https://', '/']) ? $settings['logo'] : asset($settings['logo'])) 
       : asset('themes/workspace/assets/logo.png');

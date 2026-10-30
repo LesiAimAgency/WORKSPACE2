@@ -41,6 +41,9 @@ class TextareaField extends BaseFieldType
                 $cleanName = preg_replace('/[^a-zA-Z0-9_]/', '_', (string) ($config['name'] ?? 'textarea'));
                 $attributes['id'] = 'ckeditor_'.$cleanName.'_'.uniqid();
             }
+        } else {
+            $attributes['data-editor'] = 'none';
+            $attributes['data-no-ckeditor'] = 'true';
         }
 
         $content = htmlspecialchars((string) ($value ?? $config['default'] ?? ''));

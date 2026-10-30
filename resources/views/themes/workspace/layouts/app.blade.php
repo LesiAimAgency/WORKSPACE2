@@ -194,7 +194,10 @@
         </nav>
       
       @php
-        $settings = $settings ?? [];
+        if (empty($settings)) {
+            $dbHomeWidget = \App\Models\Widget::withoutGlobalScopes()->where('type', 'workspace_home')->orderByDesc('is_active')->orderByDesc('id')->first();
+            $settings = $dbHomeWidget && is_array($dbHomeWidget->settings) ? $dbHomeWidget->settings : [];
+        }
         $logo = !empty($settings['logo']) 
         ? (Str::startsWith($settings['logo'], ['http://', 'https://', '/']) ? $settings['logo'] : asset($settings['logo'])) 
         : asset('themes/workspace/assets/logo.png');

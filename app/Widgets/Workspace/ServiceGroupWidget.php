@@ -18,6 +18,7 @@ class ServiceGroupWidget extends BaseWidget
             'author' => 'Workspace',
             'icon' => 'squares-plus',
             'group' => 'workspace_service_group',
+            'hidden' => true,
             'fields' => [
                 [
                     'name' => 'services',

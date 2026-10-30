@@ -12,12 +12,13 @@ class CoreWidget extends BaseWidget
     {
         return [
             'name' => 'Giá Trị Cốt Lõi (Workspace Core Values)',
-            'description' => 'Section giới thiệu giá trị cốt lõi công ty với đồ họa quỹ đạo SVG độc quyền và điều hướng mini-nav',
+            'description' => 'Section giới thiệu giá trị cốt lõi công ty với đồ họa quỹ đạo SVG độc quyền',
             'category' => 'Workspace',
             'version' => '1.0.0',
             'author' => 'Workspace',
             'icon' => 'sparkles',
             'group' => 'workspace_core',
+            'sort_order' => 2,
             'fields' => [
                 [
                     'name' => 'sub_heading',
@@ -35,6 +36,8 @@ class CoreWidget extends BaseWidget
                     'name' => 'description',
                     'label' => 'Đoạn văn mô tả',
                     'type' => 'textarea',
+                    'editor' => false,
+                    'rows' => 3,
                     'default' => 'This combination of core values is flexibly applied by us at each stage of the company, in personnel training, dealing with partners & serving customers!',
                 ],
                 [
@@ -42,23 +45,6 @@ class CoreWidget extends BaseWidget
                     'label' => 'Hình ảnh đồ họa cốt lõi (SVG/PNG)',
                     'type' => 'image',
                     'default' => 'themes/workspace/assets/main1.svg',
-                ],
-                [
-                    'name' => 'nav_items',
-                    'label' => 'Các mục Menu điều hướng (Mini-Nav)',
-                    'type' => 'repeatable',
-                    'fields' => [
-                        [
-                            'name' => 'label',
-                            'label' => 'Tên mục',
-                            'type' => 'text',
-                        ],
-                        [
-                            'name' => 'link',
-                            'label' => 'Link liên kết (VD: #core-values, #service)',
-                            'type' => 'text',
-                        ],
-                    ],
                 ],
             ],
             'settings' => [

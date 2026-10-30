@@ -18,6 +18,7 @@ class ConnectWidget extends BaseWidget
             'author' => 'Workspace',
             'icon' => 'envelope',
             'group' => 'workspace_connect',
+            'sort_order' => 7,
             'fields' => [
                 [
                     'name' => 'heading1',
@@ -60,29 +61,6 @@ class ConnectWidget extends BaseWidget
                     'label' => 'Chữ nút gửi',
                     'type' => 'text',
                     'default' => 'CONNECT WITH US',
-                ],
-                [
-                    'name' => 'partners_heading',
-                    'label' => 'Tiêu đề khối đối tác',
-                    'type' => 'text',
-                    'default' => 'OUR CUSTOMERS - PARTNERS',
-                ],
-                [
-                    'name' => 'partners',
-                    'label' => 'Danh sách Logo đối tác',
-                    'type' => 'repeatable',
-                    'fields' => [
-                        [
-                            'name' => 'image',
-                            'label' => 'Hình ảnh Logo',
-                            'type' => 'image',
-                        ],
-                        [
-                            'name' => 'alt',
-                            'label' => 'Tên đối tác',
-                            'type' => 'text',
-                        ],
-                    ],
                 ],
             ],
             'settings' => [

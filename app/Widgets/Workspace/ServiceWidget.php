@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Widgets\Workspace;
 
+use App\Http\Controllers\CoverflowController;
 use App\Widgets\BaseWidget;
 
 class ServiceWidget extends BaseWidget
@@ -11,56 +12,62 @@ class ServiceWidget extends BaseWidget
     public static function getConfig(): array
     {
         return [
-            'name' => 'Dịch Vụ Nổi Bật (Workspace Services)',
-            'description' => 'Bộ sưu tập các dịch vụ kiến trúc & thi công với thanh điều hướng slider ngang',
+            'name' => 'Bộ Sưu Tập Dịch Vụ Coverflow (Workspace Services)',
+            'description' => 'Trình chiếu Coverflow 5 dịch vụ kiến trúc & thi công nội thất với thanh chọn chip dịch vụ tương tác',
             'category' => 'Workspace',
-            'version' => '1.0.0',
+            'version' => '2.0.0',
             'author' => 'Workspace',
             'icon' => 'briefcase',
             'group' => 'workspace_service',
+            'sort_order' => 3,
             'fields' => [
                 [
-                    'name' => 'heading',
-                    'label' => 'Tiêu đề chính',
+                    'name' => 'view_more_text',
+                    'label' => 'Nhãn nút Xem chi tiết (CTA Button)',
                     'type' => 'text',
-                    'default' => 'OUR SERVICES',
-                ],
-                [
-                    'name' => 'description',
-                    'label' => 'Mô tả dịch vụ',
-                    'type' => 'textarea',
-                    'default' => 'Explore our service categories and completed workspace projects.',
+                    'default' => 'View more',
                 ],
                 [
                     'name' => 'services',
-                    'label' => 'Danh sách các Dịch vụ',
+                    'label' => 'Danh sách Dịch vụ Coverflow (5 dịch vụ)',
                     'type' => 'repeatable',
                     'fields' => [
                         [
+                            'name' => 'number',
+                            'label' => 'Số thứ tự (VD: 01, 02...)',
+                            'type' => 'text',
+                        ],
+                        [
                             'name' => 'title',
-                            'label' => 'Tên dịch vụ (VD: DESIGN, BUILD)',
+                            'label' => 'Tên dịch vụ chính',
+                            'type' => 'text',
+                        ],
+                        [
+                            'name' => 'chip_line_1',
+                            'label' => 'Nhãn nút chuyển dòng 1 (Chip Line 1)',
+                            'type' => 'text',
+                        ],
+                        [
+                            'name' => 'chip_line_2',
+                            'label' => 'Nhãn nút chuyển dòng 2 (Chip Line 2)',
+                            'type' => 'text',
+                        ],
+                        [
+                            'name' => 'slug',
+                            'label' => 'Định danh Slug (Dùng để liên kết chi tiết dịch vụ)',
                             'type' => 'text',
                         ],
                         [
                             'name' => 'desc',
-                            'label' => 'Mô tả ngắn',
+                            'label' => 'Mô tả ngắn hiển thị trên thẻ Coverflow',
                             'type' => 'textarea',
+                            'editor' => false,
+                            'rows' => 3,
                         ],
                         [
                             'name' => 'image',
-                            'label' => 'Hình ảnh dịch vụ',
+                            'label' => 'Hình ảnh nền thẻ Coverflow',
                             'type' => 'image',
-                        ],
-                        [
-                            'name' => 'link',
-                            'label' => 'Đường dẫn liên kết (VD: #about, #build)',
-                            'type' => 'text',
-                            'default' => '#',
-                        ],
-                        [
-                            'name' => 'data_section',
-                            'label' => 'Mã Section liên kết (VD: about, build)',
-                            'type' => 'text',
                         ],
                     ],
                 ],
@@ -74,9 +81,12 @@ class ServiceWidget extends BaseWidget
 
     public function render(): string
     {
-        return view('themes.workspace.widgets.service', [
+        $services = CoverflowController::getServicesData($this->settings);
+
+        return view('themes.workspace.widgets.coverflow', [
             'widget' => $this,
             'settings' => $this->settings,
+            'services' => $services,
         ])->render();
     }
 }

@@ -18,6 +18,7 @@ class ProjectWidget extends BaseWidget
             'author' => 'Workspace',
             'icon' => 'building-office',
             'group' => 'workspace_project',
+            'hidden' => true,
             'fields' => [
                 [
                     'name' => 'section_id',

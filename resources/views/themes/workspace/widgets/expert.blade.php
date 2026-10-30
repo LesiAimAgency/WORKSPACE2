@@ -1,5 +1,8 @@
 @php
-  $settings = $settings ?? [];
+  if (empty($settings)) {
+      $dbWidget = \App\Models\Widget::withoutGlobalScopes()->where('type', 'workspace_expert')->orderByDesc('is_active')->orderByDesc('id')->first();
+      $settings = $dbWidget && is_array($dbWidget->settings) ? $dbWidget->settings : [];
+  }
   $sectionId = $settings['section_id'] ?? 'design-expert';
   $sectionClass = $settings['section_class'] ?? 'expert-design';
   $dataUi = $settings['data_ui'] ?? 'light';
@@ -31,13 +34,7 @@
 
 <section class="panel panel-expert {{ $sectionClass }}" id="{{ $sectionId }}" data-ui="{{ $dataUi }}" aria-label="About the Expert">
   <div class="surface expert-surface">
-    <nav class="workflow-mini-nav expert-mini-nav" aria-label="Workflow menu">
-      <span class="mini-rule" aria-hidden="true"></span>
-      @foreach($navItems as $item)
-        <button {!! !empty($item['is_current']) ? 'class="is-current"' : '' !!} type="button">{{ $item['label'] ?? '' }}</button>
-      @endforeach
-      <span class="mini-rule" aria-hidden="true"></span>
-    </nav>
+ 
 
     <div class="expert-content-col animate__animated animate__fadeInLeft">
       <div class="expert-header-block">

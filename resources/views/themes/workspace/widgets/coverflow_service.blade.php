@@ -2,7 +2,8 @@
   use App\Http\Controllers\CoverflowController;
   use Illuminate\Support\Str;
 
-  $services = $services ?? CoverflowController::getServicesData();
+  $settings = CoverflowController::getServiceDetailSettings($settings ?? null);
+  $services = $services ?? CoverflowController::getServicesData($settings);
   $activeSlug = session('active_service_slug') ?: (request()->query('service') ?: ($services[0]['slug'] ?? ''));
 
   $activeService = $activeService ?? null;
@@ -56,7 +57,7 @@
       'resultImg' => asset('themes/workspace/workflow/build.png'),
   ];
 
-  $srvImg = $activeService['image'] ?? 'themes/workspace/coverflow/frame1.png';
+  $srvImg = $activeService['detail_image'] ?? ($activeService['image'] ?? 'themes/workspace/coverflow/frame1.png');
   $srvImg = $formatImg($srvImg);
 
   $serviceTitles = array_values(array_map(fn ($s) => $s['title'] ?? '', $services));
@@ -118,6 +119,11 @@
         top: 0;
         width: calc(var(--u) * 940);
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        box-sizing: border-box;
         transition: opacity 600ms ease;
     }
 
@@ -127,12 +133,10 @@
     }
 
     #coverflowService .svc-pill {
-        position: absolute;
-        left: 0;
-        top: calc(var(--u) * 85.875);
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
         min-width: calc(var(--u) * 94);
         height: calc(var(--u) * 28);
         padding: 0 calc(var(--u) * 16);
@@ -152,11 +156,8 @@
     }
 
     #coverflowService .svc-title {
-        position: absolute;
-        left: 0;
-        top: calc(var(--u) * 131);
         width: calc(var(--u) * 440);
-        margin: 0;
+        margin: calc(var(--u) * 17) 0 0;
         font-size: calc(var(--u) * 50.5);
         font-weight: 500;
         line-height: calc(var(--u) * 59);
@@ -165,10 +166,9 @@
     }
 
     #coverflowService .svc-underline {
-        position: absolute;
-        left: 0;
         display: block;
-        top: calc(var(--u) * 264);
+        flex-shrink: 0;
+        margin-top: calc(var(--u) * 15);
         width: calc(var(--u) * 205);
         height: calc(var(--u) * 4);
         border-radius: calc(var(--u) * 2);
@@ -176,13 +176,19 @@
     }
 
     #coverflowService .svc-items {
-        position: absolute;
-        left: 0;
-        top: calc(var(--u) * 327);
-        display: grid;
-        grid-template-columns: calc(var(--u) * 400) calc(var(--u) * 400);
+        margin-top: calc(var(--u) * 59);
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
         column-gap: calc(var(--u) * 104);
         row-gap: calc(var(--u) * 24);
+    }
+
+    #coverflowService .svc-item {
+        flex: 0 0 calc(var(--u) * 400);
+        width: calc(var(--u) * 400);
+        display: flex;
+        flex-direction: column;
     }
 
     #coverflowService .svc-item-title {
@@ -252,8 +258,6 @@
     }
 
     #coverflowService .svc-info .svc-underline {
-        position: relative;
-        top: auto;
         margin-top: calc(var(--u) * 10);
     }
 
@@ -459,9 +463,10 @@
         }
         #coverflowService .svc-intro { opacity: 1 !important; pointer-events: auto !important; }
         #coverflowService .svc-pill { width: auto; margin-bottom: 14px; display: inline-flex; }
-        #coverflowService .svc-title { font-size: 28px; line-height: 34px; margin-bottom: 12px; }
+        #coverflowService .svc-title { font-size: 28px; line-height: 34px; margin: 0 0 12px; }
         #coverflowService .svc-underline { width: 140px; height: 3px; margin: 0 0 20px; }
-        #coverflowService .svc-items { grid-template-columns: 1fr; row-gap: 18px; }
+        #coverflowService .svc-items { margin-top: 0; flex-direction: column; row-gap: 18px; }
+        #coverflowService .svc-item { flex: 1 1 100%; width: 100%; }
         #coverflowService .svc-item-title { font-size: 18px; line-height: 24px; }
         #coverflowService .svc-item-desc { font-size: 14px; line-height: 20px; }
         #coverflowService .svc-image { height: 220px; margin-top: 22px; }
@@ -664,7 +669,7 @@
             <div class="svc-frame" id="svcFrame">
 
                 <div class="svc-intro">
-                    <a href="#coverflow" class="svc-pill" id="coverflowServiceBackBtn" title="Quay lại bộ sưu tập Services">Services</a>
+                    <a href="#coverflow" class="svc-pill" id="coverflowServiceBackBtn" title="Quay lại bộ sưu tập Services">{{ $settings['pill_text'] ?? 'Services' }}</a>
                     <h2 class="svc-title" id="srvActiveTitle">{{ $activeService['title'] ?? 'Interior Advisory and Project Setup' }}</h2>
                     <span class="svc-underline" aria-hidden="true"></span>
 
@@ -695,28 +700,28 @@
 
                     <div class="svc-specs">
                         <div class="svc-spec-row">
-                            <span class="svc-spec-label">Total Area</span>
+                            <span class="svc-spec-label">{{ $settings['label_area'] ?? 'Total Area' }}</span>
                             <span class="svc-spec-value" id="projectArea">{{ $firstProject['area'] }}</span>
                         </div>
                         <div class="svc-spec-row">
-                            <span class="svc-spec-label">Location</span>
+                            <span class="svc-spec-label">{{ $settings['label_location'] ?? 'Location' }}</span>
                             <span class="svc-spec-value" id="projectLocation">{{ $firstProject['location'] }}</span>
                         </div>
                         <div class="svc-spec-row">
-                            <span class="svc-spec-label">Typology</span>
+                            <span class="svc-spec-label">{{ $settings['label_typology'] ?? 'Typology' }}</span>
                             <span class="svc-spec-value" id="projectTypology">{{ $firstProject['typology'] }}</span>
                         </div>
                         <div class="svc-spec-row">
-                            <span class="svc-spec-label">Style</span>
+                            <span class="svc-spec-label">{{ $settings['label_style'] ?? 'Style' }}</span>
                             <span class="svc-spec-value" id="projectStyle">{{ $firstProject['style'] }}</span>
                         </div>
                         <div class="svc-spec-row">
-                            <span class="svc-spec-label">Tech Solution</span>
+                            <span class="svc-spec-label">{{ $settings['label_tech'] ?? 'Tech Solution' }}</span>
                             <span class="svc-spec-value" id="projectTech">{{ $firstProject['tech'] }}</span>
                         </div>
                     </div>
 
-                    <button type="button" class="svc-compare" id="openComparisonModalBtn">Comparison Design and Result</button>
+                    <button type="button" class="svc-compare" id="openComparisonModalBtn">{{ $settings['compare_button_text'] ?? 'Comparison Design and Result' }}</button>
 
                     <div class="svc-pager">
                         <div class="svc-pager-left">
@@ -737,10 +742,10 @@
 
             {{-- Tabs + liên kết đáy (nằm gọn trong vùng nội dung 80vh) --}}
             <div class="svc-tabs">
-                <button type="button" class="svc-tab is-active" data-pane="intro" id="tabServiceBtn">Introductions</button>
-                <button type="button" class="svc-tab" data-pane="project" id="tabProjectBtn">Projects</button>
+                <button type="button" class="svc-tab is-active" data-pane="intro" id="tabServiceBtn">{{ $settings['tab_intro_text'] ?? 'Introductions' }}</button>
+                <button type="button" class="svc-tab" data-pane="project" id="tabProjectBtn">{{ $settings['tab_project_text'] ?? 'Projects' }}</button>
             </div>
-            <a href="#coverflow" class="svc-back" id="svcBackToServices">Back to Services</a>
+            <a href="#coverflow" class="svc-back" id="svcBackToServices">{{ $settings['back_text'] ?? 'Back to Services' }}</a>
             <button type="button" class="svc-next" id="svcNextService" data-next-index="{{ $nextServiceIndex }}">{{ $nextServiceTitle }}</button>
 
         </div>
@@ -762,12 +767,12 @@
             <div class="slider-container" id="modalSlider">
                 <div class="before-image" id="modalBeforeImage">
                     <img src="{{ !empty($firstProject['designImg']) ? $firstProject['designImg'] : asset('themes/workspace/workflow/design.png') }}" id="modalDesignImg" alt="Design 3D">
-                    <span class="before-text"><span class="dot-indicator"></span> DESIGN 3D</span>
+                  
                 </div>
 
                 <div class="after-image">
                     <img src="{{ !empty($firstProject['resultImg']) ? $firstProject['resultImg'] : asset('themes/workspace/workflow/build.png') }}" id="modalResultImg" alt="Result">
-                    <span class="after-text"><span class="dot-indicator"></span> RESULT</span>
+                    
                 </div>
 
                 <div class="slider-handle" id="sliderHandle"></div>
@@ -936,7 +941,7 @@
                 }).join('');
             }
 
-            if (service.image) {
+            if (service.detail_image || service.image) { serviceImage = resolveUrl(service.detail_image || service.image, 'themes/workspace/coverflow/frame1.png'); } else if (false) {
                 serviceImage = resolveUrl(service.image, 'themes/workspace/coverflow/frame1.png');
             }
 

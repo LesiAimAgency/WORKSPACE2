@@ -173,6 +173,23 @@ class SettingsController extends Controller
                 $request->merge(['social_items' => $socialData]);
             }
 
+            // Handle partner image uploads if any
+            if ($request->hasFile('partner_images')) {
+                $partnerData = $request->input('partners_items', []);
+                if (is_string($partnerData)) {
+                    $partnerData = json_decode($partnerData, true) ?? [];
+                }
+                foreach ($request->file('partner_images') as $idx => $file) {
+                    if ($file && $file->isValid()) {
+                        $path = $file->store('partners', 'public');
+                        if (isset($partnerData[$idx])) {
+                            $partnerData[$idx]['image'] = '/storage/'.$path;
+                        }
+                    }
+                }
+                $request->merge(['partners_items' => $partnerData]);
+            }
+
             // Sync traditional social_* keys if social_items is provided
             if ($request->has('social_items')) {
                 $sItems = $request->input('social_items');
@@ -202,7 +219,7 @@ class SettingsController extends Controller
 
             // Sử dụng transaction để tránh duplicate
             \DB::transaction(function () use ($request, $project, $tenantId, &$savedCount) {
-                foreach ($request->except('_token', '_method', 'page', 'site_favicon_file', 'contact_modal_logo_file', 'guarantee_icons', 'social_icons') as $key => $value) {
+                foreach ($request->except('_token', '_method', 'page', 'site_favicon_file', 'contact_modal_logo_file', 'guarantee_icons', 'social_icons', 'partner_images') as $key => $value) {
                     if (is_string($value)) {
                         $decoded = json_decode($value, true);
                         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -366,6 +383,11 @@ class SettingsController extends Controller
         return $this->group($request, null, 'social');
     }
 
+    public function partners(Request $request)
+    {
+        return $this->group($request, null, 'partners');
+    }
+
     public function group(Request $request, $projectCodeOrGroup = null, $group = null)
     {
         $group = $group
@@ -497,6 +519,55 @@ class SettingsController extends Controller
                 ];
             }
             $viewData['socialItems'] = $savedSocialItems;
+        }
+
+        if ($group === 'partners') {
+            $savedPartnersHeading = setting('partners_heading') ?: 'OUR CUSTOMERS - PARTNERS';
+            $savedPartnerItems = setting('partners_items', setting('partners'));
+            if (is_string($savedPartnerItems)) {
+                $savedPartnerItems = json_decode($savedPartnerItems, true) ?: [];
+            }
+            if (! is_array($savedPartnerItems) || empty($savedPartnerItems)) {
+                $savedPartnerItems = [
+                    [
+                        'id' => 1,
+                        'image' => 'themes/workspace/assets/parnert1.png',
+                        'alt' => 'Strategic Partner 1',
+                        'link' => '',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 2,
+                        'image' => 'themes/workspace/assets/parnert2.png',
+                        'alt' => 'Strategic Partner 2',
+                        'link' => '',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 3,
+                        'image' => 'themes/workspace/assets/parnert1.png',
+                        'alt' => 'Strategic Partner 3',
+                        'link' => '',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 4,
+                        'image' => 'themes/workspace/assets/parnert2.png',
+                        'alt' => 'Strategic Partner 4',
+                        'link' => '',
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => 5,
+                        'image' => 'themes/workspace/assets/parnert1.png',
+                        'alt' => 'Strategic Partner 5',
+                        'link' => '',
+                        'is_active' => true,
+                    ],
+                ];
+            }
+            $viewData['partnersHeading'] = $savedPartnersHeading;
+            $viewData['partnerItems'] = $savedPartnerItems;
         }
 
         // 1. Theme specific view
@@ -718,6 +789,15 @@ class SettingsController extends Controller
                 'url' => route('admin.settings.group', 'social'),
                 'icon' => 'share',
                 'color' => 'sky',
+            ],
+            [
+                'id' => 'partners',
+                'title' => 'Đối Tác',
+                'category' => 'general',
+                'category_name' => 'Cấu hình chung',
+                'url' => route('admin.settings.group', 'partners'),
+                'icon' => 'users',
+                'color' => 'amber',
             ],
             [
                 'id' => 'contact-buttons',

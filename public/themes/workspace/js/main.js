@@ -821,16 +821,18 @@ function renderWhySlide(index) {
   activeWhyIndex = (index + whySlides.length) % whySlides.length;
   const slide = whySlides[activeWhyIndex];
 
+  if (whyProgress) {
+    whyProgress.style.width = `${((activeWhyIndex + 1) / whySlides.length) * 100}%`;
+  }
+
   whyStatement?.classList.add("is-changing");
   whyBullets.classList.add("is-changing");
 
   window.setTimeout(() => {
+    const whyPrefix = whyStatement?.querySelector("p");
+    if (whyPrefix && slide.prefix) whyPrefix.textContent = slide.prefix;
     whyTitle.textContent = slide.title;
     whyBullets.innerHTML = slide.bullets.map((item) => `<li>${item}</li>`).join("");
-
-    if (whyProgress) {
-      whyProgress.style.width = "25%";
-    }
 
     whyStatement?.classList.remove("is-changing");
     whyBullets.classList.remove("is-changing");
@@ -927,6 +929,13 @@ function createPartnerSlider(slider) {
     }
 
     cleanRuntimeState();
+    cards.forEach((card) => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute("data-partner-clone", "true");
+      clone.setAttribute("aria-hidden", "true");
+      track.appendChild(clone);
+    });
+    track.setAttribute("data-loop-ready", "true");
     viewport.addEventListener("pointerdown", handleDragStart);
     window.addEventListener("pointermove", handleDragMove);
     window.addEventListener("pointerup", handleDragEnd);
@@ -1100,9 +1109,9 @@ function goToSection(index) {
         fullpage.style.transition = "";
       }
     }, 900);
-  } else if (targetPanel && (targetPanel.id === "why-workspace" || targetPanel.id === "connect") && isDetailFlowActive) {
+  } else if (targetPanel && targetPanel.id !== "coverflowService" && isDetailFlowActive) {
     window.setTimeout(() => {
-      if ((panels[currentIndex]?.id === "why-workspace" || panels[currentIndex]?.id === "connect") && isDetailFlowActive) {
+      if (panels[currentIndex]?.id !== "coverflowService" && isDetailFlowActive) {
         const curId = panels[currentIndex]?.id;
         isDetailFlowActive = false;
         refreshPanels();

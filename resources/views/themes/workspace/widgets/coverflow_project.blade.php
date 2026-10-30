@@ -2,7 +2,8 @@
   use App\Http\Controllers\CoverflowController;
   use Illuminate\Support\Str;
 
-  $services = $services ?? CoverflowController::getServicesData();
+  $settings = CoverflowController::getServiceDetailSettings($settings ?? null);
+  $services = $services ?? CoverflowController::getServicesData($settings);
   $activeSlug = session('active_service_slug') ?: (request()->query('service') ?: ($services[0]['slug'] ?? ''));
   
   $activeService = $activeService ?? null;
@@ -294,23 +295,23 @@
                     <!-- Bảng thông tin dự án (5 dòng) -->
                     <div class="coverflowProject-info">
                         <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">Total Area</span>
+                            <span class="coverflowProject-info-label">{{ $settings['label_area'] ?? 'Total Area' }}</span>
                             <span class="coverflowProject-info-value" id="projectArea">{{ $firstProject['area'] }}</span>
                         </div>
                         <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">Location</span>
+                            <span class="coverflowProject-info-label">{{ $settings['label_location'] ?? 'Location' }}</span>
                             <span class="coverflowProject-info-value" id="projectLocation">{{ $firstProject['location'] }}</span>
                         </div>
                         <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">Typology</span>
+                            <span class="coverflowProject-info-label">{{ $settings['label_typology'] ?? 'Typology' }}</span>
                             <span class="coverflowProject-info-value" id="projectTypology">{{ $firstProject['typology'] }}</span>
                         </div>
                         <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">Style</span>
+                            <span class="coverflowProject-info-label">{{ $settings['label_style'] ?? 'Style' }}</span>
                             <span class="coverflowProject-info-value" id="projectStyle">{{ $firstProject['style'] }}</span>
                         </div>
                         <div class="coverflowProject-info-row">
-                            <span class="coverflowProject-info-label">Tech solution</span>
+                            <span class="coverflowProject-info-label">{{ $settings['label_tech'] ?? 'Tech solution' }}</span>
                             <span class="coverflowProject-info-value" id="projectTech">{{ $firstProject['tech'] }}</span>
                         </div>
                     </div>
@@ -318,7 +319,7 @@
                     <!-- Nút Mở Modal So sánh Before-After -->
                     <div class="coverflowProject-action">
                         <a href="javascript:void(0)" class="coverflowProject-btn" id="openComparisonModalBtn" onclick="window.openComparisonModal && window.openComparisonModal(event)">
-                            <span class="coverflowProject-btn-text">Comparison Design and Result</span>
+                            <span class="coverflowProject-btn-text">{{ $settings['compare_button_text'] ?? 'Comparison Design and Result' }}</span>
                         </a>
                     </div>
 
@@ -376,13 +377,13 @@
                 <!-- Hình 1: Design (Before) -->
                 <div class="before-image">
                     <img src="{{ !empty($firstProject['designImg']) ? $firstProject['designImg'] : asset('themes/workspace/workflow/design.png') }}" id="modalDesignImg" alt="Design 3D">
-                    <span class="before-text"><span class="dot-indicator"></span> DESIGN 3D</span>
+                 
                 </div>
 
                 <!-- Hình 2: Result (After) -->
                 <div class="after-image">
                     <img src="{{ !empty($firstProject['resultImg']) ? $firstProject['resultImg'] : asset('themes/workspace/workflow/build.png') }}" id="modalResultImg" alt="Result Thực Tế">
-                    <span class="after-text"><span class="dot-indicator"></span> RESULT THỰC TẾ</span>
+                 
                 </div>
 
                 <!-- Thanh trượt & Nút kéo -->
