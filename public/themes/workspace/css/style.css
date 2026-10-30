@@ -30,12 +30,8 @@
   --h5: 28.4px;
   --h6: 21.3px;
   --h6_B: 21.3px;
-  --h6_b: 21.3px;
-  --h6-b: 21.3px;
   --p: 16px;
   --p_S: 12px;
-  --p_s: 12px;
-  --p-s: 12px;
 
   /* REM Equivalents (1rem = 16px) */
   --h1-rem: 5.6125rem;
@@ -67,8 +63,8 @@
   --text-scale-h2: var(--h2-rem);
   --text-scale-h1: var(--h1-rem);
 
-  --color-page-bg: #ffffff;
-  --color-surface: #ffffff;
+  --color-page-bg: #f2f2f2;
+  --color-surface: #f2f2f2;
   --color-text: #101010;
   --page-gutter: clamp(38px, 6.25vw, 90px);
   --content-indent: clamp(140px, 16vw, 240px);
@@ -164,8 +160,12 @@ body {
   font-size: 1rem;
   width: 100%;
   height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
   background: #ffffff;
-
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
 
 html {
@@ -175,7 +175,8 @@ html {
 
 body {
   margin: 0;
-  overflow: hidden;
+  padding: 0;
+  overflow: hidden !important;
   background: var(--color-page-bg);
   color: var(--color-text);
   font-family: var(--font-main);
@@ -327,30 +328,34 @@ a {
 }
 
 .fullpage {
+  position: relative;
   width: 100%;
+  height: 100vh;
   height: 100svh;
   background: var(--color-page-bg);
   transition: transform 850ms cubic-bezier(0.76, 0, 0.24, 1);
   will-change: transform;
+  margin: 0;
+  padding: 0;
 }
+
 
 .panel {
   position: relative;
-  display: grid;
+  display: block;
   width: 100%;
-  height: 100svh;
-  min-height: 100vh;
-  place-items: center;
-  overflow: hidden;
+  height: 100vh !important;
+
 }
 
-@supports not (height: 100svh) {
+/* @supports not (height: 100svh) {
 
   .fullpage,
   .panel {
-    height: 100vh;
+    height: 100vh !important;
+    max-height: 100vh !important;
   }
-}
+} */
 
 .panel::before {
   position: absolute;
@@ -363,13 +368,19 @@ a {
 .surface {
   width: 100%;
   height: 100%;
+  max-height: 100%;
   display: grid;
   place-items: center;
   overflow: hidden;
+  box-sizing: border-box;
   background: var(--color-surface);
 }
 
 .surface-home {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
   min-height: 100%;
 }
 
@@ -395,9 +406,13 @@ a {
   position: relative;
   overflow: hidden;
   background: #ffffff;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
 }
 
 .core-shapes {
@@ -409,14 +424,17 @@ a {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  width: var(--section-frame-width);
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1440px;
   height: 100%;
-  max-height: 100vh;
+  max-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: clamp(54px, 8vh, 84px) var(--page-gutter, 90px) clamp(20px, 3vh, 36px);
-  gap: clamp(10px, 2vh, 24px);
+  padding: calc(100vh*0.2) 60px;
+
+  overflow: hidden;
 }
 
 .core-header-row {
@@ -426,7 +444,8 @@ a {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  gap: 40px;
+  gap: 30px;
+  flex-shrink: 0;
 }
 
 .core-title-group {
@@ -473,22 +492,25 @@ a {
 .core-graphic {
   position: relative;
   z-index: 1;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  max-height: calc(100vh - clamp(200px, 24vh, 260px));
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   margin: 0 auto;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .core-svg {
   display: block;
-  width: min(100%, 1280px);
-  height: auto;
+  max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  margin: 0 auto;
 }
 
 /* Core Values Live Orbital Interface */
@@ -1616,21 +1638,29 @@ body.in-workflow-flow .global-workflow-nav {
 
 .why-layout {
   position: relative;
-  display: block;
-  width: var(--section-frame-width);
-  height: 100vh;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1440px;
+  height: 100%;
+  max-height: 100%;
   margin: 0 auto;
-  padding: 0 var(--page-gutter);
+  box-sizing: border-box;
+  padding: 0;
+  gap: clamp(16px, 2.5vh, 32px);
+  overflow: hidden;
 }
 
 .why-heading {
-  position: absolute;
-  top: 7vh;
-  left: 0;
-  right: 0;
-  display: grid;
-  place-items: start center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .why-heading h2 {
@@ -1658,19 +1688,18 @@ body.in-workflow-flow .global-workflow-nav {
 }
 
 .why-content {
-  position: absolute;
-  top: 30vh;
-  left: 50%;
+  position: relative;
   display: grid;
   grid-template-columns: 366px minmax(360px, 1fr) 104px;
   align-items: center;
   width: min(1000px, calc(100vw - 260px));
-  height: 24vh;
+  max-width: 100%;
+  height: auto;
   min-height: 210px;
   max-height: 240px;
   margin: 0 auto;
   column-gap: 66px;
-  transform: translateX(-50%);
+  flex: 0 0 auto;
 }
 
 .why-statement {
@@ -1797,15 +1826,19 @@ body.in-workflow-flow .global-workflow-nav {
 }
 
 .why-partners {
-  position: absolute;
-  top: 67vh;
-  left: 50%;
-  width: min(960px, 82vw);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(960px, 90vw);
+  max-width: 100%;
   min-width: 0;
+  margin: 0 auto;
   padding-bottom: 0;
   overflow: hidden;
   text-align: center;
-  transform: translateX(-50%);
+  flex-shrink: 0;
 }
 
 .why-partners h3 {
@@ -1820,7 +1853,7 @@ body.in-workflow-flow .global-workflow-nav {
   --partner-visible: 7;
   --partner-gap: clamp(18px, 2.3vw, 32px);
   position: relative;
-  display: block;
+  display: flex;
   align-items: center;
   width: 100%;
   max-width: 100%;
@@ -1880,11 +1913,12 @@ body.in-workflow-flow .global-workflow-nav {
 }
 
 .partner-card {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 calc((100% - (var(--partner-gap) * (var(--partner-visible) - 1))) / var(--partner-visible));
   min-width: 68px;
   height: 58px;
-  place-items: center;
   scroll-snap-align: center;
 }
 
@@ -2395,10 +2429,9 @@ body.in-workflow-flow .global-workflow-nav {
   }
 
   .why-content {
-    top: 29vh;
     width: min(780px, 78vw);
     grid-template-columns: minmax(230px, 36%) minmax(230px, 1fr) auto;
-    height: 24vh;
+    height: auto;
     min-height: 198px;
     column-gap: 28px;
   }
@@ -3969,8 +4002,14 @@ body.in-section-flow .global-section-nav {
 }
 
 .why-partners {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: min(960px, 90vw);
-  margin: 1.5rem auto 0;
+  max-width: 100%;
+  margin: 0 auto;
   text-align: center;
 }
 
@@ -4092,9 +4131,9 @@ body.in-section-flow .global-section-nav {
   cursor: pointer;
 }
 
-.coverflow-badge {
+/* .coverflow-badge {
   margin-left: -10% !important;
-}
+} */
 
 /* Trang coverflow */
 .coverflow-badge .view-more-btn {
@@ -4117,13 +4156,11 @@ body.in-section-flow .global-section-nav {
 .panel-coverflow {
   position: relative;
   width: 100%;
-  min-height: 100vh;
   background-color: #f7f7f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(30px, 5vh, 60px) clamp(20px, 4vw, 60px);
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Roboto';
   box-sizing: border-box;
 }
 
@@ -4183,6 +4220,7 @@ body.in-section-flow .global-section-nav {
 }
 
 .coverflow-media {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 8.4;
   max-height: 520px;
@@ -4202,9 +4240,6 @@ body.in-section-flow .global-section-nav {
 
 /* 3. Floating Red Overlay Card (Overlapping bottom-left of image) */
 .coverflow-badge {
-  position: absolute;
-  bottom: -16%;
-  left: 9%;
   z-index: 10;
   width: 25%;
   background: #850d11;
@@ -4265,12 +4300,23 @@ body.in-section-flow .global-section-nav {
   width: 25rem;
 }
 
+.coverflow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  max-width: 100%;
+  width: 100%;
+  transform: translateY(50%);
+}
+
 /* Phần Mô tả */
 .coverflow-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: clamp(260px, 24vw, 314px);
+  justify-content: flex-start;
+  align-items: flex-end;
+  box-sizing: border-box;
+  gap: 30px;
+
 
   box-sizing: border-box;
 
@@ -4291,6 +4337,12 @@ body.in-section-flow .global-section-nav {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  justify-content: space-between;
 }
 
 .coverflow-arrow {
@@ -4320,13 +4372,45 @@ body.in-section-flow .global-section-nav {
 /* Trang coverflow Service (Figma: Service _D1.svg) */
 #coverflowService {
   background-color: #F2F2F7;
-  padding: 80px 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
+  display: block;
+  position: relative;
+  overflow: hidden;
   box-sizing: border-box;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+/* Slider Track chứa 2 panes (Introductions & Projects) trượt ngang */
+.coverflowDetail-slider {
+  display: flex;
+  flex-direction: row;
+  width: 200%;
+  height: 100%;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+#coverflowService.is-projects-active .coverflowDetail-slider {
+  transform: translate3d(-50%, 0, 0);
+}
+
+/* Mỗi pane chiếm đúng 50% width của track (tức 100% viewport) */
+.coverflowDetail-pane {
+  flex: 0 0 50%;
+  width: 50%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coverflowDetail-pane-service {
+  background-color: #F2F2F7;
 }
 
 #coverflowService .container {
@@ -4535,6 +4619,10 @@ body.in-section-flow .global-section-nav {
 /* Responsive Breakpoints */
 @media (max-width: 1199px) {
   #coverflowService {
+    padding: 0;
+  }
+
+  #coverflowService .coverflowDetail-pane-service {
     padding: 60px 0;
   }
 
@@ -4558,6 +4646,10 @@ body.in-section-flow .global-section-nav {
 
 @media (max-width: 991px) {
   #coverflowService {
+    padding: 0;
+  }
+
+  #coverflowService .coverflowDetail-pane-service {
     padding: 50px 0;
   }
 
@@ -4623,13 +4715,16 @@ body.in-section-flow .global-section-nav {
 
 #coverflowProject {
   background-color: #F2F2F7;
-  padding: 80px 0;
-  min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow: hidden;
+  flex: 0 0 50%;
+  width: 50%;
+  height: 100%;
+  position: relative;
 }
 
 #coverflowProject .container {
@@ -5108,4 +5203,280 @@ body.is-scrolled-past-home .pdf-profile-link {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+#coverflowService .container,
+#coverflowProject .container {
+  width: 100% !important;
+  max-width: 1440px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ==========================================================================
+   LAYOUT SYSTEM 1440 - mọi section (panel) dùng chung một khung chuẩn
+   - Khung thiết kế: 1440px (màn rộng hơn thì khung được căn giữa)
+   - Chiều cao:      100vh
+   - Padding:        trên/dưới calc(100vh * 0.1), trái/phải 72px
+   => Vùng nội dung của mỗi section = 80vh (1440x900 -> 1296 x 720)
+   Padding nằm trên .panel (không đặt trên .fullpage) nên toạ độ cuộn
+   translate3d(0, -offsetTop, 0) vẫn chuẩn 100vh.
+   ========================================================================== */
+:root {
+  --frame-w: 1440px;
+  --frame-pad-x: 72px;
+  --frame-pad-y: calc(100vh * 0.1);
+  --frame-gutter: calc(max(0px, (100% - var(--frame-w)) / 2) + var(--frame-pad-x));
+}
+
+.fullpage>.panel {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100vh !important;
+  height: 100svh !important;
+  min-height: 0 !important;
+  max-height: 100vh !important;
+  max-height: 100svh !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding-top: var(--frame-pad-y) !important;
+  padding-bottom: var(--frame-pad-y) !important;
+  padding-left: var(--frame-gutter) !important;
+  padding-right: var(--frame-gutter) !important;
+}
+
+.fullpage>.panel.panel-detail-flow:not(.is-hidden) {
+  display: block !important;
+}
+
+/* Surface = vùng nội dung (80vh). Nền do .panel đảm nhiệm để tràn full-bleed */
+.fullpage>.panel>.surface {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  background: transparent !important;
+  box-sizing: border-box;
+}
+
+.fullpage>.panel-home {
+  background: var(--color-surface, #f2f2f2);
+}
+
+.fullpage>.panel-core {
+  background: #ffffff;
+}
+
+.fullpage>.panel-why,
+.fullpage>.panel-connect {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.62)),
+    url("../assets/bg-why.png") center / cover no-repeat;
+}
+
+/* Các layout bên trong không tự thêm padding/width riêng nữa */
+.fullpage .core-layout,
+.fullpage .why-layout,
+.fullpage .connect-layout,
+.fullpage .coverflow-layout {
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Dưới 769px: bỏ quy tắc 10vh (màn hình nhỏ không đủ chỗ), dùng đệm gọn */
+@media (max-width: 768px) {
+  .fullpage>.panel {
+    padding: 64px 20px 56px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SECTION FIT (80vh box) - mỗi section được dàn ở KÍCH THƯỚC THIẾT KẾ 1296 x 720
+   (vùng nội dung của khung 1440x900) rồi scale đều vào vùng nội dung thực tế.
+   --fit = min(1, rộng vùng nội dung / 1296, cao vùng nội dung / 720)
+   do script nhỏ trong <head> (layouts/app.blade.php) tính khi load/resize.
+   -------------------------------------------------------------------------- */
+:root {
+  --fit: 1;
+  --design-w: 1296px;
+  --design-h: 720px;
+}
+
+@media (min-width: 901px) {
+
+  .fullpage .core-surface,
+  .fullpage .coverflow-surface,
+  .fullpage .why-surface,
+  .fullpage .connect-surface {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .fullpage .core-layout,
+  .fullpage .why-layout,
+  .fullpage .connect-layout,
+  .fullpage .coverflow-layout {
+    flex: none;
+    width: var(--design-w);
+    height: var(--design-h);
+    max-height: none;
+    transform: scale(var(--fit, 1));
+    transform-origin: center center;
+  }
+
+  /* Core values */
+  .fullpage .core-layout {
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .fullpage .core-graphic {
+    max-height: none;
+  }
+
+  /* Coverflow: chips + ảnh (co giãn) + mô tả */
+  .fullpage .coverflow-layout {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .fullpage .coverflow-chips {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+  }
+
+  .fullpage .coverflow-stage {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-bottom: 30px;
+    overflow: visible;
+    border-radius: 0;
+    max-height: 70%;
+  }
+
+  .fullpage .coverflow-media {
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+  }
+
+  .fullpage .coverflow-footer {
+    flex: 0 0 auto;
+
+  }
+
+
+
+  .fullpage .badge-title {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Why choosing */
+  .fullpage .why-layout {
+    gap: 28px;
+    justify-content: center;
+  }
+
+  .fullpage .why-content {
+    width: 1000px;
+    max-width: 1000px;
+    grid-template-columns: 366px minmax(360px, 1fr) 104px;
+    column-gap: 66px;
+    height: auto;
+    min-height: 210px;
+    max-height: 240px;
+  }
+
+  .fullpage .why-partners {
+    width: 960px;
+    max-width: 960px;
+  }
+
+  /* Connect */
+  .fullpage .connect-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fullpage .connect-heading {
+    margin-bottom: 18px;
+  }
+
+  .fullpage .connect-heading h2 {
+    font-size: 2.9rem;
+  }
+
+  .fullpage .connect-form {
+    grid-template-rows: 48px 48px 48px 84px auto;
+    row-gap: 8px;
+    width: 960px;
+    padding: 30px 44px;
+    border-radius: 26px;
+  }
+
+  .fullpage .connect-form input,
+  .fullpage .connect-form textarea {
+    padding: 26px 0 5px;
+  }
+
+  .fullpage .connect-form textarea {
+    padding-top: 26px;
+  }
+
+  .fullpage .connect-form span {
+    top: 7px;
+  }
+
+  .fullpage .connect-form button {
+    margin-top: 18px;
+  }
+
+  .fullpage .connect-status {
+    min-height: 0;
+    margin-top: 6px;
+  }
+
+  .fullpage .connect-partners {
+    margin-top: 22px;
+    width: 900px;
+  }
+
+  .fullpage .connect-partners h3 {
+    margin-bottom: 12px;
+  }
+
+  .fullpage .connect-partners .partner-slider {
+    min-height: 0;
+    padding-top: 16px;
+    padding-bottom: 14px;
+  }
+}
+
+/* Màn nhỏ (<= 900px): giữ bố cục responsive tự nhiên, không scale cố định */
+@media (max-width: 900px) {
+
+  .fullpage .core-layout,
+  .fullpage .why-layout,
+  .fullpage .connect-layout,
+  .fullpage .coverflow-layout {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    transform: none;
+  }
 }

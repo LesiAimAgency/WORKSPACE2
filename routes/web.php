@@ -25,6 +25,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Themes\Daiphuc68\Daiphuc68Controller;
 use App\Http\Controllers\Themes\Workspace\WorkspaceThemeController;
+use App\Http\Controllers\CoverflowController;
 use App\Livewire\Admin\WidgetEditor;
 use Illuminate\Support\Facades\Route;
 
@@ -42,9 +43,6 @@ Route::get('/theme/workspace', [WorkspaceThemeController::class, 'home'])->name(
 
 // Material Lab Frontend
 Route::get('/material-lab', [MaterialLabController::class, 'index'])->name('material-lab');
-Route::get('/hihi', function () {
-    return 'hihi';
-});
 
 // Customer Survey Frontend
 Route::get('/customer-survey', [CustomerSurveyController::class, 'show'])->name('customer-survey.show');
@@ -89,13 +87,22 @@ Route::controller(Daiphuc68Controller::class)->group(function () {
     // Trang tĩnh (Pages)
     Route::get('/pages/{slug}', 'pageDetail')->name('pages.show');
     Route::get('/page/{slug}', fn (string $slug) => redirect()->route('pages.show', $slug, 301));
-    Route::get('/coverflow', fn () => view('themes.workspace.widgets.coverflow'));
-    Route::get('/coverflow-service', fn () => view('themes.workspace.widgets.coverflow_service'));
-    Route::get('/coverflow-project', fn () => view('themes.workspace.widgets.coverflow_project'));
+
+
+
    
 }); 
 
 
+
+// ============================================
+// WORKSPACE COVERFLOW & SERVICE SHOWCASE ROUTES
+// ============================================
+Route::controller(CoverflowController::class)->group(function () {
+    Route::get('/coverflow', 'coverflow')->name('coverflow.index');
+    Route::get('/coverflow-service/{slug?}', 'service')->name('coverflow.service');
+    Route::get('/coverflow-project/{slug?}', 'project')->name('coverflow.project');
+});
 
 // Fallback for public storage files
 Route::get('/storage/{path}', function (string $path) {

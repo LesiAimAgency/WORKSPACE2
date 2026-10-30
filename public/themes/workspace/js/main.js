@@ -1,13 +1,44 @@
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+document.documentElement.scrollTop = 0;
+document.body.scrollTop = 0;
+
 const fullpage = document.querySelector("#fullpage");
-let panels = Array.from(document.querySelectorAll(".panel"));
-function updatePanelsForMobile() {
+
+let isDetailFlowActive = (
+  window.location.hash === "#coverflowService" ||
+  window.location.hash === "#coverflowProject"
+);
+let currentDetailPane = (window.location.hash === "#coverflowProject") ? "project" : "intro";
+
+let panels = [];
+
+function refreshPanels() {
+  const detailPanels = document.querySelectorAll(".panel-detail-flow");
+  detailPanels.forEach((p) => {
+    if (isDetailFlowActive) {
+      p.classList.remove("is-hidden");
+    } else {
+      p.classList.add("is-hidden");
+    }
+  });
+
   if (window.innerWidth <= 760) {
-    panels = Array.from(document.querySelectorAll(".panel:not(#connect)"));
+    panels = Array.from(document.querySelectorAll(".panel:not(#connect):not(.is-hidden)"));
   } else {
-    panels = Array.from(document.querySelectorAll(".panel"));
+    panels = Array.from(document.querySelectorAll(".panel:not(.is-hidden)"));
   }
 }
-updatePanelsForMobile();
+
+refreshPanels();
+
+// Dọn dẹp query param ?service=... trên URL trang chủ để link luôn ngắn gọn
+if (window.location.search && window.location.search.includes("service=")) {
+  const cleanPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  window.history.replaceState(null, "", `${cleanPath}${window.location.hash || ''}`);
+}
 const downButton = document.querySelector(".scroll-button");
 const sectionLinks = document.querySelectorAll('a[href^="#"]:not([data-menu-section])');
 const sectionNavLinks = document.querySelectorAll(".service-mini-nav a[href^='#']");
@@ -31,9 +62,13 @@ const connectForms = document.querySelectorAll(".connect-form");
 const projectPanels = Array.from(document.querySelectorAll(".panel-project"));
 const expertPanels = Array.from(document.querySelectorAll(".panel-expert"));
 
+let initialHash = window.location.hash;
+if (initialHash === "#coverflowProject") {
+  initialHash = "#coverflowService";
+}
 let currentIndex = Math.max(
   0,
-  panels.findIndex((panel) => `#${panel.id}` === window.location.hash),
+  panels.findIndex((panel) => `#${panel.id}` === initialHash),
 );
 let locked = false;
 let touchStartX = 0;
@@ -135,7 +170,10 @@ function applyFullpageTransform() {
 }
 
 function getPanelIndexFromLink(link, datasetKey = "section") {
-  const hash = link.getAttribute("href");
+  let hash = link.getAttribute("href");
+  if (hash === "#coverflowProject") {
+    hash = "#coverflowService";
+  }
   let hashIndex = hash ? panels.findIndex((panel) => `#${panel.id}` === hash) : -1;
 
   if (hashIndex === -1 && hash === "#connect" && window.innerWidth <= 760) {
@@ -572,6 +610,9 @@ function updateControls() {
     }, 400);
   }
 
+  // Ẩn PDF PROFILE ở màn chi tiết dịch vụ (trùng vị trí "Back to Services")
+  document.body.classList.toggle("is-service-detail", currentPanel?.id === "coverflowService");
+
   const inWorkflow = currentProductStep !== -1;
   document.body.classList.toggle("in-workflow-flow", inWorkflow);
   document.body.setAttribute("data-current-step", currentProductStep);
@@ -896,6 +937,118 @@ function createPartnerSlider(slider) {
   return { init };
 }
 
+// Quản lý chuyển tab ngang giữa Service Introductions & Projects
+window.setDetailPane = function(pane, updateHistory = true) {
+  currentDetailPane = pane === "project" ? "project" : "intro";
+  const servicePanel = document.getElementById("coverflowService");
+  if (!servicePanel) return;
+
+  const isProject = currentDetailPane === "project";
+  servicePanel.classList.toggle("is-projects-active", isProject);
+
+  if (isProject) {
+    if (typeof window.expandProjectWing === "function") {
+      window.expandProjectWing();
+    }
+  } else {
+    if (typeof window.collapseProjectWing === "function") {
+      window.collapseProjectWing();
+    }
+  }
+
+  const introTabs = servicePanel.querySelectorAll('.coverflowService-nav-tab[href="#coverflowService"], .coverflowProject-nav-tab[href="#coverflowService"], [data-pane="intro"]');
+  const projectTabs = servicePanel.querySelectorAll('.coverflowService-nav-tab[href="#coverflowProject"], .coverflowProject-nav-tab[href="#coverflowProject"], [data-pane="project"]');
+
+  introTabs.forEach(t => t.classList.toggle("is-active", !isProject));
+  projectTabs.forEach(t => t.classList.toggle("is-active", isProject));
+
+  if (updateHistory) {
+    const cleanPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    const hash = isProject ? "#coverflowProject" : "#coverflowService";
+    window.history.replaceState(null, "", `${cleanPath}${hash}`);
+  }
+};
+
+// Delegated click cho các tab điều hướng Coverflow Detail
+document.addEventListener("click", function(event) {
+  const tab = event.target.closest('.coverflowService-nav-tab, .coverflowProject-nav-tab');
+  if (tab) {
+    event.preventDefault();
+    event.stopPropagation();
+    const href = tab.getAttribute("href");
+    const pane = tab.dataset.pane || (href === "#coverflowProject" ? "project" : "intro");
+
+    const srvIdx = panels.findIndex(p => p.id === "coverflowService");
+    if (currentIndex !== srvIdx && srvIdx !== -1) {
+      if (!isDetailFlowActive) {
+        isDetailFlowActive = true;
+        refreshPanels();
+      }
+      goToSection(srvIdx);
+    }
+
+    window.setDetailPane(pane, true);
+  }
+});
+
+window.openServiceDetail = function(slug, targetPane = "intro") {
+  if (!isDetailFlowActive) {
+    isDetailFlowActive = true;
+    refreshPanels();
+    const coverflowIdx = panels.findIndex((p) => p.id === "coverflow");
+    if (coverflowIdx !== -1) {
+      currentIndex = coverflowIdx;
+      fullpage.style.transition = "none";
+      applyFullpageTransform();
+      void fullpage.offsetHeight;
+      fullpage.style.transition = "";
+    }
+  }
+
+  const srvIdx = panels.findIndex((p) => p.id === "coverflowService");
+  if (srvIdx !== -1) {
+    goToSection(srvIdx);
+    window.setDetailPane(targetPane, true);
+  }
+};
+
+window.closeServiceDetail = function() {
+  if (isDetailFlowActive) {
+    isDetailFlowActive = false;
+    refreshPanels();
+    currentIndex = Math.max(0, panels.findIndex((p) => p.id === "coverflow"));
+    fullpage.style.transition = "none";
+    applyFullpageTransform();
+    void fullpage.offsetHeight;
+    fullpage.style.transition = "";
+    updateControls();
+    window.setDetailPane("intro", false);
+  }
+};
+
+window.goToSectionById = function(id) {
+  if (id === "coverflowService" || id === "coverflowProject") {
+    if (!isDetailFlowActive) {
+      isDetailFlowActive = true;
+      refreshPanels();
+    }
+    const targetIdx = panels.findIndex((p) => p.id === "coverflowService");
+    if (targetIdx !== -1) {
+      goToSection(targetIdx);
+      window.setDetailPane(id === "coverflowProject" ? "project" : "intro", true);
+    }
+    return;
+  }
+  const targetIdx = panels.findIndex((p) => p.id === id);
+  if (targetIdx !== -1) {
+    goToSection(targetIdx);
+  }
+};
+
+function getNextSectionIndex(direction) {
+  return clampIndex(currentIndex + direction);
+}
+
 function goToSection(index) {
   const nextIndex = clampIndex(index);
 
@@ -903,31 +1056,83 @@ function goToSection(index) {
     return;
   }
 
-  if (nextIndex === currentIndex && locked) {
+  if (nextIndex === currentIndex || locked) {
     return;
   }
 
+  const targetPanel = panels[nextIndex];
   currentIndex = nextIndex;
   locked = true;
   applyFullpageTransform();
   const panelId = panels[currentIndex]?.id;
 
   if (panelId) {
-    window.history.replaceState(null, "", `#${panelId}`);
+    const cleanPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    let targetHash = `#${panelId}`;
+    if (panelId === "coverflowService" && currentDetailPane === "project") {
+      targetHash = "#coverflowProject";
+    }
+    window.history.replaceState(null, "", `${cleanPath}${targetHash}`);
+  }
+
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  if (fullpage) {
+    fullpage.scrollTop = 0;
+    fullpage.scrollLeft = 0;
   }
 
   updateControls();
   syncLeadContext();
 
+  // Khi về lại Coverflow hoặc ra khỏi subflow (sang Why/Connect), tự động reset subflow về trạng thái mặc định
+  if (targetPanel && targetPanel.id === "coverflow" && isDetailFlowActive) {
+    window.setTimeout(() => {
+      if (panels[currentIndex]?.id === "coverflow" && isDetailFlowActive) {
+        isDetailFlowActive = false;
+        refreshPanels();
+        window.setDetailPane("intro", false);
+        currentIndex = panels.findIndex((p) => p.id === "coverflow");
+        fullpage.style.transition = "none";
+        applyFullpageTransform();
+        void fullpage.offsetHeight;
+        fullpage.style.transition = "";
+      }
+    }, 900);
+  } else if (targetPanel && (targetPanel.id === "why-workspace" || targetPanel.id === "connect") && isDetailFlowActive) {
+    window.setTimeout(() => {
+      if ((panels[currentIndex]?.id === "why-workspace" || panels[currentIndex]?.id === "connect") && isDetailFlowActive) {
+        const curId = panels[currentIndex]?.id;
+        isDetailFlowActive = false;
+        refreshPanels();
+        window.setDetailPane("intro", false);
+        const newIdx = panels.findIndex((p) => p.id === curId);
+        if (newIdx !== -1) {
+          currentIndex = newIdx;
+          fullpage.style.transition = "none";
+          applyFullpageTransform();
+          void fullpage.offsetHeight;
+          fullpage.style.transition = "";
+        }
+      }
+    }, 900);
+  }
+
   window.setTimeout(() => {
     locked = false;
-  }, 1200);
+  }, 950);
+}
+
+function isComparisonModalOpen() {
+  const m = document.getElementById("comparisonModal");
+  return Boolean(m && m.classList.contains("is-open"));
 }
 
 function handleWheel(event) {
   event.preventDefault();
 
-  if (getOpenProjectLightboxPanel()) {
+  if (getOpenProjectLightboxPanel() || isComparisonModalOpen()) {
     return;
   }
 
@@ -939,10 +1144,47 @@ function handleWheel(event) {
     return;
   }
 
+  const currentPanel = panels[currentIndex];
+
+  // MERGED DETAIL FLOW: Khi active, thay vì cuộn dọc (scroll down) giữa Introductions và Projects thì trượt ngang (scroll left)!
+  if (currentPanel && currentPanel.id === "coverflowService") {
+    if (event.deltaY > 0) {
+      if (currentDetailPane === "intro") {
+        window.setDetailPane("project", true);
+        locked = true;
+        window.setTimeout(() => { locked = false; }, 650);
+        return;
+      } else {
+        goToSection(currentIndex + 1);
+        return;
+      }
+    } else {
+      if (currentDetailPane === "project") {
+        window.setDetailPane("intro", true);
+        locked = true;
+        window.setTimeout(() => { locked = false; }, 650);
+        return;
+      } else {
+        goToSection(currentIndex - 1);
+        return;
+      }
+    }
+  }
+
   goToSection(currentIndex + (event.deltaY > 0 ? 1 : -1));
 }
 
 function handleKeydown(event) {
+  if (isComparisonModalOpen()) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      if (typeof window.closeComparisonModal === "function") {
+        window.closeComparisonModal();
+      }
+    }
+    return;
+  }
+
   const openProjectPanel = getOpenProjectLightboxPanel();
 
   if (openProjectPanel) {
@@ -974,6 +1216,38 @@ function handleKeydown(event) {
     return;
   }
 
+  const currentPanel = panels[currentIndex];
+  if (currentPanel && currentPanel.id === "coverflowService") {
+    const nextKeys = ["ArrowDown", "PageDown", "ArrowRight", " "];
+    const prevKeys = ["ArrowUp", "PageUp", "ArrowLeft"];
+
+    if (nextKeys.includes(event.key)) {
+      event.preventDefault();
+      if (currentDetailPane === "intro") {
+        window.setDetailPane("project", true);
+        locked = true;
+        window.setTimeout(() => { locked = false; }, 650);
+        return;
+      } else {
+        goToSection(currentIndex + 1);
+        return;
+      }
+    }
+
+    if (prevKeys.includes(event.key)) {
+      event.preventDefault();
+      if (currentDetailPane === "project") {
+        window.setDetailPane("intro", true);
+        locked = true;
+        window.setTimeout(() => { locked = false; }, 650);
+        return;
+      } else {
+        goToSection(currentIndex - 1);
+        return;
+      }
+    }
+  }
+
   const nextKeys = ["ArrowDown", "PageDown", " "];
   const prevKeys = ["ArrowUp", "PageUp"];
 
@@ -999,6 +1273,10 @@ function handleKeydown(event) {
 }
 
 downButton.addEventListener("click", () => {
+  if (panels[currentIndex]?.id === "coverflowService" && currentDetailPane === "intro") {
+    window.setDetailPane("project", true);
+    return;
+  }
   goToSection(currentIndex === panels.length - 1 ? 0 : currentIndex + 1);
 });
 
@@ -1013,6 +1291,17 @@ menuOverlay.addEventListener("click", (event) => {
 
 sectionLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
+    const hash = link.getAttribute("href");
+    if (hash === "#coverflowProject" || hash === "#coverflowService") {
+      event.preventDefault();
+      if (panels[currentIndex]?.id === "coverflowService") {
+        window.setDetailPane(hash === "#coverflowProject" ? "project" : "intro", true);
+        return;
+      }
+      window.goToSectionById(hash.replace("#", ""));
+      return;
+    }
+
     event.preventDefault();
     goToSection(getPanelIndexFromLink(link));
   });
@@ -1290,6 +1579,41 @@ window.addEventListener(
 
     touchStartedInGallery = false;
 
+    if (isComparisonModalOpen()) return;
+
+    const currentPanel = panels[currentIndex];
+    if (currentPanel && currentPanel.id === "coverflowService") {
+      if (!locked && !menuOverlay.classList.contains("is-open")) {
+        const isNext = distance > 42 || horizontalDistance > 42;
+        const isPrev = distance < -42 || horizontalDistance < -42;
+
+        if (isNext) {
+          if (currentDetailPane === "intro") {
+            window.setDetailPane("project", true);
+            locked = true;
+            window.setTimeout(() => { locked = false; }, 650);
+            return;
+          } else if (distance > 42) {
+            goToSection(currentIndex + 1);
+            return;
+          }
+        }
+
+        if (isPrev) {
+          if (currentDetailPane === "project") {
+            window.setDetailPane("intro", true);
+            locked = true;
+            window.setTimeout(() => { locked = false; }, 650);
+            return;
+          } else if (distance < -42) {
+            goToSection(currentIndex - 1);
+            return;
+          }
+        }
+      }
+      return;
+    }
+
     if (!locked && !menuOverlay.classList.contains("is-open") && Math.abs(distance) > 42) {
       goToSection(currentIndex + (distance > 0 ? 1 : -1));
     }
@@ -1298,7 +1622,7 @@ window.addEventListener(
 );
 
 window.addEventListener("resize", () => {
-  updatePanelsForMobile();
+  refreshPanels();
   currentIndex = clampIndex(currentIndex);
   applyFullpageTransform();
   requestServiceScrollUpdate();
@@ -1306,6 +1630,9 @@ window.addEventListener("resize", () => {
 
 applyFullpageTransform();
 updateControls();
+if (currentDetailPane === "project") {
+  window.setDetailPane("project", false);
+}
 setActiveService(activeServiceIndex);
 renderWhySlide(activeWhyIndex);
 partnerSliders.forEach((slider) => {

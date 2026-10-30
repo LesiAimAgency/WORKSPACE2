@@ -24,7 +24,47 @@
       }
     </script>
 
+    <script data-frame-fit>
+      /* Khung chuẩn: vùng nội dung = (min(vw,1440) - 2*72) x (80vh). Thiết kế gốc 1296 x 720.
+         --fit = hệ số scale đều để nội dung của mỗi section lọt vừa khung. */
+      (function () {
+        function fit() {
+          var w = Math.min(window.innerWidth, 1440) - 144;
+          var h = window.innerHeight * 0.8;
+          var s = Math.max(0.2, Math.min(1, w / 1296, h / 720));
+          document.documentElement.style.setProperty('--fit', s.toFixed(4));
+        }
+        fit();
+        window.addEventListener('resize', fit);
+      })();
+    </script>
+
     <style>
+      /* Guarantee One-Page Fullscreen Fit */
+      html, body {
+        height: 100% ;
+        max-height: 100% ;
+        overflow: hidden ;
+        overscroll-behavior: none ;
+      }
+      .fullpage {
+        height: 100vh ;
+        height: 100svh ;
+      }
+    
+      .panel.panel-detail-flow.is-hidden {
+        display: none ;
+      }
+      .panel.panel-detail-flow:not(.is-hidden) {
+        display: flex ;
+      }
+      .surface {
+        height: 100% ;
+        max-height: 100% ;
+        overflow: hidden ;
+        box-sizing: border-box ;
+      }
+
       /* Smooth Entrance Animation Styles */
       .panel {
           transition: opacity 1.2s ease-out;
@@ -33,6 +73,11 @@
       .panel [class*="animate__"] {
           opacity: 0;
           transition: opacity 0.8s ease-out;
+      }
+      
+      #home .brand-logo {
+          animation-iteration-count: 1 ;
+          animation-fill-mode: both ;
       }
       
       .panel.is-active .animate__animated {
@@ -62,49 +107,37 @@
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
-        transform: translateY(8px);
-        transition: opacity 300ms ease, transform 300ms ease, visibility 300ms ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
       }
-
+      .pdf-profile-link:hover {
+        color: #eb2026;
+      }
+      .pdf-profile-link .pdf-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #eb2026;
+        color: #ffffff;
+      }
       body.is-scrolled-past-home .pdf-profile-link {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
-        transform: translateY(0);
       }
-
-      body.is-workflow-section .pdf-profile-link {
-        color: #ffffff;
-      }
-
-      .pdf-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        background-color: #eb2026;
-        color: #ffffff;
-        border-radius: 50%;
-        transition: transform 260ms ease, background-color 260ms ease;
-      }
-
-      .pdf-profile-link:hover .pdf-icon {
-        transform: translateY(-2px);
-        background-color: #d11920;
-      }
-
-      @media (max-width: 900px) {
+      @media (max-width: 768px) {
         .pdf-profile-link {
-          font-size: 0.6875rem;
-          bottom: clamp(20px, 4vh, 32px);
-          gap: 8px;
+          bottom: 16px;
+          left: 16px;
+          font-size: 0.75rem;
         }
-        .pdf-icon {
-          width: 28px;
-          height: 28px;
+        .pdf-profile-link .pdf-icon {
+          width: 20px;
+          height: 20px;
         }
-        .pdf-icon svg {
+        .pdf-profile-link .pdf-icon svg {
           width: 12px;
           height: 12px;
         }
@@ -127,7 +160,7 @@
       <a href="#connect" class="contact-link" style="pointer-events: auto;">CONTACT</a>
     </header>
 
-    @if(setting('contact_pdf_link', setting('company_profile_pdf')))
+    <!-- @if(setting('contact_pdf_link', setting('company_profile_pdf')))
     <a href="{{ setting('contact_pdf_link', setting('company_profile_pdf')) }}" target="_blank" class="pdf-profile-link">
       <span class="pdf-icon">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -138,35 +171,19 @@
       </span>
       PDF PROFILE
     </a>
-    @endif
+    @endif -->
 
     <main class="fullpage" id="fullpage">
       @yield('content')
     </main>
 
-    <!-- Global Section Nav -->
-    <nav class="service-mini-nav global-section-nav" aria-label="Section menu">
-      <span class="mini-rule" aria-hidden="true"></span>
-      <a href="#core-values" class="is-current" aria-current="page">Core Values</a>
-      <a href="#service" aria-current="false">Our Services</a>
-      <a href="#why-workspace" aria-current="false">Why Choose Us</a>
-      <span class="mini-rule" aria-hidden="true"></span>
-    </nav>
 
-    <!-- Global Workflow Nav -->
-    <nav class="workflow-mini-nav global-workflow-nav" aria-label="Workflow menu">
-      <span class="mini-rule" aria-hidden="true"></span>
-      <button type="button">What we do</button>
-      <button type="button">Projects</button>
-      <button type="button">About the expert</button>
-      <span class="mini-rule" aria-hidden="true"></span>
-    </nav>
 
     <aside class="menu-overlay" id="menuOverlay" aria-hidden="true">
       <div class="menu-backdrop" aria-hidden="true">
 
         <nav class="menu-panel" aria-label="Menu">
-          <a href="#about-workspace" data-menu-section="1">ABOUT WORKSPACE</a>
+          <a href="#about" data-menu-section="1">ABOUT WORKSPACE</a>
           <a href="#core-values" data-menu-section="2">CORE VALUES</a>
           <a href="#service" data-menu-section="3">OUR SERVICES</a>
           <a href="#why-workspace" data-menu-section="4">WHY CHOOSE US</a>

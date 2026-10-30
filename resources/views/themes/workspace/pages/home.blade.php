@@ -1,27 +1,22 @@
 @extends('themes.workspace.layouts.app')
 
 @section('content')
-  @php
-    $workspaceActiveWidgets = \App\Models\Widget::where('area', 'homepage-main')
-        ->where('is_active', true)
-        ->orderBy('sort_order')
-        ->get();
-  @endphp
+  {{-- 1. Home Banner (Logo Workspace) --}}
+  @include('themes.workspace.widgets.home')
 
-  @if($workspaceActiveWidgets->isNotEmpty())
-    @foreach($workspaceActiveWidgets as $widget)
-      {!! $widget->getRenderedContent() !!}
-    @endforeach
-  @else
-    {{-- Fallback: Render chuẩn chuỗi widget của Workspace với dữ liệu mặc định --}}
-    @include('themes.workspace.widgets.home')
-    @include('themes.workspace.widgets.core')
-    @include('themes.workspace.widgets.service')
-    @include('themes.workspace.widgets.workflow')
-    @include('themes.workspace.widgets.project')
-    @include('themes.workspace.widgets.expert')
-    @include('themes.workspace.widgets.why')
-    @include('themes.workspace.widgets.connect')
-    @include('themes.workspace.widgets.coverflow')
-  @endif
+  {{-- 2. Giá trị cốt lõi (Core Values) --}}
+  @include('themes.workspace.widgets.core')
+
+  {{-- 3. Bộ sưu tập Dịch vụ dạng Coverflow (Overview Services) --}}
+  @include('themes.workspace.widgets.coverflow')
+
+  {{-- Bỏ include id="about" và id="design-project" theo yêu cầu người dùng --}}
+  {{-- @include('themes.workspace.widgets.workflow') --}}
+  {{-- @include('themes.workspace.widgets.project') --}}
+
+  {{-- Thay thế bằng widget Coverflow: Service Introductions & Projects (Mở khi bấm View More, cuộn ngang giữa 2 view) --}}
+  @include('themes.workspace.widgets.coverflow_service')
+
+  {{-- 4. Why Choosing Workspace & Connect Us --}}
+  @include('themes.workspace.widgets.why')
 @endsection
