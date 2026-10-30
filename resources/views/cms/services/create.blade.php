@@ -4,8 +4,24 @@
 @section('page-title', 'Thêm mới dịch vụ')
 
 @section('content')
+@php
+    $defaultIntros = [
+        [
+            'title' => 'Turnkey Fit-Out Execution',
+            'desc' => 'Executing civil works, MEP, HVAC, drywall, flooring, and ceiling systems with uncompromising precision.',
+        ],
+        [
+            'title' => 'Site Supervision & Quality Assurance',
+            'desc' => 'Strict QA/QC protocols ensuring every millimeter matches the approved construction drawing set.',
+        ],
+    ];
+    $initialIntros = old('intro_items_json')
+        ? (json_decode(old('intro_items_json'), true) ?: $defaultIntros)
+        : $defaultIntros;
+@endphp
+
 <div class="space-y-6" x-data="serviceFormApp()">
-    <!-- Top Header & Breadcrumbs (Identical to Material Lab Create) -->
+    <!-- Top Header & Breadcrumbs (Identical to Update) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm">
         <div>
             <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
@@ -13,16 +29,17 @@
                 <span>/</span>
                 <span class="text-gray-700 font-medium">Thêm mới</span>
             </div>
-            <h2 class="text-lg font-bold text-gray-900">Thêm dịch vụ mới</h2>
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2 flex-wrap">
+                <span x-text="title || 'Thêm dịch vụ mới'">Thêm dịch vụ mới</span>
+                <span class="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    SVC-{{ $nextNumber }}
+                </span>
+            </h2>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('admin.projects.index') }}" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 Quản lý Dự Án
-            </a>
-            <a href="{{ route('admin.services.categories') }}" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Danh mục Coverflow
             </a>
             <a href="{{ url('/#coverflow') }}" target="_blank" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -52,9 +69,8 @@
     <form action="{{ route('admin.services.store') }}" method="POST">
         @csrf
         <input type="hidden" name="intro_items_json" :value="JSON.stringify(introItems)">
-        <input type="hidden" name="project_ids_submitted" value="1">
 
-        <!-- Bố cục 2 cột tỷ lệ 4/8 giống hệt Material Lab -->
+        <!-- Bố cục 2 cột tỷ lệ 4/8 giống hệt trang Update -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
             <!-- ============================================== -->
@@ -62,10 +78,15 @@
             <!-- ============================================== -->
             <div class="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-5">
                 <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-4">
-                    <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 border-b pb-3">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-                        1. Danh mục Dịch vụ (Coverflow)
-                    </h3>
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                            1. Danh mục Dịch vụ (Coverflow)
+                        </h3>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                            SVC-{{ $nextNumber }}
+                        </span>
+                    </div>
 
                     <!-- Hình ảnh đại diện Coverflow -->
                     <div>
@@ -78,29 +99,10 @@
                         <p class="text-[10px] text-gray-400 mt-1">Ảnh hiển thị trên slide Coverflow và bên phải màn hình Chi tiết Dịch vụ.</p>
                     </div>
 
-                    <!-- Category Select -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-semibold text-gray-700">
-                                Phân loại danh mục <span class="text-rose-500">*</span>
-                            </label>
-                            <a href="{{ route('admin.services.categories') }}" class="text-[11px] text-indigo-600 hover:text-indigo-700 hover:underline font-medium">
-                                Quản lý &rarr;
-                            </a>
-                        </div>
-                        <select name="category" x-model="category" @change="onCategoryChange()" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
-                            <option value="">-- Chọn phân loại danh mục --</option>
-                            @foreach($categories as $c)
-                                @php $cName = is_array($c) ? ($c['name'] ?? '') : $c; @endphp
-                                <option value="{{ $cName }}">{{ $cName }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <!-- Title -->
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-1">Tiêu đề Danh mục / Dịch vụ <span class="text-rose-500">*</span></label>
-                        <input type="text" name="title" x-model="title" @input="autoSlug()" required placeholder="VD: Fit-Out and Finishing Works" class="w-full px-3 py-2 text-xs font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                        <input type="text" name="title" x-model="title" @input="autoSlugAndChips()" required placeholder="VD: Fit-Out and Finishing Works" class="w-full px-3 py-2 text-xs font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
                     </div>
 
                     <!-- Number & Slug -->
@@ -119,15 +121,15 @@
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Chip Dòng 1 (Top Nav)</label>
-                            <input type="text" name="chip_line_1" x-model="chipLine1" placeholder="Fit-Out and" class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                            <input type="text" name="chip_line_1" x-model="chipLine1" class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-700 mb-1">Chip Dòng 2 (Top Nav)</label>
-                            <input type="text" name="chip_line_2" x-model="chipLine2" placeholder="Finishing Works" class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                            <input type="text" name="chip_line_2" x-model="chipLine2" class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
                         </div>
                     </div>
 
-                    <!-- Short Description -->
+                    <!-- Short Description on Coverflow -->
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-1">Mô tả ngắn dưới ảnh Coverflow</label>
                         <textarea name="desc" rows="3" placeholder="Turnkey fit-out construction, advanced MEP engineering, and rigorous site management..." class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">{{ old('desc') }}</textarea>
@@ -139,15 +141,20 @@
                             <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500">
                             <div>
                                 <span class="text-xs font-semibold text-gray-800 block">Kích hoạt hiển thị</span>
-                                <span class="text-[11px] text-gray-500">Hiển thị dịch vụ trên Coverflow Trang chủ</span>
+                                <span class="text-[11px] text-gray-500">Hiển thị trên Coverflow Trang chủ</span>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <!-- Bottom Action Button -->
-                <div class="flex items-center justify-end pt-1">
-                    <button type="submit" class="w-full py-2.5 px-6 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                <!-- Bottom Action Buttons -->
+                <div class="flex items-center justify-between pt-2">
+                    <a href="{{ route('admin.services.index') }}" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Hủy bỏ
+                    </a>
+
+                    <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Lưu dịch vụ mới
                     </button>
@@ -159,16 +166,16 @@
             <!-- ============================================== -->
             <div class="lg:col-span-8 space-y-5">
 
-                <!-- Nhóm 2: Thông tin Dịch vụ Chi tiết (Tab INTRODUCTIONS) -->
+                <!-- Nhóm 2: Các Dịch vụ Chi tiết (Màn hình Chi tiết - Chữ Đỏ) -->
                 <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-5">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
                         <div>
                             <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-                                2. Thông tin Dịch vụ Chi tiết (Hiển thị tại Tab INTRODUCTIONS)
+                                2. Thông tin Dịch vụ Chi tiết (Tab INTRODUCTIONS)
                             </h3>
                             <p class="text-[11px] text-gray-500 mt-1">
-                                Các hạng mục dịch vụ con với <strong>Tiêu đề màu đỏ (#EB2026)</strong> và <strong>Nội dung mô tả màu đen</strong> bên dưới.
+                                Các hạng mục dịch vụ con hiển thị với <strong>Tiêu đề màu đỏ (#EB2026)</strong> và <strong>Mô tả màu đen</strong> khi bấm <em>View more</em>.
                             </p>
                         </div>
                         <button type="button" @click="addIntroItem()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition-colors">
@@ -237,55 +244,6 @@
                     </div>
                 </div>
 
-                <!-- Nhóm 3: Liên kết Dự án Tiêu biểu (Relationship với Quản lý Dự Án) -->
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-                        <div>
-                            <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                                3. Liên kết Dự án Tiêu biểu (Relationship &rarr; Quản lý Dự Án)
-                            </h3>
-                            <p class="text-[11px] text-gray-500 mt-1">
-                                Tích chọn các dự án từ <strong>Quản lý Dự Án</strong> để hiển thị tại tab <strong>PROJECTS</strong> của danh mục dịch vụ này.
-                            </p>
-                        </div>
-                        <a href="{{ route('admin.projects.index') }}" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg transition-colors">
-                            Quản lý tất cả dự án &rarr;
-                        </a>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @forelse($managedProjects as $proj)
-                            @php
-                                $coverUrl = str_starts_with($proj['cover_image'] ?? '', 'http') ? $proj['cover_image'] : asset(ltrim($proj['cover_image'] ?? '', '/'));
-                            @endphp
-                            <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/20 cursor-pointer transition-all">
-                                <input type="checkbox"
-                                       name="project_ids[]"
-                                       value="{{ $proj['id'] }}"
-                                       class="mt-1 w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                                <div class="w-14 h-14 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
-                                    <img src="{{ $coverUrl }}" alt="{{ $proj['title'] }}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="text-xs font-bold text-gray-900 truncate">{{ $proj['title'] }}</span>
-                                        <span class="font-mono text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $proj['code'] }}</span>
-                                    </div>
-                                    <div class="text-[11px] text-gray-500 mt-0.5 truncate">
-                                        {{ $proj['area'] ?: '—' }} • {{ $proj['location'] ?: '—' }}
-                                    </div>
-                                    <div class="text-[10px] text-gray-400 mt-0.5 truncate">{{ $proj['typology'] }}</div>
-                                </div>
-                            </label>
-                        @empty
-                            <div class="md:col-span-2 p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                Chưa có dự án nào trong Quản lý Dự Án.
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-
             </div>
         </div>
     </form>
@@ -293,41 +251,29 @@
 
 <script>
 function serviceFormApp() {
-    const categoriesMeta = @js($categories);
     return {
-        category: @js(old('category', $categories[0]['name'] ?? '')),
         title: @js(old('title', '')),
         slug: @js(old('slug', '')),
-        chipLine1: @js(old('chip_line_1', $categories[0]['chip_line_1'] ?? '')),
-        chipLine2: @js(old('chip_line_2', $categories[0]['chip_line_2'] ?? '')),
-        introItems: [
-            {
-                title: 'Turnkey Fit-Out Execution',
-                desc: 'Executing civil works, MEP, HVAC, drywall, flooring, and ceiling systems with uncompromising precision.'
-            },
-            {
-                title: 'Site Supervision & Quality Assurance',
-                desc: 'Strict QA/QC protocols ensuring every millimeter matches the approved construction drawing set.'
-            }
-        ],
+        chipLine1: @js(old('chip_line_1', '')),
+        chipLine2: @js(old('chip_line_2', '')),
+        introItems: @js($initialIntros),
 
-        onCategoryChange() {
-            const found = categoriesMeta.find(c => c.name === this.category);
-            if (found) {
-                this.chipLine1 = found.chip_line_1 || '';
-                this.chipLine2 = found.chip_line_2 || '';
-                if (!this.title) {
-                    this.title = found.name;
-                    this.autoSlug();
-                }
-            }
-        },
-        autoSlug() {
-            this.slug = (this.title || '')
+        autoSlugAndChips() {
+            const t = (this.title || '').trim();
+            this.slug = t
                 .toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, '')
                 .trim()
                 .replace(/\s+/g, '-');
+            const words = t.split(/\s+/).filter(Boolean);
+            if (words.length <= 1) {
+                this.chipLine1 = t;
+                this.chipLine2 = '';
+            } else {
+                const mid = Math.ceil(words.length / 2);
+                this.chipLine1 = words.slice(0, mid).join(' ');
+                this.chipLine2 = words.slice(mid).join(' ');
+            }
         },
         addIntroItem() {
             this.introItems.push({ title: '', desc: '' });

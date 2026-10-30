@@ -342,7 +342,8 @@ class CoverflowController extends Controller
         }
 
         if (empty($overviewServices) && empty($detailServices)) {
-            return $defaults;
+            $overviewServices = $defaults;
+            $detailServices = $defaults;
         }
 
         // Index detail services by slug and by position for seamless merging
@@ -358,6 +359,52 @@ class CoverflowController extends Controller
                 $detailBySlug[$dSlug] = $dService;
             }
         }
+
+        // Index managed categories by name for chip line lookup
+        $managedCategories = \App\Http\Controllers\Admin\ServiceController::getManagedCategories();
+        $categoryMap = [];
+        foreach ($managedCategories as $mc) {
+            if (! empty($mc['name'])) {
+                $categoryMap[mb_strtolower(trim((string) $mc['name']))] = $mc;
+            }
+        }
+
+        // Load managed projects from settings if available so specs & project relationships are always in sync
+        $managedProjectsByService = [];
+        $hasManagedProjects = false;
+        try {
+            $rawProjectsSetting = setting('workspace_projects_data');
+            $decodedProjects = null;
+            if (is_string($rawProjectsSetting) && $rawProjectsSetting !== '') {
+                $decodedProjects = json_decode($rawProjectsSetting, true);
+            } elseif (is_array($rawProjectsSetting)) {
+                $decodedProjects = $rawProjectsSetting;
+            }
+            if (is_array($decodedProjects) && ! empty($decodedProjects)) {
+                $hasManagedProjects = true;
+                foreach ($decodedProjects as $mp) {
+                    if (! is_array($mp)) {
+                        continue;
+                    }
+                    $mpActive = isset($mp['is_active']) ? (bool) $mp['is_active'] : true;
+                    if (! $mpActive) {
+                        continue;
+                    }
+                    $svcSlugs = ! empty($mp['service_slugs']) && is_array($mp['service_slugs'])
+                        ? $mp['service_slugs']
+                        : (! empty($mp['service_slug']) ? [$mp['service_slug']] : []);
+                    foreach ($svcSlugs as $ss) {
+                        $ssKey = Str::slug((string) $ss);
+                        if ($ssKey !== '') {
+                            $managedProjectsByService[$ssKey][] = $mp;
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+        }
+
+        $specFields = \App\Http\Controllers\Admin\ServiceController::getSpecFields();
 
         $baseList = ! empty($overviewServices) ? $overviewServices : $detailServices;
         $normalized = [];
@@ -381,6 +428,14 @@ class CoverflowController extends Controller
                 $detailMatch = [];
             }
 
+            $category = ! empty($s['category'])
+                ? (string) $s['category']
+                : (! empty($detailMatch['category']) ? (string) $detailMatch['category'] : $title);
+
+            $catMeta = $categoryMap[mb_strtolower(trim($category))]
+                ?? $categoryMap[mb_strtolower(trim($title))]
+                ?? null;
+
             $desc = ! empty($s['desc'])
                 ? strip_tags((string) $s['desc'])
                 : (! empty($detailMatch['desc']) ? strip_tags((string) $detailMatch['desc']) : ($def['desc'] ?? ''));
@@ -395,8 +450,12 @@ class CoverflowController extends Controller
                     ? (string) $detailMatch['detail_image']
                     : (! empty($detailMatch['image']) ? (string) $detailMatch['image'] : $image));
 
-            $chipLine1 = ! empty($s['chip_line_1']) ? (string) $s['chip_line_1'] : ($def['chip_line_1'] ?? '');
-            $chipLine2 = ! empty($s['chip_line_2']) ? (string) $s['chip_line_2'] : ($def['chip_line_2'] ?? '');
+            $chipLine1 = ! empty($s['chip_line_1'])
+                ? (string) $s['chip_line_1']
+                : (! empty($catMeta['chip_line_1']) ? (string) $catMeta['chip_line_1'] : ($def['chip_line_1'] ?? ''));
+            $chipLine2 = ! empty($s['chip_line_2'])
+                ? (string) $s['chip_line_2']
+                : (! empty($catMeta['chip_line_2']) ? (string) $catMeta['chip_line_2'] : ($def['chip_line_2'] ?? ''));
 
             $rawIntros = ! empty($detailMatch['intro_items']) && is_array($detailMatch['intro_items'])
                 ? $detailMatch['intro_items']
@@ -418,9 +477,13 @@ class CoverflowController extends Controller
                 ];
             }
 
-            $rawProjects = ! empty($detailMatch['projects']) && is_array($detailMatch['projects'])
-                ? $detailMatch['projects']
-                : (! empty($s['projects']) && is_array($s['projects']) ? $s['projects'] : ($def['projects'] ?? $defaults[0]['projects']));
+            if ($hasManagedProjects && isset($managedProjectsByService[$slug])) {
+                $rawProjects = $managedProjectsByService[$slug];
+            } else {
+                $rawProjects = ! empty($detailMatch['projects']) && is_array($detailMatch['projects'])
+                    ? $detailMatch['projects']
+                    : (! empty($s['projects']) && is_array($s['projects']) ? $s['projects'] : ($def['projects'] ?? $defaults[0]['projects']));
+            }
 
             $projects = [];
             foreach ($rawProjects as $pIdx => $proj) {
@@ -428,6 +491,7 @@ class CoverflowController extends Controller
                     continue;
                 }
                 $defProj = $def['projects'][$pIdx] ?? ($def['projects'][0] ?? $defaults[0]['projects'][0]);
+                $projSpecs = \App\Http\Controllers\Admin\ServiceController::normalizeProjectSpecs($proj, $specFields);
                 $projects[] = [
                     'title' => (string) ($proj['title'] ?? $defProj['title'] ?? 'PROJECT '.sprintf('%02d', $pIdx + 1)),
                     'area' => (string) ($proj['area'] ?? $defProj['area'] ?? ''),
@@ -435,6 +499,7 @@ class CoverflowController extends Controller
                     'typology' => (string) ($proj['typology'] ?? $defProj['typology'] ?? ''),
                     'style' => (string) ($proj['style'] ?? $defProj['style'] ?? ''),
                     'tech' => (string) ($proj['tech'] ?? $defProj['tech'] ?? ''),
+                    'specs' => $projSpecs,
                     'cover_image' => ! empty($proj['cover_image']) ? (string) $proj['cover_image'] : ($defProj['cover_image'] ?? $image),
                     'design_image' => ! empty($proj['design_image']) ? (string) $proj['design_image'] : ($defProj['design_image'] ?? $image),
                     'result_image' => ! empty($proj['result_image']) ? (string) $proj['result_image'] : ($defProj['result_image'] ?? $image),
@@ -444,6 +509,7 @@ class CoverflowController extends Controller
             $normalized[] = [
                 'number' => $num,
                 'title' => $title,
+                'category' => $category,
                 'chip_line_1' => $chipLine1,
                 'chip_line_2' => $chipLine2,
                 'slug' => $slug,

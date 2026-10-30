@@ -29,11 +29,6 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('admin.services.categories') }}"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    Danh mục ({{ count($categories ?? []) }})
-                </a>
                 <a href="{{ route('admin.projects.index') }}"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors">
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -64,23 +59,13 @@
 
     <!-- Filter & Search Bar -->
     <div class="bg-white rounded-xl border border-gray-200/80 shadow-sm p-4">
-        <form method="GET" action="{{ route('admin.services.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <form method="GET" action="{{ route('admin.services.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="lg:col-span-2">
                 <input type="text"
                        name="search"
                        value="{{ request('search') }}"
-                       placeholder="Tìm theo tên dịch vụ, mã, hạng mục chi tiết..."
+                       placeholder="Tìm theo tên danh mục dịch vụ, mã, hạng mục chi tiết..."
                        class="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
-            </div>
-
-            <div>
-                <select name="category" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-rose-500 bg-white">
-                    <option value="">-- Tất cả danh mục --</option>
-                    @foreach($categories as $cat)
-                        @php $catName = is_array($cat) ? ($cat['name'] ?? '') : $cat; @endphp
-                        <option value="{{ $catName }}" {{ request('category') === $catName ? 'selected' : '' }}>{{ $catName }}</option>
-                    @endforeach
-                </select>
             </div>
 
             <div>
@@ -95,7 +80,7 @@
                 <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
                     Lọc dữ liệu
                 </button>
-                @if(request()->anyFilled(['search', 'category', 'status']))
+                @if(request()->anyFilled(['search', 'status']))
                     <a href="{{ route('admin.services.index') }}" class="px-3 py-2 text-xs text-gray-600 hover:text-gray-900">
                         Xóa lọc
                     </a>
@@ -111,10 +96,10 @@
                 <thead>
                     <tr class="bg-gray-50/80 border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                         <th class="py-3.5 px-4 w-12">#</th>
-                        <th class="py-3.5 px-4 min-w-[260px]">Dịch vụ (Service)</th>
-                        <th class="py-3.5 px-4 min-w-[200px]">Danh mục &amp; Chip Coverflow</th>
+                        <th class="py-3.5 px-4 min-w-[260px]">Danh mục Dịch vụ (Service)</th>
+                        <th class="py-3.5 px-4 min-w-[180px]">Chip điều hướng Coverflow</th>
                         <th class="py-3.5 px-4 min-w-[280px]">Dịch vụ chi tiết (Introductions)</th>
-                        <th class="py-3.5 px-4 min-w-[160px]">Dự án (Projects)</th>
+                        <th class="py-3.5 px-4 min-w-[170px]">Dự án thuộc dịch vụ (Projects)</th>
                         <th class="py-3.5 px-4 text-center w-24">Hiển thị</th>
                         <th class="py-3.5 px-4 text-right w-28">Thao tác</th>
                     </tr>
@@ -158,11 +143,8 @@
                                 </div>
                             </td>
                             <td class="py-3.5 px-4">
-                                <span class="inline-flex px-2 py-0.5 rounded-md font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                    {{ $item['category'] }}
-                                </span>
-                                <div class="mt-1.5 text-[11px] text-gray-500 leading-tight bg-gray-50 border border-gray-200/80 rounded px-2 py-1 inline-block">
-                                    <div class="font-semibold text-gray-700">{{ $item['chip_line_1'] }}</div>
+                                <div class="text-[11px] text-gray-500 leading-tight bg-gray-50 border border-gray-200/80 rounded px-2.5 py-1.5 inline-block">
+                                    <div class="font-semibold text-gray-800">{{ $item['chip_line_1'] }}</div>
                                     <div class="text-gray-500">{{ $item['chip_line_2'] }}</div>
                                 </div>
                             </td>
@@ -185,9 +167,10 @@
                                 </div>
                             </td>
                             <td class="py-3.5 px-4">
-                                <div class="font-semibold text-gray-900">
-                                    {{ count($projectList) }} dự án
-                                </div>
+                                <a href="{{ route('admin.projects.index', ['service' => $item['slug']]) }}" class="font-semibold text-emerald-700 hover:underline inline-flex items-center gap-1">
+                                    <span>{{ count($projectList) }} dự án</span>
+                                    <span>&rarr;</span>
+                                </a>
                                 @if(!empty($projectList[0]['title']))
                                     <div class="text-gray-500 text-[11px] mt-0.5 line-clamp-1">
                                         • {{ $projectList[0]['title'] }}

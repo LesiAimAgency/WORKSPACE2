@@ -467,10 +467,33 @@ class ServiceController extends Controller
         }
 
         // Save to settings table
+        $servicesJson = json_encode($normalizedServices, JSON_UNESCAPED_UNICODE);
+        $labelsJson = json_encode($labels, JSON_UNESCAPED_UNICODE);
+
         setting([
-            'workspace_services_data' => json_encode($normalizedServices, JSON_UNESCAPED_UNICODE),
-            'workspace_services_labels' => json_encode($labels, JSON_UNESCAPED_UNICODE),
+            'workspace_services_data' => $servicesJson,
+            'workspace_services_labels' => $labelsJson,
         ]);
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'workspace_services_data', 'project_id' => null],
+            [
+                'payload' => $servicesJson,
+                'value' => $servicesJson,
+                'group' => 'general',
+                'updated_at' => now(),
+            ]
+        );
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'workspace_services_labels', 'project_id' => null],
+            [
+                'payload' => $labelsJson,
+                'value' => $labelsJson,
+                'group' => 'general',
+                'updated_at' => now(),
+            ]
+        );
 
         // Synchronize with Homepage Widgets
         $serviceWidgets = Widget::withoutGlobalScopes()
@@ -631,10 +654,8 @@ class ServiceController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
         ], [
-            'title.required' => 'Vui lòng nhập Tên dịch vụ.',
-            'category.required' => 'Vui lòng chọn Phân loại danh mục dịch vụ.',
+            'title.required' => 'Vui lòng nhập Tiêu đề Danh mục / Dịch vụ.',
         ]);
 
         $allServices = self::getAllServices();
@@ -689,10 +710,8 @@ class ServiceController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
         ], [
-            'title.required' => 'Vui lòng nhập Tên dịch vụ.',
-            'category.required' => 'Vui lòng chọn Phân loại danh mục dịch vụ.',
+            'title.required' => 'Vui lòng nhập Tiêu đề Danh mục / Dịch vụ.',
         ]);
 
         $allServices = self::getAllServices();
@@ -707,6 +726,25 @@ class ServiceController extends Controller
         $allServices[$idx] = $updatedItem;
 
         $this->ensureCategoryExists($updatedItem['category'], $updatedItem['chip_line_1'], $updatedItem['chip_line_2']);
+
+        // If slug changed, keep linked projects in sync with the new slug
+        if ($oldSlug !== '' && $oldSlug !== $updatedItem['slug']) {
+            $allProjects = ProjectController::getAllProjects();
+            $changedAnyProject = false;
+            foreach ($allProjects as &$proj) {
+                $slugs = $proj['service_slugs'] ?? [];
+                if (in_array($oldSlug, $slugs, true)) {
+                    $slugs = array_map(fn ($s) => $s === $oldSlug ? $updatedItem['slug'] : $s, $slugs);
+                    $proj['service_slugs'] = array_values(array_unique($slugs));
+                    $changedAnyProject = true;
+                }
+            }
+            unset($proj);
+            if ($changedAnyProject) {
+                ProjectController::persistProjectsAndSyncServices($allProjects, false);
+            }
+        }
+
         $this->persistServicesAndSync($allServices);
 
         if ($request->has('project_ids_submitted')) {
@@ -779,26 +817,11 @@ class ServiceController extends Controller
     }
 
     /**
-     * 8. MANAGE SERVICE CATEGORIES PAGE (Identical to Material Lab categories + Coverflow slide info).
+     * 8. MANAGE SERVICE CATEGORIES PAGE -> Redirect to Services Index (since Services ARE Project Categories).
      */
-    public function categories(): View
+    public function categories(): RedirectResponse
     {
-        $categories = self::getManagedCategories();
-        $allServices = self::getAllServices();
-
-        $counts = [];
-        $serviceByCat = [];
-        foreach ($allServices as $s) {
-            $cat = $s['category'] ?? $s['title'] ?? '';
-            if ($cat !== '') {
-                $counts[$cat] = ($counts[$cat] ?? 0) + 1;
-                if (! isset($serviceByCat[$cat])) {
-                    $serviceByCat[$cat] = $s;
-                }
-            }
-        }
-
-        return view('cms.services.categories', compact('categories', 'counts', 'serviceByCat', 'allServices'));
+        return redirect()->route('admin.services.index');
     }
 
     /**
@@ -814,9 +837,18 @@ class ServiceController extends Controller
             $defaultCats = self::getDefaultCategories();
             $this->persistCategoriesSetting($defaultCats);
 
+            foreach ($defaultCats as $cIdx => $dCat) {
+                if (isset($allServices[$cIdx])) {
+                    $allServices[$cIdx]['category'] = $dCat['name'];
+                    $allServices[$cIdx]['chip_line_1'] = $dCat['chip_line_1'];
+                    $allServices[$cIdx]['chip_line_2'] = $dCat['chip_line_2'];
+                }
+            }
+            $this->persistServicesAndSync($allServices);
+
             return redirect()
                 ->route('admin.services.categories')
-                ->with('success', 'Đã khôi phục 5 danh mục dịch vụ chuẩn thành công!');
+                ->with('success', 'Đã khôi phục 5 danh mục dịch vụ chuẩn và đồng bộ ra Coverflow thành công!');
         }
 
         if ($action === 'add') {
@@ -1108,7 +1140,7 @@ class ServiceController extends Controller
         }
 
         $title = trim((string) $request->input('title', $existing['title'] ?? $def['title']));
-        $category = trim((string) $request->input('category', $existing['category'] ?? $title));
+        $category = trim((string) $request->input('category', '')) ?: $title;
         $slug = trim((string) $request->input('slug', ''));
         $slug = $slug !== '' ? Str::slug($slug) : Str::slug($title);
 

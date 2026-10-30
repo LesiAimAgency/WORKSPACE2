@@ -25,10 +25,6 @@
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 Quản lý Dự Án
             </a>
-            <a href="{{ route('admin.services.categories') }}" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Danh mục Coverflow
-            </a>
             <a href="{{ url('/#coverflow') }}" target="_blank" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 Xem Frontend
@@ -58,7 +54,6 @@
         @csrf
         @method('PUT')
         <input type="hidden" name="intro_items_json" :value="JSON.stringify(introItems)">
-        <input type="hidden" name="project_ids_submitted" value="1">
 
         <!-- Bố cục 2 cột tỷ lệ 4/8 giống hệt Material Lab Edit -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -87,25 +82,6 @@
                             'label' => 'Chọn ảnh đại diện'
                         ])
                         <p class="text-[10px] text-gray-400 mt-1">Ảnh hiển thị trên slide Coverflow và bên phải màn hình Chi tiết Dịch vụ.</p>
-                    </div>
-
-                    <!-- Category Select -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-semibold text-gray-700">
-                                Phân loại danh mục <span class="text-rose-500">*</span>
-                            </label>
-                            <a href="{{ route('admin.services.categories') }}" class="text-[11px] text-indigo-600 hover:text-indigo-700 hover:underline font-medium">
-                                Quản lý &rarr;
-                            </a>
-                        </div>
-                        <select name="category" x-model="category" @change="onCategoryChange()" required class="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white">
-                            <option value="">-- Chọn phân loại danh mục --</option>
-                            @foreach($categories as $c)
-                                @php $cName = is_array($c) ? ($c['name'] ?? '') : $c; @endphp
-                                <option value="{{ $cName }}">{{ $cName }}</option>
-                            @endforeach
-                        </select>
                     </div>
 
                     <!-- Title -->
@@ -253,66 +229,6 @@
                     </div>
                 </div>
 
-                <!-- Nhóm 3: Liên kết Dự án Tiêu biểu (Relationship với Quản lý Dự Án) -->
-                <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-                        <div>
-                            <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                                3. Liên kết Dự án Tiêu biểu (Relationship &rarr; Quản lý Dự Án)
-                            </h3>
-                            <p class="text-[11px] text-gray-500 mt-1">
-                                Tích chọn các dự án từ <strong>Quản lý Dự Án</strong> để hiển thị tại tab <strong>PROJECTS</strong> của danh mục dịch vụ này.
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('admin.projects.create', ['service' => $service['slug']]) }}" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
-                                + Tạo dự án mới
-                            </a>
-                            <a href="{{ route('admin.projects.index') }}" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors">
-                                Quản lý tất cả dự án &rarr;
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @forelse($managedProjects as $proj)
-                            @php
-                                $isChecked = in_array($service['slug'], $proj['service_slugs'] ?? [], true);
-                                $coverUrl = str_starts_with($proj['cover_image'] ?? '', 'http') ? $proj['cover_image'] : asset(ltrim($proj['cover_image'] ?? '', '/'));
-                            @endphp
-                            <label class="flex items-start gap-3 p-3 rounded-xl border border-gray-200 hover:border-emerald-400 hover:bg-emerald-50/20 cursor-pointer transition-all">
-                                <input type="checkbox"
-                                       name="project_ids[]"
-                                       value="{{ $proj['id'] }}"
-                                       {{ $isChecked ? 'checked' : '' }}
-                                       class="mt-1 w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                                <div class="w-14 h-14 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
-                                    <img src="{{ $coverUrl }}" alt="{{ $proj['title'] }}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="text-xs font-bold text-gray-900 truncate">{{ $proj['title'] }}</span>
-                                        <span class="font-mono text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{{ $proj['code'] }}</span>
-                                    </div>
-                                    <div class="text-[11px] text-gray-500 mt-0.5 truncate">
-                                        {{ $proj['area'] ?: '—' }} • {{ $proj['location'] ?: '—' }}
-                                    </div>
-                                    <div class="mt-1 flex items-center justify-between">
-                                        <span class="text-[10px] text-gray-400 truncate">{{ $proj['typology'] }}</span>
-                                        <a href="{{ route('admin.projects.edit', $proj['id']) }}" class="text-[11px] font-semibold text-blue-600 hover:underline">
-                                            Sửa dự án &nearr;
-                                        </a>
-                                    </div>
-                                </div>
-                            </label>
-                        @empty
-                            <div class="md:col-span-2 p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                Chưa có dự án nào trong Quản lý Dự Án. Hãy nhấn "+ Tạo dự án mới" để thêm dự án đầu tiên.
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
 
             </div>
         </div>
@@ -327,22 +243,13 @@
 
 <script>
 function serviceEditApp() {
-    const categoriesMeta = @js($categories);
     return {
-        category: @js(old('category', $service['category'] ?? $service['title'] ?? '')),
         title: @js(old('title', $service['title'] ?? '')),
         slug: @js(old('slug', $service['slug'] ?? '')),
         chipLine1: @js(old('chip_line_1', $service['chip_line_1'] ?? '')),
         chipLine2: @js(old('chip_line_2', $service['chip_line_2'] ?? '')),
         introItems: @js($service['intro_items'] ?? []),
 
-        onCategoryChange() {
-            const found = categoriesMeta.find(c => c.name === this.category);
-            if (found) {
-                this.chipLine1 = found.chip_line_1 || '';
-                this.chipLine2 = found.chip_line_2 || '';
-            }
-        },
         autoSlug() {
             this.slug = (this.title || '')
                 .toLowerCase()

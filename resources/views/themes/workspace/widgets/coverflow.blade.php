@@ -30,6 +30,7 @@
           return [
               'number' => $s['number'] ?? '01',
               'title' => $s['title'] ?? '',
+              'category' => $s['category'] ?? ($s['title'] ?? ''),
               'chip_line_1' => $s['chip_line_1'] ?? '',
               'chip_line_2' => $s['chip_line_2'] ?? '',
               'slug' => $s['slug'] ?? '',
@@ -122,7 +123,7 @@
        ========================================================================== */
     .panel-coverflow .coverflow-chips {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat({{ max(1, $totalServices) }}, minmax(0, 1fr));
         gap: 16px;
         width: 100%;
         max-width: 1100px;
@@ -511,7 +512,7 @@
           @php
             $lines = (!empty($srv['chip_line_1']) || !empty($srv['chip_line_2']))
                 ? [$srv['chip_line_1'] ?? '', $srv['chip_line_2'] ?? '']
-                : $formatChipTitle($srv['title'] ?? '');
+                : $formatChipTitle($srv['category'] ?? ($srv['title'] ?? ''));
           @endphp
           <button type="button" 
                   class="coverflow-chip {{ $index === $activeServiceIndex ? 'is-active' : '' }}" 

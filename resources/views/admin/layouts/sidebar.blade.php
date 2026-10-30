@@ -338,10 +338,7 @@
                            class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.brands') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
                             • Thương hiệu / Nhà cung cấp
                         </a>
-                        <a href="{{ route('admin.material-lab.categories') }}"
-                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.categories') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
-                            • Phân loại danh mục
-                        </a>
+                      
                         <a href="{{ route('admin.material-lab.config') }}"
                            class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.material-lab.config') ? 'text-amber-400 font-semibold bg-amber-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
                             • Cấu hình các bước Wizard
@@ -396,10 +393,7 @@
                            class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.create') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
                             • Thêm dịch vụ mới
                         </a>
-                        <a href="{{ route('admin.services.categories') }}"
-                           class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.services.categories') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
-                            • Phân loại danh mục
-                        </a>
+                     
                         <a href="{{ route('admin.projects.index') }}"
                            class="block px-3 py-1.5 rounded-md text-xs transition-colors {{ request()->routeIs('admin.projects.index') || request()->routeIs('admin.projects.edit') ? 'text-emerald-400 font-semibold bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40' }}">
                             • Quản lý dự án (Projects)

@@ -587,6 +587,7 @@
         cursor: ew-resize;
         background-color: #0b0f19;
         border-radius: 12px;
+        container-type: inline-size;
     }
 
     .before-image,
@@ -596,9 +597,6 @@
         left: 0;
         width: 100%;
         height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         overflow: hidden;
     }
 
@@ -609,6 +607,7 @@
         left: 0;
         width: 100%;
         height: 100%;
+        max-width: none;
         object-fit: cover;
         pointer-events: none;
         user-select: none;
@@ -617,6 +616,10 @@
     .before-image {
         width: 50%;
         z-index: 2;
+    }
+
+    .before-image img {
+        width: 100cqw;
     }
 
     .before-text,
@@ -1050,10 +1053,19 @@
         function initModalSlider() {
             const container = document.getElementById('modalSlider');
             const beforeImage = document.getElementById('modalBeforeImage');
+            const beforeImg = document.getElementById('modalDesignImg');
             const sliderHandle = document.getElementById('sliderHandle');
             const sliderLine = document.getElementById('sliderLine');
             if (!container || !beforeImage || !sliderHandle || !sliderLine) return;
 
+            function syncBeforeImgWidth() {
+                const rect = container.getBoundingClientRect();
+                if (beforeImg && rect.width > 0) {
+                    beforeImg.style.width = rect.width + 'px';
+                }
+            }
+
+            syncBeforeImgWidth();
             beforeImage.style.width = '50%';
             sliderHandle.style.left = '50%';
             sliderLine.style.left = '50%';
@@ -1065,12 +1077,16 @@
 
             function update(clientX) {
                 const rect = container.getBoundingClientRect();
+                if (rect.width <= 0) return;
+                if (beforeImg) beforeImg.style.width = rect.width + 'px';
                 let x = Math.max(0, Math.min(clientX - rect.left, rect.width));
                 const pct = (x / rect.width) * 100;
                 beforeImage.style.width = pct + '%';
                 sliderHandle.style.left = pct + '%';
                 sliderLine.style.left = pct + '%';
             }
+
+            window.addEventListener('resize', syncBeforeImgWidth);
 
             container.addEventListener('mousedown', function (e) { dragging = true; update(e.clientX); });
             window.addEventListener('mousemove', function (e) { if (dragging) update(e.clientX); });

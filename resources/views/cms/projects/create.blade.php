@@ -28,7 +28,12 @@
                 <span>/</span>
                 <span class="text-gray-700 font-medium">Thêm mới</span>
             </div>
-            <h2 class="text-lg font-bold text-gray-900">Thêm dự án tiêu biểu mới</h2>
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2 flex-wrap">
+                <span>Thêm dự án tiêu biểu mới</span>
+                <span class="text-xs px-2 py-0.5 rounded font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {{ $nextCode }}
+                </span>
+            </h2>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('admin.services.index') }}" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5">
@@ -72,10 +77,15 @@
             <!-- ============================================== -->
             <div class="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-5">
                 <div class="bg-white p-5 rounded-xl border border-gray-200/80 shadow-sm space-y-4">
-                    <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 border-b pb-3">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-                        1. Thông tin chung &amp; Liên kết Dịch vụ
-                    </h3>
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h3 class="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                            1. Thông tin chung &amp; Liên kết Dịch vụ
+                        </h3>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                            {{ $nextCode }}
+                        </span>
+                    </div>
 
                     <!-- 1. Ảnh bìa dự án -->
                     <div>
@@ -143,9 +153,14 @@
                     </div>
                 </div>
 
-                <!-- Bottom Action Button -->
-                <div class="flex items-center justify-end pt-1">
-                    <button type="submit" class="w-full py-2.5 px-6 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                <!-- Bottom Action Buttons (Identical to Update) -->
+                <div class="flex items-center justify-between pt-2">
+                    <a href="{{ route('admin.projects.index') }}" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Hủy bỏ
+                    </a>
+
+                    <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Lưu dự án mới
                     </button>
